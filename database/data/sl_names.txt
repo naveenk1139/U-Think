@@ -1,0 +1,218 @@
+705-      if (!hasMath) {
+706-        // Filter out DU JAT since it strictly requires Class 12 Mathematics.
+707:        exams = allCommerceExams.filter(exam => exam.name !== "DU JAT");
+708-        eligibilityWarning = "❌ Non-Math Commerce students are NOT eligible for DU BMS / BBA-FIA, B.Sc Finance, and other courses requiring Class 12 Mathematics.";
+709-      } else {
+--
+2703-        if (sid) {
+2704-          const stream = STREAMS_DATA.find(s => s.id === sid);
+2705:          return stream?.courses.find(c => c.name === coursePreset);
+2706-        }
+2707-        for (const s of STREAMS_DATA) {
+2708:          const c = s.courses.find(course => course.name === coursePreset);
+2709-          if (c) return { course: c, streamId: s.id };
+2710-        }
+--
+2746-  if (selectedCourse) {
+2747-    const streamId = selectedStreamId || '12th_intermediate';
+2748:    const roadmap = getRoadmapForCourse(selectedCourse.name, streamId);
+2749:    const detailData = getSubjectsAndExamsForCourse(selectedCourse.name, streamId);
+2750-
+2751-    return (
+--
+2764-            </div>
+2765-            <h1 className="text-xl sm:text-3xl font-extrabold tracking-tight mt-1.5 text-white">
+2766:              {selectedCourse.name} Full Career Pathfinder
+2767-            </h1>
+2768-            <p className="text-xs text-slate-300 mt-1 max-w-xl font-sans font-medium">
+--
+2876-              <div className="absolute -top-12 -right-12 w-32 h-32 bg-white/5 rounded-full pointer-events-none" />
+2877-              <h4 className="text-sm font-bold flex items-center gap-1.5 z-10 relative">
+2878:                <Sparkles className="w-4 h-4 text-amber-300" /> Have questions on {selectedCourse.name}?
+2879-              </h4>
+2880-              <p className="text-xs text-blue-150 leading-relaxed font-sans font-medium z-10 relative">
+--
+2884-                onClick={() => {
+2885-                  const customEvent = new CustomEvent('open-counselor-with-context', {
+2886:                    detail: { course: selectedCourse.name }
+2887-                  });
+2888-                  window.dispatchEvent(customEvent);
+--
+2954-                      </div>
+2955-                      <h4 className="text-xs sm:text-sm font-extrabold text-slate-800 group-hover:text-blue-700 transition-colors">
+2956:                        {sub.name}
+2957-                      </h4>
+2958-                      <p className="text-xs text-slate-500 leading-relaxed font-sans line-clamp-3 font-medium">
+--
+3029-                    <p className="text-xs text-slate-500 font-medium leading-relaxed font-sans mt-1">
+3030-                      {selectedStreamId === '12th_intermediate' ? (
+3031:                        <>These target higher education courses are officially recommended for <strong className="text-slate-800 font-black">{selectedCourse.name}</strong> students. Click any degree card to explore core curricula, elite institutes, job roles, and average salary metrics.</>
+3032-                      ) : (
+3033:                        <>These specialized industry roles and upskilling pathways are highly recommended for <strong className="text-slate-800 font-black">{selectedCourse.name}</strong> students. Click any card to explore key skills, top hiring organizations, core duties, and salary trends.</>
+3034-                      )}
+3035-                    </p>
+--
+3126-                            </div>
+3127-                            <h3 className="text-lg font-black text-slate-900 leading-tight">
+3128:                              {info.fullName} {selectedStreamId === '12th_intermediate' ? `(${info.name})` : ''}
+3129-                            </h3>
+3130-                          </div>
+--
+3135-                                  detail: { 
+3136-                                    tab: 'specializations',
+3137:                                    degreePreset: info.name,
+3138-                                    degreePresetToSpec: true
+3139-                                  } 
+--
+3150-                                  detail: { 
+3151-                                    tab: 'specializations',
+3152:                                    degreePreset: info.name,
+3153-                                    degreePresetToSpec: true
+3154-                                  } 
+--
+3198-                            {/* Dynamic Specializations Directory Button */}
+3199-                            {(() => {
+3200:                              const dName = info.name;
+3201-                              let targetType: 'engineering'|'medical'|'commerce'|'arts'|'science'|'law'|null = null;
+3202-                              if (dName === "B.E. / B.Tech" || dName.startsWith("BTech")) targetType = 'engineering';
+--
+3354-                                  </div>
+3355-                                  <h3 className="text-base sm:text-lg font-black text-violet-900 leading-tight">
+3356:                                    {pgInfo.fullName} ({pgInfo.name})
+3357-                                  </h3>
+3358-                                </div>
+--
+3493-                          </div>
+3494-                          <h4 className="text-sm font-extrabold text-slate-900">
+3495:                            {exam.name}
+3496-                          </h4>
+3497-                          <p className="text-xs text-slate-600 leading-relaxed font-semibold">
+--
+3505-                                rel="noopener noreferrer"
+3506-                                className="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 font-bold hover:underline"
+3507:                                id={`exam-link-${exam.name.replace(/\s+/g, '-').toLowerCase()}`}
+3508-                              >
+3509-                                Visit {exam.link} <ExternalLink className="w-3.5 h-3.5" />
+--
+3518-                                detail: { 
+3519-                                  tab: 'exams',
+3520:                                  examPreset: exam.name
+3521-                                } 
+3522-                              }));
+--
+3571-                            <div key={idx} className="bg-white/5 border border-white/10 rounded-2xl p-4 flex flex-col justify-between space-y-3">
+3572-                              <div className="flex justify-between items-start gap-2">
+3573:                                <h5 className="text-xs font-extrabold text-white truncate max-w-[150px]">{ex.name}</h5>
+3574-                                <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${
+3575-                                  isEligible ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+--
+3612-                    <div>
+3613-                      <strong className="font-extrabold block text-amber-950 mb-0.5">Government Careers Advantage:</strong>
+3614:                      Completing PUC with this specialized {selectedCourse.name} layout opens robust administrative, defence, and technical avenues in State and Central Government.
+3615-                    </div>
+3616-                  </div>
+3617-
+3618-                  <div className="grid grid-cols-1 gap-3">
+3619:                    {getGovtExamsForCombination(selectedCourse.name).map((exam, i) => (
+3620-                      <div key={i} className="bg-white border border-slate-100 hover:border-slate-200 rounded-2xl p-5 flex flex-col sm:flex-row items-start justify-between gap-4 text-left transition-all hover:shadow-2xs">
+3621-                        <div className="space-y-2 flex-1 font-sans">
+--
+3634-                          </div>
+3635-                          <h4 className="text-sm font-extrabold text-slate-900">
+3636:                            {exam.name}
+3637-                          </h4>
+3638-                          <p className="text-xs text-slate-600 leading-relaxed font-semibold">
+--
+3646-                                rel="noopener noreferrer"
+3647-                                className="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 font-bold hover:underline"
+3648:                                id={`govt-link-${exam.name.replace(/\s+/g, '-').toLowerCase()}`}
+3649-                              >
+3650-                                Visit Official Portal ({exam.link}) <ExternalLink className="w-3.5 h-3.5" />
+--
+3659-                                detail: { 
+3660-                                  tab: 'exams',
+3661:                                  examPreset: exam.name
+3662-                                } 
+3663-                              }));
+--
+3838-        <AnimatePresence>
+3839-          {selectedSubject && (() => {
+3840:            const extra = getSubjectFullDetails(selectedSubject.name, selectedSubject.desc, selectedSubject.type);
+3841-            return (
+3842-              <div
+--
+3866-                      </span>
+3867-                      <h3 className="text-lg md:text-xl font-black text-slate-900 leading-tight">
+3868:                        {selectedSubject.name}
+3869-                      </h3>
+3870-                    </div>
+--
+3962-                        setSelectedSubject(null);
+3963-                        const customEvent = new CustomEvent('open-counselor-with-context', {
+3964:                          detail: { course: `${selectedCourse?.name} - Subject: ${selectedSubject?.name}` }
+3965-                        });
+3966-                        window.dispatchEvent(customEvent);
+--
+4266-                  ? selectedStream.courses.filter(course => {
+4267-                      if (activeCategory === 'science') {
+4268:                        return ['PCM', 'PCMC', 'PCME', 'PCMB', 'PCMS', 'PCB', 'PCBZ', 'PCBH'].some(prefix => course.name.startsWith(prefix));
+4269-                      } else if (activeCategory === 'commerce') {
+4270:                        return ['CEBA', 'SEBA', 'HEBA', 'ABMS', 'EBAC', 'BSBA', 'CSBA'].some(prefix => course.name.startsWith(prefix));
+4271-                      } else if (activeCategory === 'arts') {
+4272:                        return ['HEPS', 'HEPP', 'HESP', 'EPS', 'JPE'].some(prefix => course.name.startsWith(prefix));
+4273-                      }
+4274-                      return true;
+--
+4283-                  >
+4284-                    <h4 className="text-sm font-bold text-slate-900 group-hover:text-blue-700 transition-colors">
+4285:                      {course.name}
+4286-                    </h4>
+4287-                    <div className="flex items-center gap-1.5 mt-2 text-xs text-slate-500">
+--
+4302-                            detail: { 
+4303-                              tab: 'specializations',
+4304:                              degreePreset: course.name,
+4305-                              degreePresetToSpec: true
+4306-                            } 
+--
+4336-              </span>
+4337-              <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900 mt-2">
+4338:                {selectedCourse.name}
+4339-              </h3>
+4340-              <p className="text-xs text-slate-500 mt-1">Study Duration: {selectedCourse.duration}</p>
+--
+4412-            {/* HIGH-FIDELITY DEGREE AND CAREER PATHWAY PROGRESSION TIMELINE */}
+4413-            {(() => {
+4414:              const roadmap = getRoadmapForCourse(selectedCourse.name, selectedStreamId || '');
+4415-              return (
+4416-                <div className="border-t border-slate-100 pt-6 mt-6 space-y-5">
+--
+4675-                  <span>{
+4676-                    ENGINEERING_SPECIALIZATIONS_DATABASE.filter(spec => {
+4677:                      const matchesSearch = spec.name.toLowerCase().includes(specSearchQuery.toLowerCase()) || 
+4678-                                            spec.description.toLowerCase().includes(specSearchQuery.toLowerCase()) ||
+4679-                                            spec.subjects.some(s => s.toLowerCase().includes(specSearchQuery.toLowerCase())) ||
+--
+4687-                <div className="space-y-2.5">
+4688-                  {ENGINEERING_SPECIALIZATIONS_DATABASE.filter(spec => {
+4689:                    const matchesSearch = spec.name.toLowerCase().includes(specSearchQuery.toLowerCase()) || 
+4690-                                          spec.description.toLowerCase().includes(specSearchQuery.toLowerCase()) ||
+4691-                                          spec.subjects.some(s => s.toLowerCase().includes(specSearchQuery.toLowerCase())) ||
+--
+4695-                  }).length > 0 ? (
+4696-                    ENGINEERING_SPECIALIZATIONS_DATABASE.filter(spec => {
+4697:                      const matchesSearch = spec.name.toLowerCase().includes(specSearchQuery.toLowerCase()) || 
+4698-                                            spec.description.toLowerCase().includes(specSearchQuery.toLowerCase()) ||
+4699-                                            spec.subjects.some(s => s.toLowerCase().includes(specSearchQuery.toLowerCase())) ||
+--
+4721-                          </div>
+4722-                          <h4 className="text-xs font-black text-slate-800 leading-tight truncate">
+4723:                            {spec.name}
+4724-                          </h4>
+4725-                          <p className="text-[10px] text-slate-400 font-bold leading-normal truncate font-sans">
+--
+4780-                        </div>
+4781-                        <h3 className="text-lg md:text-xl font-black text-slate-900 leading-tight">
+4782:                          <span className="text-indigo-600">#{activeSpecialization.rank}</span> {activeSpecialization.name}
+4783-                        </h3>
+4784-                      </div>

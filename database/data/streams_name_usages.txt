@@ -1,0 +1,40 @@
+Line 707: exams = allCommerceExams.filter(exam => exam.name !== "DU JAT");
+Line 2705: return stream?.courses.find(c => c.name === coursePreset);
+Line 2708: const c = s.courses.find(course => course.name === coursePreset);
+Line 2748: const roadmap = getRoadmapForCourse(selectedCourse.name, streamId);
+Line 2749: const detailData = getSubjectsAndExamsForCourse(selectedCourse.name, streamId);
+Line 2766: {selectedCourse.name} Full Career Pathfinder
+Line 2878: <Sparkles className="w-4 h-4 text-amber-300" /> Have questions on {selectedCourse.name}?
+Line 2886: detail: { course: selectedCourse.name }
+Line 2956: {sub.name}
+Line 3031: <>These target higher education courses are officially recommended for <strong className="text-slate-800 font-black">{selectedCourse.name}</strong> students. Click any degree card to explore core curricula, elite institutes, job roles, and average salary metrics.</>
+Line 3033: <>These specialized industry roles and upskilling pathways are highly recommended for <strong className="text-slate-800 font-black">{selectedCourse.name}</strong> students. Click any card to explore key skills, top hiring organizations, core duties, and salary trends.</>
+Line 3128: {info.fullName} {selectedStreamId === '12th_intermediate' ? `(${info.name})` : ''}
+Line 3137: degreePreset: info.name,
+Line 3152: degreePreset: info.name,
+Line 3200: const dName = info.name;
+Line 3356: {pgInfo.fullName} ({pgInfo.name})
+Line 3495: {exam.name}
+Line 3507: id={`exam-link-${exam.name.replace(/\s+/g, '-').toLowerCase()}`}
+Line 3520: examPreset: exam.name
+Line 3573: <h5 className="text-xs font-extrabold text-white truncate max-w-[150px]">{ex.name}</h5>
+Line 3614: Completing PUC with this specialized {selectedCourse.name} layout opens robust administrative, defence, and technical avenues in State and Central Government.
+Line 3619: {getGovtExamsForCombination(selectedCourse.name).map((exam, i) => (
+Line 3636: {exam.name}
+Line 3648: id={`govt-link-${exam.name.replace(/\s+/g, '-').toLowerCase()}`}
+Line 3661: examPreset: exam.name
+Line 3840: const extra = getSubjectFullDetails(selectedSubject.name, selectedSubject.desc, selectedSubject.type);
+Line 3868: {selectedSubject.name}
+Line 3964: detail: { course: `${selectedCourse?.name} - Subject: ${selectedSubject?.name}` }
+Line 4268: return ['PCM', 'PCMC', 'PCME', 'PCMB', 'PCMS', 'PCB', 'PCBZ', 'PCBH'].some(prefix => course.name.startsWith(prefix));
+Line 4270: return ['CEBA', 'SEBA', 'HEBA', 'ABMS', 'EBAC', 'BSBA', 'CSBA'].some(prefix => course.name.startsWith(prefix));
+Line 4272: return ['HEPS', 'HEPP', 'HESP', 'EPS', 'JPE'].some(prefix => course.name.startsWith(prefix));
+Line 4285: {course.name}
+Line 4304: degreePreset: course.name,
+Line 4338: {selectedCourse.name}
+Line 4414: const roadmap = getRoadmapForCourse(selectedCourse.name, selectedStreamId || '');
+Line 4677: const matchesSearch = spec.name.toLowerCase().includes(specSearchQuery.toLowerCase()) ||
+Line 4689: const matchesSearch = spec.name.toLowerCase().includes(specSearchQuery.toLowerCase()) ||
+Line 4697: const matchesSearch = spec.name.toLowerCase().includes(specSearchQuery.toLowerCase()) ||
+Line 4723: {spec.name}
+Line 4782: <span className="text-indigo-600">#{activeSpecialization.rank}</span> {activeSpecialization.name}

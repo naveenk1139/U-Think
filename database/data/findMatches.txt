@@ -1,0 +1,28 @@
+src/components/ExamsDirectory.tsx:5771: const exam = ENTRANCE_EXAMS_DATABASE.find(e => e.name === examPreset);
+src/components/ExamsDirectory.tsx:5780: const degree = DEGREES_PROFILES_DATABASE.find(d => d.name === degreePreset);
+src/components/ExamsDirectory.tsx:5936: const match = db.find(s => s.category?.includes('Computing') || s.name.toLowerCase().includes('software') || s.name.toLowerCase().includes('computer'));
+src/components/ExamsDirectory.tsx:5940: const match = db.find(s => s.category?.includes('Design') || s.name.toLowerCase().includes('design') || s.name.toLowerCase().includes('creative') || s.name.toLowerCase().includes('fashion'));
+src/components/ExamsDirectory.tsx:5944: const match = db.find(s => s.category?.includes('Media') || s.name.toLowerCase().includes('journal') || s.name.toLowerCase().includes('communication'));
+src/components/ExamsDirectory.tsx:5956: const exists = db.find(s => s.name === selectedSpec.name);
+src/components/ExamsDirectory.tsx:6083: if (nameLower.includes('agronomy')) return db.find(s => s.name.toLowerCase().includes('agronomy')) || db[0];
+src/components/ExamsDirectory.tsx:6084: if (nameLower.includes('horticulture')) return db.find(s => s.name.toLowerCase().includes('horticulture')) || db[1];
+src/components/ExamsDirectory.tsx:6085: if (nameLower.includes('forestry')) return db.find(s => s.name.toLowerCase().includes('forestry')) || db[2];
+src/components/ExamsDirectory.tsx:6086: if (nameLower.includes('fisheries') || nameLower.includes('f.sc') || nameLower.includes('fsc')) return db.find(s => s.name.toLowerCase().includes('aquaculture') || s.name.toLowerCase().includes('fisheries')) || db[3];
+src/components/ExamsDirectory.tsx:6087: if (nameLower.includes('silk') || nameLower.includes('sericulture')) return db.find(s => s.name.toLowerCase().includes('sericulture') || s.name.toLowerCase().includes('silk')) || db[4];
+src/components/ExamsDirectory.tsx:6088: if (nameLower.includes('food tech')) return db.find(s => s.name.toLowerCase().includes('food')) || db[5];
+src/components/ExamsDirectory.tsx:6089: if (nameLower.includes('biotech')) return db.find(s => s.name.toLowerCase().includes('biotechnology') || s.name.toLowerCase().includes('biotech')) || db[6];
+src/components/ExamsDirectory.tsx:6090: if (nameLower.includes('plant science') || nameLower.includes('pathology')) return db.find(s => s.name.toLowerCase().includes('plant') || s.name.toLowerCase().includes('pathology')) || db[7];
+src/components/ExamsDirectory.tsx:6091: if (nameLower.includes('soil science')) return db.find(s => s.name.toLowerCase().includes('soil')) || db[8];
+src/components/ExamsDirectory.tsx:6092: if (nameLower.includes('poultry')) return db.find(s => s.name.toLowerCase().includes('poultry')) || db[9];
+src/components/ExamsDirectory.tsx:6093: if (nameLower.includes('animal nutrition')) return db.find(s => s.name.toLowerCase().includes('animal')) || db[10];
+src/components/ExamsDirectory.tsx:6097: if (nameLower.includes('aviation') || nameLower.includes('airport')) return db.find(s => s.name.toLowerCase().includes('aviation')) || db[1];
+src/components/ExamsDirectory.tsx:6098: if (nameLower.includes('nautical') || nameLower.includes('maritime')) return db.find(s => s.name.toLowerCase().includes('nautical')) || db[0];
+src/components/ExamsDirectory.tsx:6102: if (nameLower.includes('physical education') || nameLower.includes('sports') || nameLower.includes('p.ed')) return db.find(s => s.name.toLowerCase().includes('physical')) || db[1];
+src/components/ExamsDirectory.tsx:6103: if (nameLower.includes('defence')) return db.find(s => s.name.toLowerCase().includes('defence')) || db[0];
+src/components/ExamsDirectory.tsx:6107: if (nameLower.includes('childhood')) return db.find(s => s.name.toLowerCase().includes('early')) || db[0];
+src/components/ExamsDirectory.tsx:6511: const leftDegreeObj = DEGREES_PROFILES_DATABASE.find(d => d.name === compareLeft) || DEGREES_PROFILES_DATABASE[0];
+src/components/ExamsDirectory.tsx:6512: const rightDegreeObj = DEGREES_PROFILES_DATABASE.find(d => d.name === compareRight) || DEGREES_PROFILES_DATABASE[1];
+src/components/ExamsDirectory.tsx:7076: Showing candidates inside: <strong className="text-blue-900 font-extrabold">{MIND_MAP_NODES.find(n => n.id === mindMapNodeId)?.name}</strong>
+src/components/ExamsDirectory.tsx:7081: {MIND_MAP_NODES.find(n => n.id === mindMapNodeId)?.subNodes?.find(s => s.id === mindMapSubNodeId)?.name}
+src/components/StreamsList.tsx:2705: return stream?.courses.find(c => c.name === coursePreset);
+src/components/StreamsList.tsx:2708: const c = s.courses.find(course => course.name === coursePreset);

@@ -1,0 +1,63 @@
+5749:  const [selectedDegree, setSelectedDegree] = useState<DegreeInfo | null>(null);
+5965:    if (selectedDegree) {
+5966:      const computedSpecType = getSpecTypeForDegree(selectedDegree.name);
+5972:  }, [selectedDegree]);
+6317:    if (activeTab === 'degrees' && degreeViewMode === 'list' && !selectedDegree && filteredComprehensiveDegrees.length > 0) {
+6322:  }, [degreeViewMode, activeTab, filteredComprehensiveDegrees, selectedDegree]);
+6341:  // Sync logic 3: When selectedDegree changes, highlight its matching Mind Map node and category
+6343:    if (selectedDegree && activeTab === 'degrees') {
+6344:      const mapping = getDegreeNodeMapping(selectedDegree.name, selectedDegree.fullName);
+6355:  }, [selectedDegree, activeTab]);
+6357:  // Sync logic 4: Keep selectedDegree synchronized (auto-select disabled for precise user intent)
+6496:  const filteredSpecs = (selectedDegree && activeTab === 'specializations') 
+6497:    ? getSpecsForSpecificDegree(selectedDegree.name, baseFilteredSpecs) 
+7191:                        const isSelected = selectedDegree && selectedDegree.name === deg.name;
+7500:                   {selectedDegree && (selectedDegree.name.toLowerCase().includes('b.sc') || selectedDegree.name.toLowerCase().includes('bsc')) && (
+7953:            ) : activeTab === 'degrees' && selectedDegree && (mindMapNodeId !== 'all' || searchQuery.trim() !== '') ? (
+7961:                        {selectedDegree.duration} {isPG(selectedDegree.name, selectedDegree.fullName) ? 'Postgraduate' : 'Undergraduate'} degree
+7964:                        Stream: {selectedDegree.stream.toUpperCase()}
+7968:                      {selectedDegree.fullName} ({selectedDegree.name})
+7976:                      {selectedDegree.careerOutlook}
+7985:                    {selectedDegree.overview}
+7991:                  const dName = selectedDegree.name;
+8103:                    <span>🔧 Practical (lab / internship / mock): {selectedDegree.practicalPercent}%</span>
+8104:                    <span>📚 Theoretical (textbook / exam essays): {100 - selectedDegree.practicalPercent}%</span>
+8107:                    <div className="bg-blue-600 h-full" style={{ width: `${selectedDegree.practicalPercent}%` }} />
+8108:                    <div className="bg-indigo-400 h-full" style={{ width: `${100 - selectedDegree.practicalPercent}%` }} />
+8120:                      {selectedDegree.keySubjects.map((sub, i) => (
+8137:                      {selectedDegree.topColleges.map((col, i) => (
+8157:                      {selectedDegree.industryRoles.map((role, i) => (
+8177:                      <p className="text-base font-black text-amber-700">{selectedDegree.avgSalary}</p>
+8192:                    {selectedDegree.higherStudies.map((prog, i) => (
+8201:                {selectedDegree.name.startsWith("BTech") && (
+8206:                        Explore premium, highly accredited AICTE-approved engineering colleges offering <strong>{selectedDegree.fullName}</strong>.
+8211:                        const targetSearch = selectedDegree.name === "BTech CSE" ? "BTech CSE" : 
+8212:                                            selectedDegree.name === "BTech Mechanical" ? "BTech Mechanical Engineering" : 
+8213:                                            selectedDegree.name === "BTech Electrical" ? "BTech EE" : 
+8214:                                            selectedDegree.name === "BTech ECE" ? "BTech ECE" : 
+8215:                                            selectedDegree.name === "BTech Civil" ? "BTech Civil Engg" : 
+8216:                                            selectedDegree.name === "BTech Biomedical" ? "BTech Biomedical Engineering" : 
+8217:                                            selectedDegree.name === "BTech Food Tech" ? "BTech Food Technology" : 
+8218:                                            selectedDegree.name === "BTech IT" ? "BTech IT" : 
+8219:                                            selectedDegree.name === "BTech AI" ? "BTech in AI" : 
+8220:                                            selectedDegree.name === "BTech Biotech" ? "BTech Biotechnology" : 
+8221:                                            selectedDegree.name === "BTech Robotics" ? "BTech in Robotics Engg" : 
+8222:                                            selectedDegree.name === "BTech Automobile" ? "BTech Automobile Engg" : 
+8223:                                            selectedDegree.name === "BTech Chemical" ? "BTech Chemical Engineering" : 
+8224:                                            selectedDegree.name === "BTech Marine" ? "BTech Marine Engineering" : selectedDegree.name;
+8233:                      {selectedDegree.name === "BTech CSE" ? "Check BTech CSE Colleges" : 
+8234:                       selectedDegree.name === "BTech Mechanical" ? "Check BTech Mechanical Engineering Colleges" : 
+8235:                       selectedDegree.name === "BTech Electrical" ? "Check BTech EE Colleges" : 
+8236:                       selectedDegree.name === "BTech ECE" ? "Check BTech ECE Colleges" : 
+8237:                       selectedDegree.name === "BTech Civil" ? "Check B Tech Civil Engg Colleges" : 
+8238:                       selectedDegree.name === "BTech Biomedical" ? "Check BTech Biomedical Engineering Colleges" : 
+8239:                       selectedDegree.name === "BTech Food Tech" ? "Check BTech Food Technology Colleges" : 
+8240:                       selectedDegree.name === "BTech IT" ? "Check BTech IT Colleges" : 
+8241:                       selectedDegree.name === "BTech AI" ? "Check BTech in AI Colleges" : 
+8242:                       selectedDegree.name === "BTech Biotech" ? "Check BTech Biotechnology Colleges" : 
+8243:                       selectedDegree.name === "BTech Robotics" ? "Check BTech in Robotics Engg Colleges" : 
+8244:                       selectedDegree.name === "BTech Automobile" ? "Check BTech Automobile Engg Colleges" : 
+8245:                       selectedDegree.name === "BTech Chemical" ? "Check BTech Chemical Engineering Colleges" : 
+8246:                       selectedDegree.name === "BTech Marine" ? "Check BTech Marine Engineering Colleges" : `Check ${selectedDegree.name} Colleges`} &rarr;
+8255:                      const d = selectedDegree.name.toLowerCase();
+8256:                      const mappingCategory = getDegreeNodeMapping(selectedDegree.name, selectedDegree.fullName).category;

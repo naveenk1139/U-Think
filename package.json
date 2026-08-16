@@ -1,0 +1,23 @@
+{
+  "name": "u-think-mern-workspace",
+  "version": "1.0.0",
+  "private": true,
+  "description": "U-THINK — MERN Stack Monorepo Workspace",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "cd backend && npm run dev",
+    "build": "npm run build:backend && npm run build:frontend",
+    "build:frontend": "cd frontend && npm run build",
+    "build:backend": "cd backend && npm run build",
+    "seed": "node database/seeds/seedExams.js",
+    "init:db": "node database/initDB.js"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "mongoose": "^8.7.0"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

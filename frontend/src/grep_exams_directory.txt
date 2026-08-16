@@ -1,0 +1,190 @@
+3854:    categoryName: node.name,
+4686:    const degNameLower = deg.name.toLowerCase();
+4749:    fallback = COMPREHENSIVE_PDF_DEGREES.filter(d => d.parentDegree === "BCA" || d.name.includes("CSE") || d.name.includes("CS") || d.name.includes("IT"));
+4751:    fallback = COMPREHENSIVE_PDF_DEGREES.filter(d => d.parentDegree === "B.E. / B.Tech" && (d.name.includes("ECE") || d.name.includes("EEE") || d.name.includes("Electronics") || d.name.includes("VLSI")));
+4753:    fallback = COMPREHENSIVE_PDF_DEGREES.filter(d => d.parentDegree === "B.E. / B.Tech" && (d.name.includes("ME") || d.name.includes("Robotics") || d.name.includes("Aerospace") || d.name.includes("Automobile")));
+4755:    fallback = COMPREHENSIVE_PDF_DEGREES.filter(d => d.name.includes("Biotech") || d.name.includes("Chemical") || d.name.includes("Food") || d.parentDegree === "M.Sc.");
+4757:    fallback = COMPREHENSIVE_PDF_DEGREES.filter(d => d.parentDegree === "B.E. / B.Tech" && (d.name.includes("Civil") || d.name.includes("Environmental") || d.name.includes("Mining")));
+4759:    fallback = COMPREHENSIVE_PDF_DEGREES.filter(d => d.parentDegree === "MBA/PGDM" || d.parentDegree === "BBA" || d.name.includes("B.Com") || d.name.includes("Industrial"));
+4773:    return COMPREHENSIVE_PDF_DEGREES.filter(d => d.parentDegree === "LLB / Law Studies" || d.name.includes("LLM") || d.fullName.includes("Laws"));
+4779:    return COMPREHENSIVE_PDF_DEGREES.filter(d => d.parentDegree === "B.Com" || d.name.includes("B.Com") || d.name.includes("M.Com"));
+4782:    return COMPREHENSIVE_PDF_DEGREES.filter(d => d.parentDegree === "BBA" || d.parentDegree === "MBA/PGDM" || d.name.includes("MBA") || d.name.includes("BMS") || d.name.includes("BBM"));
+4791:    return COMPREHENSIVE_PDF_DEGREES.filter(d => d.parentDegree === "BA Economics" || d.parentDegree === "B.Sc Psychology" || d.name.startsWith("BA") || d.parentDegree === "M.A.");
+4794:    return COMPREHENSIVE_PDF_DEGREES.filter(d => d.name.includes("B.Ed") || d.fullName.includes("Education") || d.fullName.includes("Teacher") || d.name.includes("M.Ed") || d.parentDegree === "M.P.Ed");
+4797:    return COMPREHENSIVE_PDF_DEGREES.filter(d => d.name.toLowerCase().includes("aviation") || d.fullName.toLowerCase().includes("aviation") || (d.parentDegree === "B.Sc" && d.name.includes("Aviation")));
+4800:    return COMPREHENSIVE_PDF_DEGREES.filter(d => d.name.toLowerCase().includes("b.des") || d.fullName.toLowerCase().includes("design") || d.name.toLowerCase().includes("m.des"));
+4803:    return COMPREHENSIVE_PDF_DEGREES.filter(d => d.parentDegree === "BPT" || d.parentDegree === "BMLT" || d.parentDegree === "MPT" || d.parentDegree === "MMLT" || d.name.includes("MPT") || d.parentDegree === "MOT" || d.parentDegree === "MHA");
+4806:    return COMPREHENSIVE_PDF_DEGREES.filter(d => d.parentDegree === "B.Pharm" || d.parentDegree === "D.Pharma" || d.parentDegree === "M.Pharma" || d.parentDegree === "Pharm.D" || d.name.toLowerCase().includes("pharm"));
+4815:    return COMPREHENSIVE_PDF_DEGREES.filter(d => d.parentDegree === "BCA" || d.name.includes("MCA") || d.fullName.includes("Applications") || d.name.includes("BCA"));
+4821:    return parent.includes(cat) || cat.includes(parent) || d.name.toLowerCase().includes(cat);
+5609:    d => d.name.toLowerCase() === parentName.toLowerCase() ||
+5610:         d.name.toLowerCase().includes(parentName.toLowerCase()) ||
+5611:         parentName.toLowerCase().includes(d.name.toLowerCase())
+5771:        const exam = ENTRANCE_EXAMS_DATABASE.find(e => e.name === examPreset);
+5780:        const degree = DEGREES_PROFILES_DATABASE.find(d => d.name === degreePreset);
+5819:            ex => ex.name.toLowerCase() === customEvent.detail.examPreset.toLowerCase() ||
+5820:                  ex.name.toLowerCase().includes(customEvent.detail.examPreset.toLowerCase())
+5830:            d => d.name.toLowerCase() === degreePresetVal.toLowerCase() ||
+5831:                 d.name.toLowerCase().includes(degreePresetVal.toLowerCase()) ||
+5832:                 degreePresetVal.toLowerCase().includes(d.name.toLowerCase())
+5936:      const match = db.find(s => s.category?.includes('Computing') || s.name.toLowerCase().includes('software') || s.name.toLowerCase().includes('computer'));
+5940:      const match = db.find(s => s.category?.includes('Design') || s.name.toLowerCase().includes('design') || s.name.toLowerCase().includes('creative') || s.name.toLowerCase().includes('fashion'));
+5944:      const match = db.find(s => s.category?.includes('Media') || s.name.toLowerCase().includes('journal') || s.name.toLowerCase().includes('communication'));
+5956:      const exists = db.find(s => s.name === selectedSpec.name);
+5966:      const computedSpecType = getSpecTypeForDegree(selectedDegree.name);
+5982:        ex => ex.name.toLowerCase() === examKeyword.toLowerCase() || 
+5983:              ex.name.toLowerCase().includes(examKeyword.toLowerCase()) ||
+5984:              examKeyword.toLowerCase().includes(ex.name.toLowerCase())
+5996:        deg => deg.name.toLowerCase() === degreeKeyword.toLowerCase() || 
+5997:               deg.name.toLowerCase().includes(degreeKeyword.toLowerCase()) ||
+5998:               degreeKeyword.toLowerCase().includes(deg.name.toLowerCase()) ||
+6003:        const cat = getSpecTypeForDegree(foundDegree.name);
+6007:          const matchSpec = getBestMatchingSpec(cat, foundDegree.name);
+6034:          s => s.name.toLowerCase() === specKeyword.toLowerCase() || 
+6035:               s.name.toLowerCase().includes(specKeyword.toLowerCase()) ||
+6036:               specKeyword.toLowerCase().includes(s.name.toLowerCase())
+6049:  const [compareLeft, setCompareLeft] = useState<string>(DEGREES_PROFILES_DATABASE[0].name);
+6050:  const [compareRight, setCompareRight] = useState<string>(DEGREES_PROFILES_DATABASE[1].name);
+6054:    const matchesSearch = exam.name.toUpperCase().includes(searchQuery.toUpperCase()) || 
+6083:      if (nameLower.includes('agronomy')) return db.find(s => s.name.toLowerCase().includes('agronomy')) || db[0];
+6084:      if (nameLower.includes('horticulture')) return db.find(s => s.name.toLowerCase().includes('horticulture')) || db[1];
+6085:      if (nameLower.includes('forestry')) return db.find(s => s.name.toLowerCase().includes('forestry')) || db[2];
+6086:      if (nameLower.includes('fisheries') || nameLower.includes('f.sc') || nameLower.includes('fsc')) return db.find(s => s.name.toLowerCase().includes('aquaculture') || s.name.toLowerCase().includes('fisheries')) || db[3];
+6087:      if (nameLower.includes('silk') || nameLower.includes('sericulture')) return db.find(s => s.name.toLowerCase().includes('sericulture') || s.name.toLowerCase().includes('silk')) || db[4];
+6088:      if (nameLower.includes('food tech')) return db.find(s => s.name.toLowerCase().includes('food')) || db[5];
+6089:      if (nameLower.includes('biotech')) return db.find(s => s.name.toLowerCase().includes('biotechnology') || s.name.toLowerCase().includes('biotech')) || db[6];
+6090:      if (nameLower.includes('plant science') || nameLower.includes('pathology')) return db.find(s => s.name.toLowerCase().includes('plant') || s.name.toLowerCase().includes('pathology')) || db[7];
+6091:      if (nameLower.includes('soil science')) return db.find(s => s.name.toLowerCase().includes('soil')) || db[8];
+6092:      if (nameLower.includes('poultry')) return db.find(s => s.name.toLowerCase().includes('poultry')) || db[9];
+6093:      if (nameLower.includes('animal nutrition')) return db.find(s => s.name.toLowerCase().includes('animal')) || db[10];
+6097:      if (nameLower.includes('aviation') || nameLower.includes('airport')) return db.find(s => s.name.toLowerCase().includes('aviation')) || db[1];
+6098:      if (nameLower.includes('nautical') || nameLower.includes('maritime')) return db.find(s => s.name.toLowerCase().includes('nautical')) || db[0];
+6102:      if (nameLower.includes('physical education') || nameLower.includes('sports') || nameLower.includes('p.ed')) return db.find(s => s.name.toLowerCase().includes('physical')) || db[1];
+6103:      if (nameLower.includes('defence')) return db.find(s => s.name.toLowerCase().includes('defence')) || db[0];
+6107:      if (nameLower.includes('childhood')) return db.find(s => s.name.toLowerCase().includes('early')) || db[0];
+6117:      const specLower = spec.name.toLowerCase();
+6137:      const matchesSearch = degree.name.toUpperCase().includes(searchQuery.toUpperCase()) || 
+6144:        const mapping = getDegreeNodeMapping(degree.name, degree.fullName);
+6162:        const eng = isEngineering(degree.name);
+6163:        const pharm = isPharmacy(degree.name);
+6164:        const med = isMedical(degree.name);
+6165:        const maritime = isMaritime(degree.name);
+6166:        const defence = isDefence(degree.name);
+6167:        const education = isEducation(degree.name);
+6168:        const law = isLaw(degree.name);
+6169:        const agriculture = isAgriculture(degree.name);
+6183:        const ug = isUG(degree.name, degree.fullName);
+6184:        const pg = isPG(degree.name, degree.fullName);
+6193:        matchesSelect = matchesSelect && allowed.some(d => degree.name.includes(d) || d.includes(degree.name));
+6198:        const dName = degree.name.toLowerCase();
+6199:        const mapping = getDegreeNodeMapping(degree.name, degree.fullName);
+6251:      if (node.name.toLowerCase().includes(query)) return true;
+6254:      if (node.subNodes && node.subNodes.some(sub => sub.name.toLowerCase().includes(query))) return true;
+6262:        const mapping = getDegreeNodeMapping(d.name, d.fullName);
+6265:      if (associated.some(d => d.name.toLowerCase().includes(query) || d.fullName.toLowerCase().includes(query) || d.overview.toLowerCase().includes(query))) {
+6279:        deg.name.toLowerCase().includes(query) || 
+6283:      const isPgDeg = isPG(deg.name, deg.fullName);
+6291:        const mapping = getDegreeNodeMapping(deg.name, deg.fullName);
+6298:        const mapping = getDegreeNodeMapping(deg.name, deg.fullName);
+6300:          matchesPdfFieldFilter = mapping.category === 'computing_it' || deg.name.toLowerCase().includes('bca') || deg.name.toLowerCase().includes('mca') || deg.name.toLowerCase().includes('computer');
+6319:      const specDeg = getSpecificDegreeProfile(firstDeg.name, firstDeg.fullName, firstDeg.duration, firstDeg.parentDegree);
+6344:      const mapping = getDegreeNodeMapping(selectedDegree.name, selectedDegree.fullName);
+6409:    const matchesSearch = spec.name.toUpperCase().includes(searchQuery.toUpperCase()) ||
+6417:      matchesPdfFilter = !!(spec.category?.includes('Computing') || spec.name.toLowerCase().includes('software') || spec.name.toLowerCase().includes('data') || spec.name.toLowerCase().includes('computer'));
+6419:      matchesPdfFilter = !!(spec.category?.includes('Design') || spec.name.toLowerCase().includes('design') || spec.name.toLowerCase().includes('creative') || spec.name.toLowerCase().includes('anim') || spec.name.toLowerCase().includes('fashion'));
+6421:      matchesPdfFilter = !!(spec.category?.includes('Media') || spec.name.toLowerCase().includes('journalism') || spec.name.toLowerCase().includes('writing') || spec.name.toLowerCase().includes('communication'));
+6425:      matchesPdfFilter = !!(spec.category?.includes('Hospitality') || spec.name.toLowerCase().includes('hotel') || spec.name.toLowerCase().includes('tourism') || spec.name.toLowerCase().includes('culinary'));
+6438:      const lowerSpec = spec.name.toLowerCase();
+6497:    ? getSpecsForSpecificDegree(selectedDegree.name, baseFilteredSpecs) 
+6503:      const isStillInList = filteredSpecs.some(spec => spec.name === selectedSpec?.name);
+6511:  const leftDegreeObj = DEGREES_PROFILES_DATABASE.find(d => d.name === compareLeft) || DEGREES_PROFILES_DATABASE[0];
+6512:  const rightDegreeObj = DEGREES_PROFILES_DATABASE.find(d => d.name === compareRight) || DEGREES_PROFILES_DATABASE[1];
+6666:                    <option key={d.name} value={d.name}>{d.name}</option>
+6679:                    <option key={d.name} value={d.name}>{d.name}</option>
+6695:                      <span className="text-sm underline decoration-blue-400 decoration-2">{leftDegreeObj.fullName} ({leftDegreeObj.name})</span>
+6699:                      <span className="text-sm underline decoration-indigo-400 decoration-2">{rightDegreeObj.fullName} ({rightDegreeObj.name})</span>
+7022:                      <span className="truncate max-w-[125px]">{node.name}</span>
+7040:                        <h4 className="text-xs font-bold text-white">{activeNode.name}</h4>
+7059:                          {sub.name}
+7076:                    Showing candidates inside: <strong className="text-blue-900 font-extrabold">{MIND_MAP_NODES.find(n => n.id === mindMapNodeId)?.name}</strong>
+7081:                          {MIND_MAP_NODES.find(n => n.id === mindMapNodeId)?.subNodes?.find(s => s.id === mindMapSubNodeId)?.name}
+7143:                    const isSelected = selectedExam?.name === exam.name;
+7157:                          {exam.name.slice(0, 2)}
+7169:                            {exam.name}
+7191:                        const isSelected = selectedDegree && selectedDegree.name === deg.name;
+7192:                        const isPgDeg = isPG(deg.name, deg.fullName);
+7197:                              const specDeg = getSpecificDegreeProfile(deg.name, deg.fullName, deg.duration, deg.parentDegree);
+7212:                                {deg.name} • {deg.duration}
+7238:                        const m = getDegreeNodeMapping(d.name, d.fullName);
+7305:                              {node.name}
+7331:                                      {sub.name}
+7428:                                  {node.name} Sub-Branches:
+7452:                                        {sub.name}
+7500:                   {selectedDegree && (selectedDegree.name.toLowerCase().includes('b.sc') || selectedDegree.name.toLowerCase().includes('bsc')) && (
+7543:                        const isSelected = selectedSpec?.name === spec.name;
+7546:                            key={`${spec.name}-${specIdx}`}
+7571:                                {spec.name}
+7624:                      {selectedExam.fullName} ({selectedExam.name})
+7720:                        const target = mapping[selectedExam.name] || { sid: '12th_intermediate', course: 'PCM (Physics, Chemistry, Maths)' };
+7763:                  name: node.id === 'bsc' ? `B.Sc in ${subBranch.name}` : subBranch.name,
+7789:                          <span className="text-2xl">{displayNode.icon}</span> {displayNode.name}
+7824:                            General {node.name} Overview
+7836:                              {sub.name}
+7855:                            The following programs are offered under the {displayNode.name} domain. Click on a course to navigate to its core profile directory.
+7862:                                  const specificProfile = getSpecificDegreeProfile(deg.name, deg.fullName, deg.duration, deg.parentDegree);
+7878:                                    <span className="text-indigo-500 text-xs">🎓</span> {deg.name}
+7961:                        {selectedDegree.duration} {isPG(selectedDegree.name, selectedDegree.fullName) ? 'Postgraduate' : 'Undergraduate'} degree
+7968:                      {selectedDegree.fullName} ({selectedDegree.name})
+7991:                  const dName = selectedDegree.name;
+8077:                            Explore {match.name} Specialization
+8080:                            Rather than a single static path, this degree comprises highly detailed modules and focus specialties, preparing you for targeted industry placement. Click below to analyze syllabus breakdowns and industry research roles for <strong className="text-slate-800">{match.name}</strong>.
+8094:                        🚀 Explore {match.name} Specialization &rarr;
+8201:                {selectedDegree.name.startsWith("BTech") && (
+8211:                        const targetSearch = selectedDegree.name === "BTech CSE" ? "BTech CSE" : 
+8212:                                            selectedDegree.name === "BTech Mechanical" ? "BTech Mechanical Engineering" : 
+8213:                                            selectedDegree.name === "BTech Electrical" ? "BTech EE" : 
+8214:                                            selectedDegree.name === "BTech ECE" ? "BTech ECE" : 
+8215:                                            selectedDegree.name === "BTech Civil" ? "BTech Civil Engg" : 
+8216:                                            selectedDegree.name === "BTech Biomedical" ? "BTech Biomedical Engineering" : 
+8217:                                            selectedDegree.name === "BTech Food Tech" ? "BTech Food Technology" : 
+8218:                                            selectedDegree.name === "BTech IT" ? "BTech IT" : 
+8219:                                            selectedDegree.name === "BTech AI" ? "BTech in AI" : 
+8220:                                            selectedDegree.name === "BTech Biotech" ? "BTech Biotechnology" : 
+8221:                                            selectedDegree.name === "BTech Robotics" ? "BTech in Robotics Engg" : 
+8222:                                            selectedDegree.name === "BTech Automobile" ? "BTech Automobile Engg" : 
+8223:                                            selectedDegree.name === "BTech Chemical" ? "BTech Chemical Engineering" : 
+8224:                                            selectedDegree.name === "BTech Marine" ? "BTech Marine Engineering" : selectedDegree.name;
+8233:                      {selectedDegree.name === "BTech CSE" ? "Check BTech CSE Colleges" : 
+8234:                       selectedDegree.name === "BTech Mechanical" ? "Check BTech Mechanical Engineering Colleges" : 
+8235:                       selectedDegree.name === "BTech Electrical" ? "Check BTech EE Colleges" : 
+8236:                       selectedDegree.name === "BTech ECE" ? "Check BTech ECE Colleges" : 
+8237:                       selectedDegree.name === "BTech Civil" ? "Check B Tech Civil Engg Colleges" : 
+8238:                       selectedDegree.name === "BTech Biomedical" ? "Check BTech Biomedical Engineering Colleges" : 
+8239:                       selectedDegree.name === "BTech Food Tech" ? "Check BTech Food Technology Colleges" : 
+8240:                       selectedDegree.name === "BTech IT" ? "Check BTech IT Colleges" : 
+8241:                       selectedDegree.name === "BTech AI" ? "Check BTech in AI Colleges" : 
+8242:                       selectedDegree.name === "BTech Biotech" ? "Check BTech Biotechnology Colleges" : 
+8243:                       selectedDegree.name === "BTech Robotics" ? "Check BTech in Robotics Engg Colleges" : 
+8244:                       selectedDegree.name === "BTech Automobile" ? "Check BTech Automobile Engg Colleges" : 
+8245:                       selectedDegree.name === "BTech Chemical" ? "Check BTech Chemical Engineering Colleges" : 
+8246:                       selectedDegree.name === "BTech Marine" ? "Check BTech Marine Engineering Colleges" : `Check ${selectedDegree.name} Colleges`} &rarr;
+8255:                      const d = selectedDegree.name.toLowerCase();
+8256:                      const mappingCategory = getDegreeNodeMapping(selectedDegree.name, selectedDegree.fullName).category;
+8318:                    d => d.name.toLowerCase() === selectedSubCourse.name.toLowerCase() ||
+8319:                         d.name.toLowerCase().includes(selectedSubCourse.name.toLowerCase()) ||
+8320:                         selectedSubCourse.name.toLowerCase().includes(d.name.toLowerCase()) ||
+8324:                    name: selectedSubCourse.name,
+8327:                    overview: "This is a specialized course under the " + subBranch.name + " stream. Focuses on advanced concepts, industrial projects, and specialized research.",
+8343:                          &larr; Back to {subBranch.name} Overview
+8346:                          {activePdfField === 'bsc' ? 'BSc ' : ''}{subBranch.name} Specialization
+8352:                          {matchedProfile.name}
+8439:                            {activePdfField === 'bsc' ? 'BSC ' : ''}{subBranch.name.toUpperCase()} STREAM
+8447:                          <span>{activePdfField === 'bsc' ? `B.Sc in ${subBranch.name}` : subBranch.name}</span>
+8520:                                <span className="text-indigo-500 text-xs">🎓</span> {course.name}
+8558:                      <span>{selectedSpec.name}</span>
+8626:                    {getMatchingComprehensiveDegrees(selectedSpec.name, selectedSpec.category).map((deg, i) => (
+8630:                          const specificProfile = getSpecificDegreeProfile(deg.name, deg.fullName, deg.duration, deg.parentDegree);
+8645:                            <span className="text-blue-500 text-xs">🎓</span> {deg.name}
+8665:                      Verify which national institutes offer customized degrees in <strong>{selectedSpec.name}</strong>, or consult our automated admission predictor instantly.
+8672:                        const targetSearch = selectedSpec.name;
+8689:                      💬 Ask AI Counselor about {selectedSpec.name.split(' ')[0]}
