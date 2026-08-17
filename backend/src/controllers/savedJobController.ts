@@ -4,7 +4,7 @@ import SavedJob from '../models/SavedJob';
 // Save a job
 export const saveJob = async (req: Request, res: Response) => {
   try {
-    const userId = req.user?.userId; // Assumes authMiddleware sets req.user
+    const userId = (req as any).user?.userId; // Assumes authMiddleware sets req.user
     if (!userId) {
       return res.status(401).json({ success: false, message: 'Unauthorized' });
     }
@@ -39,7 +39,7 @@ export const saveJob = async (req: Request, res: Response) => {
 // Get all saved jobs for current user
 export const getSavedJobs = async (req: Request, res: Response) => {
   try {
-    const userId = req.user?.userId;
+    const userId = (req as any).user?.userId;
     if (!userId) {
       return res.status(401).json({ success: false, message: 'Unauthorized' });
     }
@@ -55,7 +55,7 @@ export const getSavedJobs = async (req: Request, res: Response) => {
 // Remove a saved job
 export const removeSavedJob = async (req: Request, res: Response) => {
   try {
-    const userId = req.user?.userId;
+    const userId = (req as any).user?.userId;
     if (!userId) {
       return res.status(401).json({ success: false, message: 'Unauthorized' });
     }
@@ -82,7 +82,7 @@ export const removeSavedJob = async (req: Request, res: Response) => {
 // Update status, notes, or reminders
 export const updateSavedJob = async (req: Request, res: Response) => {
   try {
-    const userId = req.user?.userId;
+    const userId = (req as any).user?.userId;
     if (!userId) {
       return res.status(401).json({ success: false, message: 'Unauthorized' });
     }
@@ -110,7 +110,7 @@ export const updateSavedJob = async (req: Request, res: Response) => {
 // Check if specific jobs are saved
 export const checkSavedJobs = async (req: Request, res: Response) => {
   try {
-    const userId = req.user?.userId;
+    const userId = (req as any).user?.userId;
     if (!userId) {
       return res.status(401).json({ success: false, message: 'Unauthorized' });
     }

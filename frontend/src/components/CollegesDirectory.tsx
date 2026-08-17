@@ -78,12 +78,17 @@ export default function CollegesDirectory() {
     return () => clearTimeout(timeoutId);
   }, [searchQuery, selectedCategory, selectedType, selectedDistrict, page]);
 
-  // Generate a match score: use real AI score if available, otherwise mock based on user interests
+  // Generate a match score: use real AI score if available, otherwise calculate from user preferences
   const getMatchScore = (college: College) => {
     if (aiScores[college._id]?.score) return aiScores[college._id].score;
-    if (!college?._id) return 75;
-    if (currentUser?.interests?.includes(college.category)) return 95 + (college._id.length % 5);
-    return 75 + (college._id.length % 20);
+    
+    // Naive baseline calculation without randomness
+    let score = 50;
+    if (currentUser?.interests?.some((i: string) => college.categories?.includes(i))) score += 20;
+    if (currentUser?.location && (college.city === currentUser.location || college.district === currentUser.location)) score += 15;
+    // We would add budget checks here if we had them typed
+    
+    return score;
   };
 
   // Haversine distance formula to calculate distance between two lat/lng in kilometers
@@ -262,10 +267,36 @@ export default function CollegesDirectory() {
                 >
                   <option>Any District</option>
                   <option>Bengaluru Urban</option>
+                  <option>Bengaluru Rural</option>
                   <option>Mysuru</option>
-                  <option>Dakshina Kannada</option>
-                  <option>Dharwad</option>
+                  <option>Mandya</option>
+                  <option>Ramanagara</option>
+                  <option>Tumakuru</option>
+                  <option>Hassan</option>
+                  <option>Kodagu</option>
+                  <option>Chikkaballapur</option>
+                  <option>Kolar</option>
+                  <option>Chitradurga</option>
+                  <option>Davanagere</option>
+                  <option>Shivamogga</option>
+                  <option>Chikkamagaluru</option>
+                  <option>Ballari</option>
+                  <option>Vijayanagara</option>
+                  <option>Raichur</option>
+                  <option>Koppal</option>
+                  <option>Kalaburagi</option>
+                  <option>Yadgir</option>
+                  <option>Bidar</option>
+                  <option>Vijayapura</option>
+                  <option>Bagalkot</option>
                   <option>Belagavi</option>
+                  <option>Dharwad</option>
+                  <option>Gadag</option>
+                  <option>Haveri</option>
+                  <option>Uttara Kannada</option>
+                  <option>Dakshina Kannada</option>
+                  <option>Udupi</option>
+                  <option>Chamarajanagar</option>
                 </select>
               </div>
 
@@ -332,7 +363,7 @@ export default function CollegesDirectory() {
             <h2 className="text-xl font-black text-slate-900">
               {selectedCategory === 'All' ? 'All Colleges' : `${selectedCategory} Colleges`}
               <span className="text-slate-400 text-base font-semibold ml-2">
-                (Showing {colleges.length} of {totalCollegesCount} in Karnataka)
+                — Showing {colleges.length} of {totalCollegesCount > 0 ? `${totalCollegesCount}+` : 0} in Karnataka
               </span>
             </h2>
             <div className="flex items-center gap-2 text-sm font-bold text-slate-500">
@@ -401,7 +432,7 @@ export default function CollegesDirectory() {
                         <div>
                           <div className="flex items-center gap-2">
                             <h3 className="text-lg font-black text-slate-900 group-hover:text-blue-600 transition-colors">{college.name}</h3>
-                            {college.isVerified && <BadgeCheck className="w-5 h-5 text-blue-500" title="Verified by U THINK" />}
+                            {college.isVerified && <BadgeCheck className="w-5 h-5 text-blue-500" />}
                           </div>
                           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1 text-xs font-semibold text-slate-500">
                             <span className="flex items-center gap-1">

@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import College from '../models/College';
+import { searchCollegesFromAPI } from '../services/collegeDbService';
 
 const router = Router();
 
@@ -8,7 +9,7 @@ router.get('/stats', async (req: Request, res: Response) => {
   try {
     const totalColleges = await College.countDocuments();
     
-    // Aggregation pipeline to count colleges by category (since categories is an array now)
+    // Aggregation pipeline to count colleges by category
     const categoryCounts = await College.aggregate([
       { $unwind: '$categories' },
       { $group: { _id: '$categories', count: { $sum: 1 } } }
@@ -21,7 +22,7 @@ router.get('/stats', async (req: Request, res: Response) => {
     };
 
     categoryCounts.forEach(c => {
-      stats.categories[c._id] = c.count;
+      if (c._id) stats.categories[c._id] = c.count;
     });
 
     res.json(stats);
@@ -34,7 +35,12 @@ router.get('/stats', async (req: Request, res: Response) => {
 // GET /api/colleges/:id
 router.get('/:id', async (req: Request, res: Response): Promise<void> => {
   try {
-    const college = await College.findById(req.params.id);
+    let college = await College.findById(req.params.id);
+    if (!college) {
+      // If not found by object id, try finding by sourceId
+      college = await College.findOne({ sourceId: req.params.id });
+    }
+    
     if (!college) {
       res.status(404).json({ message: 'College not found' });
       return;
@@ -62,49 +68,40 @@ router.get('/', async (req: Request, res: Response) => {
       limit = 20
     } = req.query;
 
-    const filter: any = {};
+    // 1. Always attempt to fetch the requested page from the API to keep DB fresh
+    const apiResult = await searchCollegesFromAPI({ 
+      q, category, type, district, city, course, page, limit 
+    });
 
-    // Search query uses text index if provided
-    if (q) {
-      filter.$text = { $search: String(q) };
+    let colleges = [];
+    let total = 0;
+
+    // 2. If API returned data, use it directly (it was already synced to DB)
+    if (apiResult.colleges && apiResult.colleges.length > 0) {
+      colleges = apiResult.colleges;
+      total = apiResult.total;
+    } else {
+      // 3. Fallback to local DB cache (e.g. if rate limited or API is down)
+      const filter: any = { state: 'Karnataka' }; // Enforce Karnataka
+
+      if (q) filter.$text = { $search: String(q) };
+      if (category && category !== 'All') filter.categories = { $in: [String(category)] };
+      if (type && type !== 'All') filter.type = String(type);
+      if (ownership) filter.ownership = String(ownership);
+      if (district && district !== 'Any District' && district !== 'Any State') filter.district = String(district);
+      if (city) filter.city = String(city);
+      if (course) filter.courses = { $regex: String(course), $options: 'i' };
+      if (entranceExam) filter.entranceExams = { $in: [String(entranceExam)] };
+
+      const skip = (Number(page) - 1) * Number(limit);
+
+      colleges = await College.find(filter)
+        .sort(q ? { score: { $meta: 'textScore' } } : { nirfRank: 1 })
+        .skip(skip)
+        .limit(Number(limit));
+
+      total = await College.countDocuments(filter);
     }
-
-    if (category && category !== 'All') {
-      filter.categories = { $in: [String(category)] };
-    }
-
-    if (type) {
-      filter.type = String(type);
-    }
-
-    if (ownership) {
-      filter.ownership = String(ownership);
-    }
-
-    if (district && district !== 'Any District' && district !== 'Any State') {
-      filter.district = String(district);
-    }
-
-    if (city) {
-      filter.city = String(city);
-    }
-
-    if (course) {
-      filter.courses = { $regex: String(course), $options: 'i' };
-    }
-
-    if (entranceExam) {
-      filter.entranceExams = { $in: [String(entranceExam)] };
-    }
-
-    const skip = (Number(page) - 1) * Number(limit);
-
-    const colleges = await College.find(filter)
-      .sort(q ? { score: { $meta: 'textScore' } } : { nirfRank: 1 })
-      .skip(skip)
-      .limit(Number(limit));
-
-    const total = await College.countDocuments(filter);
 
     res.json({
       data: colleges,
