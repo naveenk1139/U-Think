@@ -51,6 +51,6 @@ From the workspace root directory:
 npm run dev
 ```
 
-- **Frontend**: http://localhost:5173
+- **Frontend**: http://localhost:3000
 - **Backend**: http://localhost:5000
 - **Health Check**: http://localhost:5000/api/health
