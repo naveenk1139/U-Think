@@ -6,6 +6,8 @@ export interface JobSearchParams {
   jobType?: string; // 'Full Time', 'Part Time', 'Internship', etc.
   experience?: string; // 'Fresher', '1-3 years', etc.
   minSalary?: number;
+  page?: number;
+  limit?: number;
 }
 
 export abstract class JobProvider {

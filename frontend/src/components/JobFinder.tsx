@@ -14,6 +14,11 @@ export default function JobFinder({ initialRole }: { initialRole?: string | null
   const [jobAlerts, setJobAlerts] = useState(true);
   const [savedJobIds, setSavedJobIds] = useState<Set<string>>(new Set());
 
+  // Pagination
+  const [page, setPage] = useState(1);
+  const [totalJobs, setTotalJobs] = useState(0);
+  const limit = 20;
+
   // Filters
   const [query, setQuery] = useState(initialRole || '');
   const [location, setLocation] = useState('');
@@ -30,7 +35,7 @@ export default function JobFinder({ initialRole }: { initialRole?: string | null
     try {
       setLoading(true);
       setError(null);
-      const params: JobSearchParams = {};
+      const params: JobSearchParams = { page, limit };
       if (query) params.query = query;
       if (location) params.location = location;
       if (jobType !== 'all') params.jobType = jobType;
@@ -38,13 +43,14 @@ export default function JobFinder({ initialRole }: { initialRole?: string | null
 
       const res = await searchJobs(params);
       setJobs(res.data || []);
+      setTotalJobs(res.total || res.data?.length || 0);
     } catch (err: any) {
       console.error(err);
       setError('Failed to fetch jobs. Please try again.');
     } finally {
       setLoading(false);
     }
-  }, [query, location, jobType, experience]);
+  }, [query, location, jobType, experience, page]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -322,7 +328,7 @@ export default function JobFinder({ initialRole }: { initialRole?: string | null
               {loading ? (
                 <span className="flex items-center gap-2 text-blue-600"><Loader className="w-4 h-4 animate-spin" /> Fetching...</span>
               ) : (
-                `Showing 1 - ${Math.min(20, filteredJobs.length)} of ${filteredJobs.length} jobs`
+                `Showing ${jobs.length > 0 ? (page - 1) * limit + 1 : 0} - ${Math.min(page * limit, totalJobs)} of ${totalJobs > 0 ? totalJobs : filteredJobs.length} jobs`
               )}
             </div>
             
@@ -333,13 +339,17 @@ export default function JobFinder({ initialRole }: { initialRole?: string | null
                
                {/* Pagination */}
                <div className="flex items-center gap-1">
-                 <button className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-600"><ChevronLeft className="w-4 h-4" /></button>
-                 <button className="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 font-bold text-sm">1</button>
-                 <button className="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-600 font-medium text-sm">2</button>
-                 <button className="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-600 font-medium text-sm">3</button>
-                 <span className="w-6 text-center text-slate-400 text-sm">...</span>
-                 <button className="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-600 font-medium text-sm">63</button>
-                 <button className="w-8 h-8 flex items-center justify-center text-slate-600 hover:text-slate-900"><ChevronRight className="w-4 h-4" /></button>
+                 <button 
+                   onClick={() => setPage(p => Math.max(1, p - 1))}
+                   disabled={page === 1}
+                   className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-600 disabled:opacity-50"><ChevronLeft className="w-4 h-4" />
+                 </button>
+                 <span className="text-sm font-medium text-slate-600 px-2">Page {page} {totalJobs > page * limit ? `of ${Math.ceil(totalJobs / limit)}` : ''}</span>
+                 <button 
+                   onClick={() => setPage(p => p + 1)}
+                   disabled={totalJobs <= page * limit}
+                   className="w-8 h-8 flex items-center justify-center text-slate-600 hover:text-slate-900 disabled:opacity-50"><ChevronRight className="w-4 h-4" />
+                 </button>
                </div>
             </div>
           </div>

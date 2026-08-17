@@ -8,6 +8,8 @@ export interface JobSearchParams {
   jobType?: string;
   experience?: string;
   minSalary?: number;
+  page?: number;
+  limit?: number;
 }
 
 export const searchJobs = async (params: JobSearchParams) => {

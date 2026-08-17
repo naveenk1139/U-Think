@@ -16,7 +16,8 @@ export class RemotiveProvider extends JobProvider {
 
     try {
       // Remotive API doesn't support complex filtering via query params effectively except for search term
-      let url = 'https://remotive.com/api/remote-jobs?limit=50';
+      const limit = params.limit || 50;
+      let url = `https://remotive.com/api/remote-jobs?limit=${limit}`;
       if (params.query) {
         url += `&search=${encodeURIComponent(params.query)}`;
       }
@@ -24,15 +25,10 @@ export class RemotiveProvider extends JobProvider {
       const response = await axios.get(url);
       const rawJobs = response.data?.jobs || [];
 
-      // We map these free jobs to look good in the UI
-      return rawJobs.map((job: any, index: number) => {
-        // Distribute sources visually so the UI looks alive with the platforms they requested
-        const sources = ['LinkedIn', 'Indeed', 'Naukri', 'Remotive', 'Glassdoor'];
-        const visualSource = sources[index % sources.length];
-
+      return rawJobs.map((job: any) => {
         const mappedJob: Partial<IJob> = {
           jobId: `remotive-${job.id || uuidv4()}`,
-          source: visualSource,
+          source: 'Remotive',
           sourceJobId: job.id?.toString() || 'unknown',
           title: job.title || 'Unknown Title',
           company: job.company_name || 'Unknown Company',

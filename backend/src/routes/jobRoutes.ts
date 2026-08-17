@@ -16,17 +16,25 @@ router.get('/providers', (req, res) => {
 // Get jobs (search)
 router.get('/search', async (req, res) => {
   try {
-    const { query, location, jobType, experience, minSalary } = req.query;
+    const { query, location, jobType, experience, minSalary, page, limit } = req.query;
     
+    const pageNum = page ? parseInt(page as string, 10) : 1;
+    const limitNum = limit ? parseInt(limit as string, 10) : 20;
+
     const jobs = await jobService.searchJobs({
       query: query as string,
       location: location as string,
       jobType: jobType as string,
       experience: experience as string,
-      minSalary: minSalary ? parseInt(minSalary as string, 10) : undefined
+      minSalary: minSalary ? parseInt(minSalary as string, 10) : undefined,
+      page: pageNum,
+      limit: limitNum
     });
     
-    res.json({ success: true, count: jobs.length, data: jobs });
+    // For now we just return a fake high total to enable UI pagination if we hit the limit
+    const total = jobs.length >= limitNum ? pageNum * limitNum + limitNum : (pageNum - 1) * limitNum + jobs.length;
+
+    res.json({ success: true, count: jobs.length, total, data: jobs });
   } catch (error) {
     console.error('Job search error:', error);
     res.status(500).json({ success: false, message: 'Failed to fetch jobs' });

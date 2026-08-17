@@ -9,3 +9,4 @@ export * from './JobHaiProvider';
 export * from './AdminImportedProvider';
 export * from './JSearchProvider';
 export * from './RemotiveProvider';
+export * from './AdzunaProvider';

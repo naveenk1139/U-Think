@@ -12,7 +12,8 @@ import {
   JobHaiProvider,
   AdminImportedProvider,
   JSearchProvider,
-  RemotiveProvider
+  RemotiveProvider,
+  AdzunaProvider
 } from './jobProviders';
 
 class JobService {
@@ -20,7 +21,8 @@ class JobService {
 
   constructor() {
     this.providers = [
-      new RemotiveProvider(), // Always configured (Free)
+      new AdzunaProvider(), // Primary provider for Indian jobs
+      new RemotiveProvider(), // Free fallback
       new JSearchProvider(), // Needs API Key
       new AdminImportedProvider(),
       new LinkedInProvider(),
@@ -90,12 +92,16 @@ class JobService {
       if (!jobData.jobId) continue;
       
       // Upsert job into DB
-      const updatedJob = await Job.findOneAndUpdate(
-        { jobId: jobData.jobId },
-        { ...jobData, lastUpdated: new Date() },
-        { new: true, upsert: true }
-      );
-      result.push(updatedJob);
+      try {
+        const updatedJob = await Job.findOneAndUpdate(
+          { jobId: jobData.jobId },
+          { ...jobData, lastUpdated: new Date() },
+          { new: true, upsert: true }
+        );
+        result.push(updatedJob);
+      } catch (err: any) {
+        console.error('Mongoose cache error for job:', jobData.jobId, err.message);
+      }
     }
     
     return result;
