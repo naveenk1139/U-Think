@@ -33,43 +33,66 @@ router.post('/aptitude/evaluate', async (req: Request, res: Response, next: Next
       Based on these responses and their primary alignment with specific paths, please generate a highly professional, highly motivating, and detailed career pathway proposal.
       Be extremely specific to the fields of Indian post-10th academics:
       Options:
-      - 12th / Intermediate (MPC for Engineering, BiPC for Medicine, CEC for Commerce/CS, HEC for Humanities, Arts, UPSC)
-      - Polytechnic / Diploma in Engineering, Architecture, Management
-      - Paramedical & Healthcare Allied Certificates/Diplomas
-      - ITI (Industrial Training Institutes) Technical & Non-Technical Trades
-      - Vocational Skills & Design Certifications
+      - 12th_intermediate (MPC for Engineering, BiPC for Medicine, CEC for Commerce/CS, HEC for Humanities, Arts, UPSC)
+      - diploma (Polytechnic in Engineering, Architecture, Management)
+      - paramedical (Allied Certificates/Diplomas)
+      - iti (Industrial Training Institutes Technical & Non-Technical Trades)
+      - vocational (Vocational Skills & Design Certifications)
 
-      Format your response in Markdown with standard headers:
-      ### Primary Stream Recommendation
-      ### Detailed Justification & Strengths Highlight
-      ### Recommended Next Steps & Entrance Exams to Watch
+      Respond strictly in valid JSON format like this (no markdown block, just JSON):
+      {
+        "recommendedStream": "Readable Name of the stream (e.g. 12th / Intermediate Academic Pathway)",
+        "recommendedStreamId": "12th_intermediate", // Must be one of: 12th_intermediate, diploma, paramedical, iti, vocational
+        "whyThisFits": "1-2 sentences on why this fits them",
+        "detailedAnalysis": "Detailed paragraph of academic analysis",
+        "suggestedCareers": ["Career 1", "Career 2", "Career 3"],
+        "actionPlan": ["Action Step 1", "Action Step 2", "Action Step 3"],
+        "motivationalMessage": "A short inspiring quote or message"
+      }
     `;
 
     const model = ai.models;
-    let analysisText = '';
+    let resultData: any = {};
     
     if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === 'your_gemini_api_key_here') {
-      analysisText = 'This is a **simulated analysis** because the Gemini API Key is not configured in the backend.\n\n### Primary Stream Recommendation\nBased on your responses, we highly recommend the **Polytechnic / Diploma** stream.\n\n### Detailed Justification & Strengths Highlight\nYour answers indicate a strong preference for hands-on, practical learning rather than purely theoretical academics. A diploma will allow you to enter the workforce sooner with specialized skills.\n\n### Recommended Next Steps & Entrance Exams to Watch\nLook out for the state polytechnic entrance exam (POLYCET) notifications usually released in March/April.';
+      resultData = {
+        recommendedStream: 'Polytechnic Diploma in Tech & Engineering',
+        recommendedStreamId: 'diploma',
+        whyThisFits: 'Your answers indicate a strong preference for hands-on, practical learning rather than purely theoretical academics. A diploma will allow you to enter the workforce sooner with specialized skills.',
+        detailedAnalysis: 'This is a simulated analysis because the Gemini API Key is not configured in the backend. Based on your responses, we highly recommend the Polytechnic / Diploma stream.',
+        suggestedCareers: ['Junior Engineer', 'Technical Supervisor', 'Site Coordinator'],
+        actionPlan: [
+            'Look out for the state polytechnic entrance exam (POLYCET) notifications usually released in March/April.',
+            'Research top polytechnic colleges in your state.',
+            'Review previous years exam papers.'
+        ],
+        motivationalMessage: 'Your practical mindset is your greatest asset. Build the future with your own hands!'
+      };
     } else {
       const response = await generateWithRetry(model, {
         model: 'gemini-2.5-flash',
         contents: prompt,
       });
-      analysisText = response.text || 'Unable to generate analysis at this time.';
+      
+      let text = response.text || '{}';
+      text = text.replace(/```json/g, '').replace(/```/g, '').trim();
+      try {
+        resultData = JSON.parse(text);
+      } catch (e) {
+        console.error("Failed to parse Gemini JSON for aptitude evaluation:", text);
+        resultData = {
+          recommendedStream: '12th / Intermediate Academic Pathway',
+          recommendedStreamId: '12th_intermediate',
+          whyThisFits: 'Based on your varied responses, a traditional path gives you the most flexibility.',
+          detailedAnalysis: text,
+          suggestedCareers: ['Various Options'],
+          actionPlan: ['Speak to a local counselor', 'Review academic options'],
+          motivationalMessage: 'Every step is progress!'
+        };
+      }
     }
 
-    // Rough extraction of recommended streams
-    const recommendedStreams: string[] = [];
-    if (analysisText.includes('12th') || analysisText.includes('Intermediate')) recommendedStreams.push('12th_intermediate');
-    if (analysisText.includes('Diploma') || analysisText.includes('Polytechnic')) recommendedStreams.push('diploma');
-    if (analysisText.includes('Paramedical')) recommendedStreams.push('paramedical');
-    if (analysisText.includes('ITI')) recommendedStreams.push('iti');
-    if (analysisText.includes('Vocational')) recommendedStreams.push('vocational');
-
-    res.json({
-      analysisText,
-      recommendedStreams: recommendedStreams.length ? recommendedStreams : ['12th_intermediate', 'diploma'],
-    });
+    res.json(resultData);
   } catch (err) {
     next(err);
   }
@@ -212,8 +235,8 @@ router.get('/conversations', async (req: Request, res: Response, next: NextFunct
   } catch (err) { next(err); }
 });
 
-// GET /api/ai/conversations/:id
-router.get('/conversations/:id', async (req: Request, res: Response, next: NextFunction) => {
+// GET /api/ai/conversations/messages/:id
+router.get('/conversations/messages/:id', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const messages = await Message.find({ conversationId: req.params.id }).sort({ createdAt: 1 });
     res.json(messages);
@@ -325,7 +348,7 @@ router.post('/chat/stream', async (req: Request, res: Response, next: NextFuncti
 
   } catch (err: any) {
     console.error('AI Stream Error:', err);
-    res.write(`data: {"error": "AI Counselor is temporarily unavailable. Please try again."}\n\n`);
+    res.write(`data: {"error": "AI Error: ${err.message || 'Temporarily unavailable'}"}\n\n`);
     res.end();
   }
 });

@@ -22,8 +22,15 @@ export interface IJob extends Document {
   applicationUrl?: string; // Direct link to apply if available
   sourceUrl: string; // Link to the job on the source platform
   category?: string;
+  subcategory?: string;
   industry?: string;
   verified: boolean;
+  status: 'ACTIVE' | 'EXPIRED' | 'CLOSED' | 'UNKNOWN';
+  expiresAt?: Date;
+  city?: string;
+  state?: string;
+  country?: string;
+  currency?: string;
   lastUpdated: Date;
 }
 
@@ -49,13 +56,20 @@ const JobSchema: Schema = new Schema({
   applicationUrl: { type: String },
   sourceUrl: { type: String, required: true },
   category: { type: String },
+  subcategory: { type: String },
   industry: { type: String },
   verified: { type: Boolean, default: false },
+  status: { type: String, enum: ['ACTIVE', 'EXPIRED', 'CLOSED', 'UNKNOWN'], default: 'ACTIVE' },
+  expiresAt: { type: Date },
+  city: { type: String },
+  state: { type: String },
+  country: { type: String, default: 'India' },
+  currency: { type: String, default: 'INR' },
   lastUpdated: { type: Date, default: Date.now },
 });
 
 // Indexing for search
-JobSchema.index({ title: 'text', company: 'text', description: 'text', skills: 'text' });
+JobSchema.index({ title: 'text', company: 'text', description: 'text', skills: 'text', category: 'text' });
 JobSchema.index({ source: 1, sourceJobId: 1 }, { unique: true });
 
 export default mongoose.model<IJob>('Job', JobSchema);

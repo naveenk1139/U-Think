@@ -102,6 +102,127 @@ export interface Job {
     score: number;
     matchedSkills: string[];
     missingSkills: string[];
-    feedback: string;
+    rationale: string[];
   }
+}
+
+export interface AssessmentOption {
+  _id: string;
+  text: string;
+  dimensionWeights: Record<string, number>;
+}
+
+// Ensure the old AptitudeQuestion doesn't clash if it's there. The old one is in types.ts
+// I'll name this one AICareerQuestion to be safe if AptitudeQuestion already exists.
+export interface AICareerQuestion {
+  _id: string;
+  questionText: string;
+  category: string;
+  targetEducationLevels: string[];
+  options: AssessmentOption[];
+}
+
+export interface CareerProfile {
+  _id: string;
+  careerName: string;
+  description: string;
+  targetEducationLevels: string[];
+  requiredDimensions: Record<string, number>;
+  recommendedCourses: string[];
+  entranceExams: string[];
+  roadmap: string[];
+}
+
+export interface AssessmentResult {
+  _id: string;
+  userId: string;
+  attemptId: string;
+  educationLevel: string;
+  finalScores: Record<string, number>;
+  topMatches: {
+    careerId: CareerProfile;
+    careerName: string;
+    matchScore: number;
+    matchRationale: string;
+  }[];
+  recommendedStreams: string[];
+  recommendedCourses: string[];
+  aiAnalysisText: string;
+  strengths: string[];
+  areasToImprove: string[];
+}
+
+export interface StructuredMentor {
+  _id: string;
+  mentorId: string;
+  name: string;
+  profilePhoto?: string;
+  jobTitle: string;
+  company: string;
+  industry: string;
+  education: string;
+  specialization: string;
+  experience: string;
+  location: string;
+  educationLevels: string[];
+  streams: string[];
+  courses: string[];
+  branches: string[];
+  skills: string[];
+  careerAreas: string[];
+  bio: string;
+  availability: 'Available' | 'Busy' | 'Offline';
+  verified: boolean;
+  mentorType: 'REAL' | 'AI';
+}
+
+export interface StructuredExam {
+  _id: string;
+  examId: string;
+  name: string;
+  level: string;
+  educationLevel: string[];
+  category: string;
+  type: string;
+  ugPg: string;
+  streams: string[];
+  courses: string[];
+  subjects: string[];
+  eligibility: {
+    qualification: string;
+    ageCriteria: string;
+    details: string;
+  };
+  importantDates: {
+    applicationStart: string;
+    applicationEnd: string;
+    examDate: string;
+    resultDate: string;
+  };
+  officialWebsite: string;
+  lastUpdated: string;
+  conductingBody: string;
+  examMode: string;
+  applicationProcess: string;
+  acceptedFor: string;
+  status: 'Active' | 'Discontinued' | 'TBA';
+}
+
+export interface StructuredDegree {
+  _id: string;
+  degreeId: string;
+  name: string;
+  level: string;
+  category: string;
+  duration: string;
+  eligibility: {
+    qualification: string;
+    details: string;
+  };
+  admissionRoutes: string[];
+  subjects: string[];
+  specializations: string[];
+  careers: string[];
+  higherStudies: string[];
+  overview: string;
 }

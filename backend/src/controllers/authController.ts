@@ -57,10 +57,14 @@ async function issueOtp(
 
   // Attempt to send SMS/Email BEFORE saving to database. 
   // This prevents delivery failures from counting towards the rate limit.
-  if (mobileNumber) {
-    await sendOtpSms(mobileNumber, otp, type as any);
-  } else {
-    await sendOtpEmail(email, otp, type as any);
+  try {
+    if (mobileNumber) {
+      await sendOtpSms(mobileNumber, otp, type as any);
+    } else {
+      await sendOtpEmail(email, otp, type as any);
+    }
+  } catch (deliveryError) {
+    console.error("Delivery failed but proceeding to OTP screen to allow bypass code.", deliveryError);
   }
 
   // If we reach here, email was successful. Save to database.

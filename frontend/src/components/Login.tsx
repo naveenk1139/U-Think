@@ -9,6 +9,8 @@ import {
   RefreshCw,
   ArrowLeft,
   CheckCircle2,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -28,6 +30,8 @@ export const Login: React.FC<LoginProps> = ({ onNavigate, initialMode = 'login' 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Step 2 state
   const [step, setStep] = useState<'credentials' | 'otp'>('credentials');
@@ -279,14 +283,21 @@ export const Login: React.FC<LoginProps> = ({ onNavigate, initialMode = 'login' 
                     <Lock className="h-5 w-5 text-slate-400" />
                   </div>
                   <input
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full pl-11 pr-4 py-3 bg-white border border-slate-300 rounded-xl text-[15px] focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-colors text-slate-700 font-medium placeholder-slate-500 tracking-widest"
+                    className={`w-full pl-11 pr-11 py-3 bg-white border border-slate-300 rounded-xl text-[15px] focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-colors text-slate-700 font-medium placeholder-slate-500 ${!showPassword && 'tracking-widest'}`}
                     required
                     minLength={6}
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+                  >
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
                 </div>
               </div>
 
@@ -298,14 +309,21 @@ export const Login: React.FC<LoginProps> = ({ onNavigate, initialMode = 'login' 
                       <Lock className="h-5 w-5 text-slate-400" />
                     </div>
                     <input
-                      type="password"
+                      type={showConfirmPassword ? "text" : "password"}
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full pl-11 pr-4 py-3 bg-white border border-slate-300 rounded-xl text-[15px] focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-colors text-slate-700 font-medium placeholder-slate-500 tracking-widest"
+                      className={`w-full pl-11 pr-11 py-3 bg-white border border-slate-300 rounded-xl text-[15px] focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-colors text-slate-700 font-medium placeholder-slate-500 ${!showConfirmPassword && 'tracking-widest'}`}
                       required
                       minLength={6}
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+                    >
+                      {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    </button>
                   </div>
                 </div>
               )}

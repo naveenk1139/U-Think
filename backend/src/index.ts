@@ -22,6 +22,9 @@ import notificationRoutes from './routes/notificationRoutes.js';
 import collegeRoutes from './routes/collegeRoutes.js';
 import jobRoutes from './routes/jobRoutes.js';
 import savedJobRoutes from './routes/savedJobRoutes.js';
+import assessmentRoutes from './routes/assessmentRoutes.js';
+import mentorRoutes from './routes/mentorRoutes.js';
+import degreeRoutes from './routes/degreeRoutes.js';
 
 // Middleware
 import { errorHandler } from './middleware/errorHandler.js';
@@ -60,7 +63,7 @@ app.get('/', (_req, res) => {
 app.use('/api', healthRoutes);
 app.use('/api/auth', authRoutes);     // MongoDB Auth (register, login, me)
 app.use('/api/users', userRoutes);
-app.use('/api', aiRoutes);            // /api/aptitude/evaluate, /api/ai/counselor
+app.use('/api/ai', aiRoutes);            // /api/ai/aptitude/evaluate, /api/ai/chat/stream
 app.use('/api/colleges', collegeRoutes);
 app.use('/api/quiz', quizRoutes);
 app.use('/api/pathways', pathwayRoutes);
@@ -68,8 +71,11 @@ app.use('/api/exams', examRoutes);
 app.use('/api/reminders', reminderRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/jobs/saved', savedJobRoutes);
 app.use('/api/jobs', jobRoutes);
-app.use('/api/saved-jobs', savedJobRoutes);
+app.use('/api/assessment', assessmentRoutes);
+app.use('/api/mentors', mentorRoutes);
+app.use('/api/degrees', degreeRoutes);
 
 // ─── Global Error Handler ─────────────────────────────────────────
 app.use(errorHandler);

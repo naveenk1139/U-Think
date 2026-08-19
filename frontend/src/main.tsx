@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App.tsx';
 import './index.css';
 import { AuthProvider } from './contexts/AuthContext';
+import { AppearanceProvider } from './contexts/AppearanceContext';
 
 class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
   constructor(props: any) {
@@ -38,7 +39,9 @@ createRoot(document.getElementById('root')!).render(
     <BrowserRouter>
       <ErrorBoundary>
         <AuthProvider>
-          <App />
+          <AppearanceProvider>
+            <App />
+          </AppearanceProvider>
         </AuthProvider>
       </ErrorBoundary>
     </BrowserRouter>

@@ -6,6 +6,9 @@ export interface IJobAlert extends Document {
   location?: string;
   experienceLevel?: string;
   minSalary?: number;
+  workMode?: string;
+  jobType?: string;
+  frequency: 'Daily' | 'Weekly' | 'Monthly';
   isActive: boolean;
   createdAt: Date;
 }
@@ -16,6 +19,9 @@ const JobAlertSchema: Schema = new Schema({
   location: { type: String },
   experienceLevel: { type: String },
   minSalary: { type: Number },
+  workMode: { type: String },
+  jobType: { type: String },
+  frequency: { type: String, enum: ['Daily', 'Weekly', 'Monthly'], default: 'Weekly' },
   isActive: { type: Boolean, default: true },
   createdAt: { type: Date, default: Date.now }
 });

@@ -1,0 +1,1 @@
+import mongoose from 'mongoose'; import College from './src/models/College.js'; async function run() { await mongoose.connect('mongodb://localhost:27017/uthink'); const count = await College.countDocuments(); console.log('Count:', count); const docs = await College.find().limit(2); console.log(JSON.stringify(docs, null, 2)); process.exit(0); } run();

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Job } from '../types';
-import { X, Building, MapPin, Briefcase, Calendar, IndianRupee, Link as LinkIcon, Star, CheckCircle } from 'lucide-react';
+import { X, Building, MapPin, Briefcase, Calendar, IndianRupee, Link as LinkIcon, Star, CheckCircle, Bookmark } from 'lucide-react';
 
 interface JobDetailsModalProps {
   job: Job;
@@ -63,7 +63,13 @@ export default function JobDetailsModal({ job, isSaved, onToggleSave, onClose }:
                 <div className="text-4xl font-extrabold text-emerald-600 mt-1">{job.matchAnalysis.score}%</div>
               </div>
               <div>
-                <p className="text-slate-800 font-semibold mb-3">{job.matchAnalysis.feedback}</p>
+                <ul className="space-y-1 mb-3">
+                  {job.matchAnalysis.rationale.map((rat, i) => (
+                    <li key={i} className={`text-sm font-semibold ${rat.startsWith('✓') ? 'text-emerald-700' : 'text-amber-700'}`}>
+                      {rat}
+                    </li>
+                  ))}
+                </ul>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                    <div>
                      <strong className="text-emerald-700 flex items-center gap-1 mb-1"><CheckCircle className="w-4 h-4" /> Matched Skills</strong>

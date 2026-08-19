@@ -1,9 +1,57 @@
-import { Router, Response, NextFunction } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
 import { protect, AuthRequest } from '../middleware/authMiddleware';
+import Exam from '../models/Exam';
 
 const router = Router();
 
+// Get all exams with optional filtering
+router.get('/', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { search, educationLevel, category, level, type } = req.query;
+    
+    let query: any = {};
+
+    if (educationLevel && educationLevel !== 'All') {
+      query.educationLevel = educationLevel;
+    }
+    
+    if (category && category !== 'All') {
+      query.category = category;
+    }
+
+    if (level && level !== 'All') {
+      query.level = level;
+    }
+
+    if (type && type !== 'All') {
+      query.type = type;
+    }
+
+    if (search) {
+      query.$text = { $search: search as string };
+    }
+
+    const exams = await Exam.find(query).limit(100);
+    res.json(exams);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Get single exam
+router.get('/info/:id', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const exam = await Exam.findOne({ examId: req.params.id });
+    if (!exam) {
+      res.status(404).json({ error: 'Exam not found' });
+      return;
+    }
+    res.json(exam);
+  } catch (err) {
+    next(err);
+  }
+});
 const getTrackedExamModel = (): mongoose.Model<any> => {
   const existing = mongoose.models.TrackedExam as mongoose.Model<any> | undefined;
   if (existing) {

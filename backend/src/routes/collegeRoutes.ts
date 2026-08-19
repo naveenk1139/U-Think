@@ -7,10 +7,12 @@ const router = Router();
 // GET /api/colleges/stats
 router.get('/stats', async (req: Request, res: Response) => {
   try {
-    const totalColleges = await College.countDocuments();
+    const filter = { state: 'Karnataka' }; // Enforce Karnataka globally
+    const totalColleges = await College.countDocuments(filter);
     
     // Aggregation pipeline to count colleges by category
     const categoryCounts = await College.aggregate([
+      { $match: filter },
       { $unwind: '$categories' },
       { $group: { _id: '$categories', count: { $sum: 1 } } }
     ]);
@@ -62,46 +64,48 @@ router.get('/', async (req: Request, res: Response) => {
       district, 
       city, 
       course, 
+      branch,
       entranceExam,
       ownership,
+      sortBy,
       page = 1,
-      limit = 20
+      limit = 20,
+      userLat,
+      userLng
     } = req.query;
 
-    // 1. Always attempt to fetch the requested page from the API to keep DB fresh
-    const apiResult = await searchCollegesFromAPI({ 
-      q, category, type, district, city, course, page, limit 
-    });
+    const filter: any = { state: 'Karnataka' }; // Enforce Karnataka
 
-    let colleges = [];
-    let total = 0;
-
-    // 2. If API returned data, use it directly (it was already synced to DB)
-    if (apiResult.colleges && apiResult.colleges.length > 0) {
-      colleges = apiResult.colleges;
-      total = apiResult.total;
-    } else {
-      // 3. Fallback to local DB cache (e.g. if rate limited or API is down)
-      const filter: any = { state: 'Karnataka' }; // Enforce Karnataka
-
-      if (q) filter.$text = { $search: String(q) };
-      if (category && category !== 'All') filter.categories = { $in: [String(category)] };
-      if (type && type !== 'All') filter.type = String(type);
-      if (ownership) filter.ownership = String(ownership);
-      if (district && district !== 'Any District' && district !== 'Any State') filter.district = String(district);
-      if (city) filter.city = String(city);
-      if (course) filter.courses = { $regex: String(course), $options: 'i' };
-      if (entranceExam) filter.entranceExams = { $in: [String(entranceExam)] };
-
-      const skip = (Number(page) - 1) * Number(limit);
-
-      colleges = await College.find(filter)
-        .sort(q ? { score: { $meta: 'textScore' } } : { nirfRank: 1 })
-        .skip(skip)
-        .limit(Number(limit));
-
-      total = await College.countDocuments(filter);
+    if (q) {
+      filter.$or = [
+        { name: { $regex: String(q), $options: 'i' } },
+        { aliases: { $regex: String(q), $options: 'i' } },
+        { 'specializations': { $regex: String(q), $options: 'i' } }
+      ];
     }
+    
+    if (category && category !== 'All') filter.categories = { $in: [String(category)] };
+    if (type && type !== 'All') filter.type = { $regex: String(type), $options: 'i' };
+    if (ownership) filter.ownership = String(ownership);
+    if (district && district !== 'Any District' && district !== 'Any State') filter.district = String(district);
+    if (city) filter.city = String(city);
+    if (course) filter.courses = { $regex: String(course), $options: 'i' };
+    if (branch) filter.specializations = { $regex: String(branch), $options: 'i' };
+    if (entranceExam) filter.entranceExams = { $in: [String(entranceExam)] };
+
+    const skip = (Number(page) - 1) * Number(limit);
+
+    let sortOption: any = { nirfRank: 1 }; // Default
+
+    // If q is provided, we sort by match relevance implicitly if using text search, but since we used $or regex, 
+    // we can stick to nirfRank or a basic name sort. We'll leave nirfRank as default.
+
+    let colleges = await College.find(filter)
+      .sort(sortOption)
+      .skip(skip)
+      .limit(Number(limit));
+
+    const total = await College.countDocuments(filter);
 
     res.json({
       data: colleges,

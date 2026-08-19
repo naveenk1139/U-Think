@@ -20,7 +20,7 @@ export const submitQuiz = (
   answers: QuizAnswer[]
 ): Promise<{ analysisText: string; recommendedStreams: string[] }> =>
   api
-    .post('/api/aptitude/evaluate', { answers })
+    .post('/api/ai/aptitude/evaluate', { answers })
     .then((r) => r.data);
 
 /** Save a completed quiz result to the user's history */

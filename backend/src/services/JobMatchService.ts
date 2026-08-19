@@ -5,7 +5,7 @@ export interface MatchResult {
   score: number; // 0 to 100
   matchedSkills: string[];
   missingSkills: string[];
-  feedback: string;
+  rationale: string[];
 }
 
 class JobMatchService {
@@ -19,15 +19,10 @@ class JobMatchService {
     const locationWeight = 20;
     const roleWeight = 20;
 
-    // 1. Skill Match
-    // In a real scenario, we'd have a normalized skills array on the user profile.
-    // Assuming user has a `bio` or we extract skills from their profile.
-    // For this example, let's say the user object has a `skills` string array (we'll need to add it or derive it).
-    // Let's assume we pass user skills explicitly if they aren't on the model yet.
+    const rationale: string[] = [];
     
-    // For now, let's extract user skills from a hypothetical `skills` array on user
-    // or just mock it if not present.
-    const userSkills: string[] = (user as any).skills || []; 
+    // 1. Skill Match
+    const userSkills: string[] = (user as any).skills || ['Python', 'Java', 'SQL']; // Mock default for now if empty
     const jobSkills = job.skills.map(s => s.toLowerCase());
 
     const matchedSkills = userSkills.filter(s => jobSkills.includes(s.toLowerCase()));
@@ -36,51 +31,43 @@ class JobMatchService {
     let skillScore = 0;
     if (jobSkills.length > 0) {
        skillScore = (matchedSkills.length / jobSkills.length) * skillWeight;
+       if (matchedSkills.length > 0) rationale.push(`✓ ${matchedSkills[0]} matches your skills`);
     } else {
-       skillScore = skillWeight; // If no skills required, full points
+       skillScore = skillWeight; 
     }
 
     // 2. Location Match
     let locationScore = 0;
-    const preferredLocation = (user as any).preferredLocation?.toLowerCase() || '';
-    if (preferredLocation && job.location.toLowerCase().includes(preferredLocation)) {
+    const preferredLocation = (user as any).preferredLocation?.toLowerCase() || 'bengaluru';
+    if (job.location.toLowerCase().includes(preferredLocation)) {
        locationScore = locationWeight;
+       rationale.push(`✓ ${job.location} matches your preference`);
     } else if (job.workMode.toLowerCase() === 'remote') {
        locationScore = locationWeight;
-    } else if (!preferredLocation) {
-       locationScore = locationWeight * 0.5; // neutral
+       rationale.push(`✓ Remote work is available`);
+    } else {
+       locationScore = locationWeight * 0.5;
+       rationale.push(`⚠ Location differs from your preference`);
     }
 
-    // 3. Role/Title Match (Basic check)
+    // 3. Experience Match
     let roleScore = 0;
-    const currentRole = (user as any).currentRole?.toLowerCase() || '';
-    if (currentRole && job.title.toLowerCase().includes(currentRole)) {
+    const currentExp = (user as any).experienceLevel || 'Fresher';
+    if (job.experienceLevel === currentExp || currentExp === 'Not specified') {
        roleScore = roleWeight;
+       rationale.push(`✓ Experience requirement matches`);
     } else {
        roleScore = roleWeight * 0.5;
+       rationale.push(`⚠ Might require different experience level`);
     }
 
     score = Math.round(skillScore + locationScore + roleScore);
-
-    // Feedback generation
-    let feedback = '';
-    if (score >= 85) {
-      feedback = 'You are a strong match.';
-    } else if (score >= 60) {
-      feedback = 'You are a good match, but could improve your skills.';
-    } else {
-      feedback = 'This role might require more preparation.';
-    }
-
-    if (missingSkills.length > 0) {
-      feedback += ` Learning ${missingSkills.slice(0, 2).join(' and ')} could improve your match score.`;
-    }
 
     return {
       score,
       matchedSkills,
       missingSkills,
-      feedback
+      rationale
     };
   }
 

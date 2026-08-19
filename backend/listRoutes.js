@@ -1,0 +1,1 @@
+import app from './src/index.js'; app._router.stack.forEach(r => { if(r.route && r.route.path) console.log(r.route.path); if(r.name === 'router') { console.log('Mounted on', r.regexp); r.handle.stack.forEach(h => { if(h.route) console.log('  ', h.route.path); }) } });

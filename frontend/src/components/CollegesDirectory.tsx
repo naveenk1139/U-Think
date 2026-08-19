@@ -10,6 +10,7 @@ import { useAuth } from '../contexts/AuthContext';
 export default function CollegesDirectory() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [selectedBranch, setSelectedBranch] = useState('All');
   const [selectedDistrict, setSelectedDistrict] = useState('Any District');
   const [selectedType, setSelectedType] = useState('All');
   const [sortBy, setSortBy] = useState('AI Match Score');
@@ -34,6 +35,21 @@ export default function CollegesDirectory() {
 
   const categories = ['All', 'Engineering', 'Medical', 'Management', 'Law', 'Design', 'Science', 'Commerce', 'Diploma', 'Polytechnic', 'ITI', 'Paramedical', 'Vocational'];
 
+  const CATEGORY_BRANCHES: Record<string, string[]> = {
+    'Engineering': ['All', 'Computer Science', 'Information Science', 'AIML', 'Electronics and Communication', 'Electrical', 'Mechanical', 'Civil'],
+    'Medical': ['All', 'MBBS', 'BDS', 'BAMS', 'BHMS', 'Nursing', 'Pharmacy'],
+    'Management': ['All', 'BBA', 'MBA', 'PGDM', 'BBM'],
+    'Law': ['All', 'LLB', 'BA LLB', 'BBA LLB', 'LLM'],
+    'Design': ['All', 'B.Des', 'M.Des', 'Fashion Design', 'Interior Design'],
+    'Science': ['All', 'Physics', 'Chemistry', 'Mathematics', 'Biotechnology', 'Microbiology', 'Computer Science'],
+    'Commerce': ['All', 'B.Com', 'M.Com', 'Accounting', 'Finance', 'Taxation'],
+    'Diploma': ['All', 'Diploma CSE', 'Diploma Mechanical', 'Diploma Civil', 'Diploma ECE'],
+    'Polytechnic': ['All', 'Polytechnic CSE', 'Polytechnic Mechanical', 'Polytechnic Civil', 'Polytechnic ECE'],
+    'ITI': ['All', 'Electrician', 'Fitter', 'Welder', 'COPA', 'Turner'],
+    'Paramedical': ['All', 'Medical Lab Tech', 'Operation Theatre Tech', 'Radiology', 'Optometry'],
+    'Vocational': ['All', 'Retail', 'Hospitality', 'Healthcare', 'Automotive']
+  };
+
   useEffect(() => {
     fetchCollegeStats().then(setStats).catch(console.error);
   }, []);
@@ -41,7 +57,13 @@ export default function CollegesDirectory() {
   // Reset page when filters change
   useEffect(() => {
     setPage(1);
-  }, [searchQuery, selectedCategory, selectedType, selectedDistrict]);
+    // Reset branch when category changes, unless it's just the page changing
+  }, [searchQuery, selectedCategory, selectedBranch, selectedType, selectedDistrict]);
+
+  // Reset branch when category changes
+  useEffect(() => {
+    setSelectedBranch('All');
+  }, [selectedCategory]);
 
   useEffect(() => {
     const loadColleges = async () => {
@@ -50,6 +72,7 @@ export default function CollegesDirectory() {
         const params: any = {
           q: searchQuery,
           category: selectedCategory === 'All' ? undefined : selectedCategory,
+          branch: selectedBranch === 'All' ? undefined : selectedBranch,
           type: selectedType === 'All' ? undefined : selectedType,
           district: selectedDistrict === 'Any District' ? undefined : selectedDistrict,
           page: page,
@@ -76,7 +99,7 @@ export default function CollegesDirectory() {
     }, 300);
     
     return () => clearTimeout(timeoutId);
-  }, [searchQuery, selectedCategory, selectedType, selectedDistrict, page]);
+  }, [searchQuery, selectedCategory, selectedBranch, selectedType, selectedDistrict, page]);
 
   // Generate a match score: use real AI score if available, otherwise calculate from user preferences
   const getMatchScore = (college: College) => {
@@ -251,6 +274,28 @@ export default function CollegesDirectory() {
             </div>
           </div>
 
+          {/* Sub-Category / Branch Filters */}
+          {selectedCategory !== 'All' && CATEGORY_BRANCHES[selectedCategory] && (
+            <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm">
+              <h3 className="text-sm font-black text-slate-900 mb-4 uppercase tracking-wider flex items-center gap-2">
+                <Briefcase className="w-4 h-4 text-orange-500" /> {selectedCategory} Branches
+              </h3>
+              <div className="space-y-2">
+                {CATEGORY_BRANCHES[selectedCategory].map(branch => (
+                  <label key={branch} className="flex items-center gap-2 text-sm font-semibold text-slate-700 cursor-pointer">
+                    <input 
+                      type="radio" 
+                      name={`${selectedCategory}Branch`} 
+                      checked={selectedBranch === branch}
+                      onChange={() => setSelectedBranch(branch)}
+                      className="w-4 h-4 rounded-full border-slate-300 text-blue-600 focus:ring-blue-500" 
+                    /> {branch}
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Advanced Filters */}
           <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm">
             <h3 className="text-sm font-black text-slate-900 mb-4 uppercase tracking-wider flex items-center gap-2">
@@ -363,7 +408,7 @@ export default function CollegesDirectory() {
             <h2 className="text-xl font-black text-slate-900">
               {selectedCategory === 'All' ? 'All Colleges' : `${selectedCategory} Colleges`}
               <span className="text-slate-400 text-base font-semibold ml-2">
-                — Showing {colleges.length} of {totalCollegesCount > 0 ? `${totalCollegesCount}+` : 0} in Karnataka
+                — Showing {colleges.length > 0 ? 1 : 0}-{colleges.length} of {totalCollegesCount} in Karnataka
               </span>
             </h2>
             <div className="flex items-center gap-2 text-sm font-bold text-slate-500">

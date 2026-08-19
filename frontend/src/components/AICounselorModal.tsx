@@ -102,11 +102,16 @@ export default function AICounselorModal({ isOpen, onClose }: AICounselorModalPr
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          userId: currentUser?._id,
+          userId: currentUser?.id || currentUser?._id, // Handle both id and _id
           conversationId: activeConversationId,
           message: textToSend
         })
       });
+
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.error || `Error ${response.status}: Failed to reach AI.`);
+      }
 
       if (!response.body) throw new Error("No response body");
 
@@ -130,6 +135,11 @@ export default function AICounselorModal({ isOpen, onClose }: AICounselorModalPr
                 const data = JSON.parse(dataStr);
                 if (data.error) {
                    aiResponseText = data.error;
+                   setMessages(prev => {
+                     const newMsgs = [...prev];
+                     newMsgs[newMsgs.length - 1].content = aiResponseText;
+                     return newMsgs;
+                   });
                 } else if (data.done) {
                   if (!activeConversationId && data.conversationId) {
                     setActiveConversationId(data.conversationId);
@@ -150,11 +160,11 @@ export default function AICounselorModal({ isOpen, onClose }: AICounselorModalPr
           }
         }
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
       setMessages(prev => {
         const newMsgs = [...prev];
-        newMsgs[newMsgs.length - 1].content = "⚠️ AI Counselor is temporarily unavailable. Please try again.";
+        newMsgs[newMsgs.length - 1].content = `⚠️ ${err.message || "AI Counselor is temporarily unavailable."}`;
         return newMsgs;
       });
     } finally {
@@ -212,7 +222,13 @@ export default function AICounselorModal({ isOpen, onClose }: AICounselorModalPr
           </div>
           
           <div className="p-4 border-t border-slate-200 min-w-[16rem]">
-            <button className="flex items-center gap-2 text-slate-600 hover:text-slate-900 text-sm font-medium transition-colors w-full p-2 rounded-lg hover:bg-slate-100 cursor-pointer">
+            <button 
+              onClick={() => {
+                onClose();
+                window.location.href = '/settings';
+              }}
+              className="flex items-center gap-2 text-slate-600 hover:text-slate-900 text-sm font-medium transition-colors w-full p-2 rounded-lg hover:bg-slate-100 cursor-pointer"
+            >
               <Settings className="w-4 h-4" />
               Counselor Settings
             </button>
@@ -252,7 +268,24 @@ export default function AICounselorModal({ isOpen, onClose }: AICounselorModalPr
           {/* Messages */}
           <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
             
-            {messages.length === 0 ? (
+            {!currentUser ? (
+              <div className="h-full flex flex-col items-center justify-center text-center max-w-md mx-auto animate-fade-in pb-10">
+                <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mb-6 shadow-sm border border-blue-100">
+                  <Bot className="w-8 h-8 text-blue-600" />
+                </div>
+                <h2 className="text-xl font-bold text-slate-800 mb-2">Login Required</h2>
+                <p className="text-sm text-slate-500 mb-8">Please log in or create an account to use the AI Career Counselor and get personalized guidance.</p>
+                <button
+                  onClick={() => {
+                    onClose();
+                    window.location.href = '/login';
+                  }}
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl transition-colors shadow-md"
+                >
+                  Log In Now
+                </button>
+              </div>
+            ) : messages.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-center max-w-md mx-auto animate-fade-in pb-10">
                 <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mb-6 shadow-sm border border-blue-100">
                   <Bot className="w-8 h-8 text-blue-600" />
@@ -340,16 +373,16 @@ export default function AICounselorModal({ isOpen, onClose }: AICounselorModalPr
                 placeholder="Message U THINK AI Counselor..."
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
-                disabled={isStreaming}
+                disabled={isStreaming || !currentUser}
                 className="w-full bg-slate-50 border border-slate-200 hover:border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 rounded-2xl pl-14 pr-24 py-4 text-[15px] font-medium text-slate-800 transition-all outline-none disabled:opacity-50"
               />
               <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
-                <button type="button" className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors cursor-pointer" title="Voice Input">
+                <button type="button" disabled={isStreaming || !currentUser} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors cursor-pointer" title="Voice Input">
                   <Mic className="w-5 h-5" />
                 </button>
                 <button
                   type="submit"
-                  disabled={!inputText.trim() || isStreaming}
+                  disabled={!inputText.trim() || isStreaming || !currentUser}
                   className="bg-blue-600 hover:bg-blue-700 text-white p-2.5 rounded-xl cursor-pointer transition-colors disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
                 >
                   <ArrowRight className="w-5 h-5" />

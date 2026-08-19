@@ -101,16 +101,19 @@ export default function Sidebar() {
             <UserCheck className="w-4 h-4 text-blue-500" />
           </div>
           <div className="w-full bg-slate-100 h-2 rounded-full mb-2 overflow-hidden">
-            <div className="bg-blue-600 h-full rounded-full" style={{ width: '43%' }}></div>
+            <div className="bg-blue-600 h-full rounded-full transition-all duration-1000 ease-out" style={{ width: `${Math.round((Object.keys(currentUser || {}).length / 10) * 100) > 100 ? 100 : Math.max(25, Math.round((Object.keys(currentUser || {}).length / 10) * 100))}%` }}></div>
           </div>
           <div className="flex justify-between text-[10px] font-bold text-slate-500 mb-3">
-            <span className="text-blue-600">43%</span>
+            <span className="text-blue-600">{Math.round((Object.keys(currentUser || {}).length / 10) * 100) > 100 ? 100 : Math.max(25, Math.round((Object.keys(currentUser || {}).length / 10) * 100))}%</span>
             <span>Complete</span>
           </div>
           <p className="text-[10px] text-slate-500 leading-tight mb-3">
             Complete your profile to get better AI recommendations.
           </p>
-          <button className="w-full text-xs font-bold text-blue-600 flex items-center justify-center gap-1 hover:text-blue-700 transition-colors cursor-pointer">
+          <button 
+            onClick={() => navigate('/settings')}
+            className="w-full text-xs font-bold text-blue-600 flex items-center justify-center gap-1 hover:text-blue-700 transition-colors cursor-pointer"
+          >
             Continue Profile <ArrowRight className="w-3 h-3" />
           </button>
         </div>

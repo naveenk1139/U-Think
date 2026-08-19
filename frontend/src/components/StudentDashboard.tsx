@@ -114,10 +114,10 @@ export default function StudentDashboard() {
               <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
                 <CheckCircle className="w-4 h-4 text-blue-600" /> Profile Completion
               </h2>
-              <span className="text-xs font-black text-blue-600">43% Complete</span>
+              <span className="text-xs font-black text-blue-600">{currentUser?.profileCompletion || 43}% Complete</span>
             </div>
             <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden mb-3">
-              <div className="bg-blue-600 h-full rounded-full" style={{ width: '43%' }}></div>
+              <div className="bg-blue-600 h-full rounded-full" style={{ width: `${currentUser?.profileCompletion || 43}%` }}></div>
             </div>
             <p className="text-[10px] text-slate-500 font-medium">Complete your profile to unlock better AI recommendations and detailed career path analysis.</p>
           </div>
@@ -145,7 +145,7 @@ export default function StudentDashboard() {
                 </div>
                 <div className="pt-2">
                   <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Career Goal</div>
-                  <div className="text-sm font-black text-slate-800">Senior Data Scientist</div>
+                  <div className="text-sm font-black text-slate-800">{currentUser?.careerGoal || 'Senior Data Scientist'}</div>
                 </div>
               </div>
             </div>
@@ -181,7 +181,7 @@ export default function StudentDashboard() {
                 <h2 className="text-sm font-bold text-blue-300 mb-2 flex items-center gap-2">
                   <Target className="w-4 h-4" /> Career Match
                 </h2>
-                <div className="text-3xl font-black text-white mb-1">Software Engineer</div>
+                <div className="text-3xl font-black text-white mb-1">{currentUser?.targetExam || 'Software Engineer'}</div>
                 <div className="text-emerald-400 font-bold text-xs mb-4">92% Match • High Demand</div>
                 <p className="text-xs text-slate-400 leading-relaxed max-w-sm">Based on your aptitude and interests, this career offers the best growth and matches your skill profile perfectly.</p>
               </div>
@@ -278,7 +278,10 @@ export default function StudentDashboard() {
             <p className="text-xs text-indigo-100 mb-5 leading-relaxed">
               Get instant, personalized guidance for your exams, colleges, and career path based on your exact profile.
             </p>
-            <button className="w-full bg-white text-indigo-600 font-bold text-xs py-3 rounded-xl shadow-lg hover:bg-slate-50 transition-colors">
+            <button 
+              onClick={() => window.dispatchEvent(new CustomEvent('open-counselor-with-context'))}
+              className="w-full bg-white text-indigo-600 font-bold text-xs py-3 rounded-xl shadow-lg hover:bg-slate-50 transition-colors cursor-pointer"
+            >
               Chat with AI
             </button>
           </div>

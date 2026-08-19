@@ -69,8 +69,19 @@
   }
 }
 
+
 .animate-float-subnode {
   animation: float-gentle 4s ease-in-out infinite;
 }
 
+/* Global Dark Mode Hack since the app lacks native dark utility classes */
+html.dark {
+  filter: invert(1) hue-rotate(180deg);
+}
+html.dark img, 
+html.dark video, 
+html.dark [style*="background-image"], 
+html.dark svg {
+  filter: invert(1) hue-rotate(180deg);
+}
 

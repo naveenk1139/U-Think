@@ -1,391 +1,331 @@
-import React, { useState } from 'react';
-import { APTITUDE_QUESTIONS } from './data';
-import { StreamType } from './types';
-import { Award, Compass, Sparkles, Loader2, RefreshCw, Check, AlertCircle, ArrowRight, BookOpen } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { AICareerQuestion, AssessmentResult } from './types';
 
-interface EvaluationResult {
-  recommendedStream: string;
-  recommendedStreamId: string;
-  whyThisFits: string;
-  detailedAnalysis: string;
-  suggestedCareers: string[];
-  actionPlan: string[];
-  motivationalMessage: string;
-}
+// Icons
+import {
+  Brain,
+  ChevronRight,
+  GraduationCap,
+  Target,
+  Sparkles,
+  Trophy,
+  ArrowRight,
+  Loader2,
+  Briefcase,
+  BookOpen
+} from 'lucide-react';
 
-export default function AptitudeQuiz() {
-  const [currentIdx, setCurrentIdx] = useState(0);
-  const [selectedScores, setSelectedScores] = useState<Record<number, { choiceText: string, weight: Record<string, number> }>>({});
-  const [isEvaluating, setIsEvaluating] = useState(false);
-  const [errorText, setErrorText] = useState<string | null>(null);
-  const [evaluation, setEvaluation] = useState<EvaluationResult | null>(null);
+const EDUCATION_LEVELS = [
+  { id: 'POST_10TH', label: 'Completed 10th' },
+  { id: '12TH_SCIENCE', label: '12th / PU (Science)' },
+  { id: '12TH_COMMERCE', label: '12th / PU (Commerce)' },
+  { id: '12TH_ARTS', label: '12th / PU (Arts)' },
+  { id: 'DIPLOMA', label: 'Diploma' },
+  { id: 'ITI', label: 'ITI' },
+  { id: 'PARAMEDICAL', label: 'Paramedical' },
+  { id: 'VOCATIONAL', label: 'Vocational' },
+  { id: 'ENGINEERING', label: 'Engineering Degree' },
+  { id: 'MEDICAL', label: 'Medical Degree' },
+  { id: 'MANAGEMENT', label: 'Management Degree' },
+  { id: 'LAW', label: 'Law Degree' },
+  { id: 'DESIGN', label: 'Design Degree' },
+  { id: 'SCIENCE', label: 'Science Degree (B.Sc)' },
+  { id: 'COMMERCE', label: 'Commerce Degree (B.Com)' },
+  { id: 'DEGREE', label: 'Other Degree' }
+];
 
-  React.useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [currentIdx, evaluation]);
+export default function CareerAssessment() {
+  const navigate = useNavigate();
+  const [step, setStep] = useState<'INTRO' | 'EDUCATION' | 'QUIZ' | 'ANALYZING' | 'RESULT'>('INTRO');
+  
+  const [educationLevel, setEducationLevel] = useState<string>('');
+  const [attemptId, setAttemptId] = useState<string>('');
+  
+  const [currentQuestion, setCurrentQuestion] = useState<AICareerQuestion | null>(null);
+  const [questionCount, setQuestionCount] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Quick offline backup logic in case of network discrepancies or mock scenarios
-  const computeOfflineResult = () => {
-    const totals: Record<StreamType, number> = {
-      '12th_intermediate': 0,
-      'diploma': 0,
-      'paramedical': 0,
-      'iti': 0,
-      'vocational': 0
-    };
+  const [result, setResult] = useState<AssessmentResult | null>(null);
 
-    Object.values(selectedScores).forEach((scItem) => {
-      const sc = scItem as { choiceText: string; weight: Record<string, number> };
-      Object.entries(sc.weight).forEach(([streamKey, value]) => {
-        const key = streamKey as StreamType;
-        totals[key] = (totals[key] || 0) + ((value as number) || 0);
-      });
-    });
+  // Hardcoded for demo, normally from auth context
+  const userId = 'user-123'; 
 
-    // Find stream with maximum score
-    let highestStream: StreamType = '12th_intermediate';
-    let highestScore = -1;
-    Object.entries(totals).forEach(([stream, score]) => {
-      if (score > highestScore) {
-        highestScore = score;
-        highestStream = stream as StreamType;
-      }
-    });
-
-    const streamTitles: Record<StreamType, string> = {
-      '12th_intermediate': '12th / Intermediate Academic Pathway',
-      'diploma': 'Polytechnic Diploma in Tech & Engineering',
-      'paramedical': 'Paramedical Clinical Technician Track',
-      'iti': 'ITI Industrial Craft Trades (Electrical/Mechanical Specialist)',
-      'vocational': 'Vocational Commerce, Design & Travel Admin'
-    };
-
-    const streamBios: Record<StreamType, string> = {
-      '12th_intermediate': 'You display a strong core in abstract thinking, deep academic curiosity, and desire to qualify for universities or premier medical examinations.',
-      'diploma': 'You possess sharp technical, physical, or diagnostic logic, matching you directly with structured industrial mechanical processes.',
-      'paramedical': 'You show high biological alignment, medical diagnostics skill, and a deep sense of patient duty and treatment setups.',
-      'iti': 'Your scores show a great talent for direct physical craftsmanship, hands-on diagnostics, tools usage, and practical labor solutions.',
-      'vocational': 'Your answers indicate high affinity for business coordination, boutique management, travel desk execution, or soft-skill sales.'
-    };
-
-    return {
-      recommendedStream: streamTitles[highestStream],
-      recommendedStreamId: highestStream,
-      whyThisFits: streamBios[highestStream],
-      detailedAnalysis: `Based on your selection of answers, we analyzed your cognitive patterns and vocational desires. You scored highest in fields related to ${streamTitles[highestStream]}, indicating you prefer applied projects and action-oriented challenges compared to traditional long-term theory classes.`,
-      suggestedCareers: [
-        'Junior Project Supervisor',
-        'Certified Sector Analyst',
-        'Technical Field Consultant'
-      ],
-      actionPlan: [
-        'Research 3 local state colleges with matching courses that are recognized.',
-        'Arrange a quick meeting with graduates in this specific domain.',
-        'Review syllabus topics on the U THINK Streams page.'
-      ],
-      motivationalMessage: "Every great path begins with understanding your unique mental design. Pursue your choice with pride and consistency!"
-    };
-  };
-
-  const handleSelectOption = (idx: number, choiceText: string, weight: Record<string, number>) => {
-    setSelectedScores((prev) => ({
-      ...prev,
-      [currentIdx]: { choiceText, weight }
-    }));
-  };
-
-  const handleNext = () => {
-    if (currentIdx < APTITUDE_QUESTIONS.length - 1) {
-      setCurrentIdx((prev) => prev + 1);
-    }
-  };
-
-  const handlePrevious = () => {
-    if (currentIdx > 0) {
-      setCurrentIdx((prev) => prev - 1);
-    }
-  };
-
-  const handleSubmitQuiz = async () => {
-    setIsEvaluating(true);
-    setErrorText(null);
-
-    // Prepare JSON payload
-    const payload = APTITUDE_QUESTIONS.map((q, i) => ({
-      question: q.question,
-      category: q.category,
-      choiceText: selectedScores[i]?.choiceText || ''
-    }));
-
+  const startAssessment = async (level: string) => {
+    setEducationLevel(level);
+    setIsSubmitting(true);
     try {
-      const response = await fetch('/api/aptitude/evaluate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ answers: payload })
+      const res = await axios.post('http://localhost:5000/api/assessment/start', {
+        userId,
+        educationLevel: level
       });
-
-      if (!response.ok) {
-        throw new Error("Server failed to generate custom evaluation.");
-      }
-
-      const data = await response.json();
-      setEvaluation(data);
-      localStorage.setItem('aptitude_test_result', JSON.stringify(data));
-      window.dispatchEvent(new Event('profile_updated'));
-    } catch (err: any) {
-      console.warn("API evaluate error, falling back to offline parsing:", err);
-      // Fallback
-      const fallbackData = computeOfflineResult();
-      setEvaluation(fallbackData);
-      localStorage.setItem('aptitude_test_result', JSON.stringify(fallbackData));
-      window.dispatchEvent(new Event('profile_updated'));
+      setAttemptId(res.data.attemptId);
+      setCurrentQuestion(res.data.nextQuestion);
+      setStep('QUIZ');
+    } catch (err) {
+      console.error(err);
+      alert('Failed to start assessment. Ensure backend is running.');
     } finally {
-      setIsEvaluating(false);
+      setIsSubmitting(false);
     }
   };
 
-  const handleRestartQuiz = () => {
-    setSelectedScores({});
-    setCurrentIdx(0);
-    setEvaluation(null);
-    setErrorText(null);
-  };
+  const handleAnswer = async (choiceText: string) => {
+    if (!currentQuestion) return;
+    setIsSubmitting(true);
+    try {
+      const res = await axios.post('http://localhost:5000/api/assessment/answer', {
+        attemptId,
+        questionId: currentQuestion._id,
+        choiceText
+      });
 
-  const progressPct = ((currentIdx + 1) / APTITUDE_QUESTIONS.length) * 100;
-  const currentQuestion = APTITUDE_QUESTIONS[currentIdx];
-  const allAnswered = Object.keys(selectedScores).length === APTITUDE_QUESTIONS.length;
+      if (res.data.isComplete) {
+        setStep('ANALYZING');
+        // Fetch result
+        const resultRes = await axios.get(`http://localhost:5000/api/assessment/result/${res.data.resultId}`);
+        setTimeout(() => {
+          setResult(resultRes.data);
+          setStep('RESULT');
+        }, 2000); // Fake delay for AI effect
+      } else {
+        setCurrentQuestion(res.data.nextQuestion);
+        setQuestionCount(prev => prev + 1);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
-    <div id="quiz-page" className="space-y-8 animate-fade-in">
-      {/* Intro Header */}
-      <div className="bg-gradient-to-r from-teal-700 to-emerald-900 rounded-3xl p-6 sm:p-10 text-white shadow-xl relative overflow-hidden">
-        <div className="absolute top-0 right-0 p-4 opacity-10">
-          <Award className="w-64 h-64 -mr-16 -mt-16" />
-        </div>
-        <div className="relative z-10 max-w-2xl">
-          <span className="bg-emerald-500/30 text-emerald-100 text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">
-            Interactive AI Dossier
-          </span>
-          <h1 className="text-3xl sm:text-4xl font-extrabold mt-3 tracking-tight font-sans">
-            Post-10th Aptitude Assessment
-          </h1>
-          <p className="mt-4 text-sm sm:text-base text-emerald-100 leading-relaxed font-sans">
-            Answer 5 reflective scenario questions below. Our intelligent assessment algorithm maps your logical, biological, mechanical, or coordination traits to recommend the perfect match stream.
-          </p>
-        </div>
-      </div>
+    <div className="min-h-screen bg-black text-white pt-20">
+      <div className="max-w-6xl mx-auto px-4 py-12">
+        <AnimatePresence mode="wait">
+          
+          {step === 'INTRO' && (
+            <motion.div
+              key="intro"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="text-center max-w-3xl mx-auto"
+            >
+              <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-blue-500/20 to-purple-500/20 text-blue-400 px-4 py-2 rounded-full mb-8 border border-blue-500/20">
+                <Sparkles className="h-5 w-5" />
+                <span className="font-medium">AI-Powered Career Intelligence</span>
+              </div>
+              
+              <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400 tracking-tight leading-tight">
+                Discover Your Perfect Career Path
+              </h1>
+              
+              <p className="text-xl text-gray-400 mb-12 leading-relaxed">
+                Stop guessing your future. Our advanced AI analyzes your 18-dimension cognitive and psychological profile to map you to the exact degree, college, and career where you'll thrive.
+              </p>
 
-      {!evaluation ? (
-        <div className="max-w-3xl mx-auto bg-white border border-slate-100 shadow-sm rounded-3xl p-6 sm:p-10 space-y-8">
-          {/* Progress Indication */}
-          <div className="space-y-2">
-            <div className="flex justify-between items-center text-xs">
-              <span className="font-bold text-slate-400 uppercase tracking-wider">
-                Assessment Progress
-              </span>
-              <span className="font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
-                Question {currentIdx + 1} of {APTITUDE_QUESTIONS.length}
-              </span>
-            </div>
-            <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-emerald-600 rounded-full transition-all duration-300"
-                style={{ width: `${progressPct}%` }}
-              />
-            </div>
-          </div>
-
-          {/* Active Question Box */}
-          <div className="space-y-5">
-            <span className="bg-slate-100 text-slate-600 text-xs font-semibold px-2 py-1 rounded">
-              Scenario Section: <span className="capitalize">{currentQuestion.category} Logic</span>
-            </span>
-            <h2 className="text-lg sm:text-xl font-bold text-slate-800 font-sans tracking-tight leading-relaxed">
-              {currentQuestion.question}
-            </h2>
-
-            {/* Answer Options */}
-            <div className="space-y-3 pt-2">
-              {currentQuestion.options.map((option, oIdx) => {
-                const isSelected = selectedScores[currentIdx]?.choiceText === option.text;
-                return (
-                  <button
-                    id={`q-${currentIdx}-opt-${oIdx}`}
-                    key={oIdx}
-                    onClick={() => handleSelectOption(currentIdx, option.text, option.scoreWeight)}
-                    className={`w-full text-left p-4 rounded-xl border transition-all text-xs sm:text-sm font-medium flex items-center gap-3 cursor-pointer ${
-                      isSelected
-                        ? 'border-emerald-500 bg-emerald-50/50 text-emerald-950 font-semibold'
-                        : 'border-slate-200 hover:bg-slate-50 text-slate-700 hover:border-slate-300'
-                    }`}
-                  >
-                    <div className={`w-5 h-5 rounded-full border shrink-0 flex items-center justify-center transition-all ${
-                      isSelected ? 'border-emerald-600 bg-emerald-600' : 'border-slate-300 bg-white'
-                    }`}>
-                      {isSelected && <Check className="w-3 h-3 text-white stroke-[3px]" />}
-                    </div>
-                    <span>{option.text}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Error Prompt */}
-          {errorText && (
-            <div className="flex gap-2 bg-red-50 text-red-700 p-4 rounded-xl text-xs sm:text-sm items-center">
-              <AlertCircle className="w-4 h-4 shrink-0" />
-              <span>{errorText}</span>
-            </div>
+              <button
+                onClick={() => setStep('EDUCATION')}
+                className="group relative inline-flex items-center justify-center px-8 py-4 bg-white text-black font-bold text-lg rounded-full overflow-hidden transition-transform hover:scale-105"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-400 via-purple-400 to-blue-400 opacity-0 group-hover:opacity-20 transition-opacity"></div>
+                <span className="relative flex items-center space-x-2">
+                  <span>Start Free Assessment</span>
+                  <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                </span>
+              </button>
+            </motion.div>
           )}
 
-          {/* Buttons Controls */}
-          <div className="flex justify-between items-center pt-4 border-t border-slate-100">
-            <button
-              onClick={handlePrevious}
-              disabled={currentIdx === 0}
-              className="text-xs sm:text-sm font-semibold text-slate-500 bg-slate-50 hover:bg-slate-100 px-4 py-2.5 rounded-xl disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+          {step === 'EDUCATION' && (
+            <motion.div
+              key="education"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="max-w-4xl mx-auto"
             >
-              Previous
-            </button>
-
-            {currentIdx < APTITUDE_QUESTIONS.length - 1 ? (
-              <button
-                onClick={handleNext}
-                disabled={!selectedScores[currentIdx]}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs sm:text-sm px-6 py-2.5 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all"
-              >
-                Next Question
-              </button>
-            ) : (
-              <button
-                id="btn-evaluate-quiz"
-                onClick={handleSubmitQuiz}
-                disabled={!allAnswered || isEvaluating}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs sm:text-sm px-6 py-2.5 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all flex items-center gap-2 shadow-md shadow-emerald-100"
-              >
-                {isEvaluating ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" /> Evaluating with AI...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="w-4 h-4 text-emerald-200" /> Evaluate My Pathway
-                  </>
-                )}
-              </button>
-            )}
-          </div>
-        </div>
-      ) : (
-        /* Quiz Results Display Panel */
-        <div className="max-w-3xl mx-auto space-y-8 animate-slide-up">
-          <div className="bg-white border border-slate-100 shadow-xl rounded-3xl p-6 sm:p-10 space-y-6">
-            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-5">
-              <div>
-                <span className="bg-emerald-50 text-emerald-700 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-                  AI Recommended Pathway
-                </span>
-                <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2 tracking-tight">
-                  {evaluation.recommendedStream}
-                </h2>
+              <div className="text-center mb-12">
+                <h2 className="text-3xl font-bold mb-4">What is your current education level?</h2>
+                <p className="text-gray-400">This helps our AI adapt the questions to your exact context.</p>
               </div>
-              <button
-                onClick={handleRestartQuiz}
-                className="flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-slate-800 hover:bg-slate-100 border border-slate-200 px-4 py-2 rounded-xl cursor-pointer"
-              >
-                <RefreshCw className="w-3.5 h-3.5" /> Restart Quiz
-              </button>
-            </div>
 
-            {/* Why This Fits */}
-            <div className="space-y-2">
-              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
-                🎯 Why This Matches Your Aptitude
-              </h3>
-              <p className="text-slate-800 text-sm sm:text-base leading-relaxed bg-emerald-50/40 p-5 rounded-2xl border border-emerald-50">
-                {evaluation.whyThisFits}
-              </p>
-            </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {EDUCATION_LEVELS.map((level) => (
+                  <button
+                    key={level.id}
+                    onClick={() => startAssessment(level.id)}
+                    disabled={isSubmitting}
+                    className="p-6 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 hover:border-blue-500/50 transition-all text-left group flex flex-col h-full"
+                  >
+                    <GraduationCap className="h-8 w-8 text-blue-400 mb-4 group-hover:scale-110 transition-transform" />
+                    <span className="font-semibold">{level.label}</span>
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          )}
 
-            {/* Detailed Analysis Output */}
-            <div className="space-y-2">
-              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
-                📊 Detailed Academic Analysis
-              </h3>
-              <p className="text-slate-600 text-sm sm:text-base leading-relaxed font-sans">
-                {evaluation.detailedAnalysis}
-              </p>
-            </div>
+          {step === 'QUIZ' && currentQuestion && (
+            <motion.div
+              key="quiz"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 1.05 }}
+              className="max-w-3xl mx-auto"
+            >
+              <div className="mb-8 flex justify-between items-center text-sm font-medium text-gray-400">
+                <span className="bg-white/10 px-3 py-1 rounded-full text-blue-400">
+                  {currentQuestion.category} Analysis
+                </span>
+                <span>Question {questionCount} of 5</span>
+              </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-              {/* Recommended Jobs / Careers */}
-              <div className="space-y-3 bg-slate-50/50 p-5 rounded-2xl border border-slate-100">
-                <h4 className="text-xs font-bold text-slate-700 uppercase tracking-widest">
-                  💼 Potential High-Growth Job Roles
-                </h4>
-                <div className="space-y-1.5 pt-1">
-                  {evaluation.suggestedCareers.map((car, idx) => (
-                    <div key={idx} className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-900">
-                      <div className="w-1.5 h-1.5 bg-emerald-600 rounded-full" />
-                      <span>{car}</span>
-                    </div>
+              <div className="bg-white/5 border border-white/10 rounded-3xl p-8 md:p-12 backdrop-blur-sm">
+                <h2 className="text-2xl md:text-3xl font-semibold mb-10 leading-relaxed">
+                  {currentQuestion.questionText}
+                </h2>
+
+                <div className="space-y-4">
+                  {currentQuestion.options.map((option, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => handleAnswer(option.text)}
+                      disabled={isSubmitting}
+                      className="w-full p-6 text-left bg-black border border-white/10 rounded-2xl hover:border-blue-500 focus:border-blue-500 hover:bg-blue-500/5 transition-all group flex items-center justify-between"
+                    >
+                      <span className="text-lg text-gray-300 group-hover:text-white transition-colors">
+                        {option.text}
+                      </span>
+                      <ChevronRight className="h-5 w-5 text-gray-600 group-hover:text-blue-400 transition-colors" />
+                    </button>
                   ))}
                 </div>
               </div>
+            </motion.div>
+          )}
 
-              {/* Steps / Action Plan List */}
-              <div className="space-y-3 bg-slate-50/50 p-5 rounded-2xl border border-slate-100">
-                <h4 className="text-xs font-bold text-slate-700 uppercase tracking-widest">
-                  📅 Recommended Action Steps
-                </h4>
-                <ul className="space-y-2 pt-1 text-xs">
-                  {evaluation.actionPlan.map((step, idx) => (
-                    <li key={idx} className="flex gap-2 text-slate-600 font-sans leading-relaxed">
-                      <span className="font-bold text-emerald-700 bg-emerald-50 w-5 h-5 rounded-md flex items-center justify-center shrink-0">
-                        {idx + 1}
-                      </span>
-                      <span>{step}</span>
-                    </li>
+          {step === 'ANALYZING' && (
+            <motion.div
+              key="analyzing"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="flex flex-col items-center justify-center min-h-[60vh]"
+            >
+              <div className="relative mb-8">
+                <div className="absolute inset-0 bg-blue-500 blur-[40px] opacity-20 rounded-full"></div>
+                <Brain className="h-24 w-24 text-blue-400 animate-pulse relative z-10" />
+              </div>
+              <h2 className="text-3xl font-bold mb-4">AI is computing your career matrix...</h2>
+              <p className="text-gray-400 text-lg">Analyzing 18 cognitive and behavioral dimensions.</p>
+            </motion.div>
+          )}
+
+          {step === 'RESULT' && result && (
+            <motion.div
+              key="result"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="max-w-6xl mx-auto space-y-8"
+            >
+              <div className="text-center mb-12">
+                <div className="inline-flex items-center space-x-2 bg-green-500/20 text-green-400 px-4 py-2 rounded-full mb-6 border border-green-500/20">
+                  <Trophy className="h-5 w-5" />
+                  <span className="font-medium">Analysis Complete</span>
+                </div>
+                <h2 className="text-4xl font-bold mb-4">Your AI Career Blueprint</h2>
+                <p className="text-xl text-gray-400 max-w-3xl mx-auto">
+                  {result.aiAnalysisText}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Matches */}
+                <div className="lg:col-span-2 space-y-6">
+                  <h3 className="text-2xl font-bold flex items-center space-x-2">
+                    <Target className="text-blue-400" />
+                    <span>Top Career Matches</span>
+                  </h3>
+                  
+                  {result.topMatches.map((match, idx) => (
+                    <div key={match.careerId?._id || idx} className="bg-white/5 border border-white/10 rounded-3xl p-8 relative overflow-hidden">
+                      <div className="absolute top-0 right-0 bg-gradient-to-bl from-blue-500 to-purple-600 text-white font-bold py-2 px-6 rounded-bl-2xl">
+                        {match.matchScore}% Match
+                      </div>
+                      
+                      <h4 className="text-3xl font-bold mb-2">{match.careerName}</h4>
+                      <p className="text-gray-400 mb-6">{match.careerId?.description || 'A highly recommended career path for your profile.'}</p>
+                      
+                      <div className="bg-black/50 rounded-xl p-4 mb-6">
+                        <p className="text-sm font-medium text-gray-300">Why this matches you:</p>
+                        <p className="text-gray-400 mt-2">{match.matchRationale}</p>
+                      </div>
+
+                      <div className="flex flex-wrap gap-4">
+                        <button onClick={() => navigate('/colleges?stream=Engineering')} className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl flex items-center space-x-2 transition-colors">
+                          <GraduationCap className="h-5 w-5" />
+                          <span>Find Colleges</span>
+                        </button>
+                        <button onClick={() => navigate('/jobs')} className="px-6 py-3 bg-white/10 hover:bg-white/20 text-white font-medium rounded-xl flex items-center space-x-2 transition-colors border border-white/5">
+                          <Briefcase className="h-5 w-5" />
+                          <span>View Jobs in this Field</span>
+                        </button>
+                      </div>
+                    </div>
                   ))}
-                </ul>
-              </div>
-            </div>
+                </div>
 
-            {/* Inspirational Quote Callout */}
-            <div className="pt-6 border-t border-slate-100 text-center">
-              <p className="text-slate-500 italic text-sm font-sans max-w-xl mx-auto mb-6">
-                "{evaluation.motivationalMessage}"
-              </p>
-              
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-                <button
-                  onClick={() => {
-                    const ev = new CustomEvent('navigate-tab-with-search', { 
-                      detail: { 
-                        tab: 'streams',
-                        streamPreset: evaluation.recommendedStreamId 
-                      } 
-                    });
-                    window.dispatchEvent(ev);
-                  }}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer w-full sm:w-auto shadow-sm"
-                >
-                  Explore Recommended Streams
-                  <ArrowRight className="w-4 h-4" />
-                </button>
+                {/* Profile Dimensions */}
+                <div className="space-y-8">
+                  <div className="bg-white/5 border border-white/10 rounded-3xl p-8">
+                    <h3 className="text-xl font-bold mb-6 flex items-center space-x-2">
+                      <Brain className="text-purple-400" />
+                      <span>Your Cognitive Profile</span>
+                    </h3>
+                    
+                    <div className="space-y-4">
+                      {Object.entries(result.finalScores).map(([dim, score]) => {
+                        const pct = Math.min((score / 50) * 100, 100);
+                        return (
+                          <div key={dim}>
+                            <div className="flex justify-between text-sm mb-1">
+                              <span className="text-gray-300 capitalize">{dim}</span>
+                              <span className="text-blue-400">{Math.round(pct)}%</span>
+                            </div>
+                            <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                              <div 
+                                className="h-full bg-gradient-to-r from-blue-500 to-purple-500"
+                                style={{ width: `${pct}%` }}
+                              />
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
 
-                <button
-                  onClick={handleRestartQuiz}
-                  className="bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-800 border border-slate-200 px-4 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer w-full sm:w-auto"
-                >
-                  <RefreshCw className="w-4 h-4" />
-                </button>
+                  <div className="bg-gradient-to-br from-blue-600 to-purple-700 rounded-3xl p-8">
+                    <h3 className="text-xl font-bold mb-4">Recommended Next Step</h3>
+                    <p className="text-blue-100 mb-6">
+                      Based on your profile, you should start preparing for entrance exams in your recommended streams.
+                    </p>
+                    <button onClick={() => navigate('/exams')} className="w-full py-4 bg-white text-black font-bold rounded-xl flex items-center justify-center space-x-2 hover:bg-gray-100 transition-colors">
+                      <BookOpen className="h-5 w-5" />
+                      <span>Explore Entrance Exams</span>
+                    </button>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-        </div>
-      )}
+
+            </motion.div>
+          )}
+
+        </AnimatePresence>
+      </div>
     </div>
   );
 }
