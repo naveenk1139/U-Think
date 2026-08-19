@@ -196,9 +196,9 @@ export default function MentorshipProgram() {
                         <h3 className="font-bold text-slate-900 text-lg flex items-center gap-2">
                           {mentor.name}
                           {mentor.mentorType === 'REAL' ? (
-                            <ShieldCheck className="h-4 w-4 text-emerald-500" title="Verified Professional" />
+                            <ShieldCheck className="h-4 w-4 text-emerald-500" />
                           ) : (
-                            <Bot className="h-4 w-4 text-indigo-500" title="AI Persona" />
+                            <Bot className="h-4 w-4 text-indigo-500" />
                           )}
                         </h3>
                         <p className="text-sm text-slate-600 font-medium">{mentor.jobTitle} at {mentor.company}</p>

@@ -25,6 +25,7 @@ import savedJobRoutes from './routes/savedJobRoutes.js';
 import assessmentRoutes from './routes/assessmentRoutes.js';
 import mentorRoutes from './routes/mentorRoutes.js';
 import degreeRoutes from './routes/degreeRoutes.js';
+import statsRoutes from './routes/statsRoutes.js';
 
 // Middleware
 import { errorHandler } from './middleware/errorHandler.js';
@@ -76,6 +77,7 @@ app.use('/api/jobs', jobRoutes);
 app.use('/api/assessment', assessmentRoutes);
 app.use('/api/mentors', mentorRoutes);
 app.use('/api/degrees', degreeRoutes);
+app.use('/api/stats', statsRoutes);
 
 // ─── Global Error Handler ─────────────────────────────────────────
 app.use(errorHandler);

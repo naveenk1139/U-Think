@@ -46,7 +46,7 @@ export default function AICounselorModal({ isOpen, onClose }: AICounselorModalPr
 
   const fetchConversations = async () => {
     try {
-      const res = await fetch(`/api/ai/conversations?userId=${currentUser?._id}`);
+      const res = await fetch(`/api/ai/conversations?userId=${(currentUser as any)?._id || currentUser?.id}`);
       if (res.ok) {
         const data = await res.json();
         setConversations(data);
@@ -102,7 +102,7 @@ export default function AICounselorModal({ isOpen, onClose }: AICounselorModalPr
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          userId: currentUser?.id || currentUser?._id, // Handle both id and _id
+          userId: currentUser?.id || (currentUser as any)?._id,
           conversationId: activeConversationId,
           message: textToSend
         })

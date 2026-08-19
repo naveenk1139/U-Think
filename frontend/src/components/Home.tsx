@@ -1,30 +1,13 @@
-import React from 'react';
-import { 
-  ArrowRight, 
-  Map, 
-  Building2, 
-  CalendarDays, 
-  Settings, 
-  BriefcaseMedical, 
-  Briefcase,
-  PenTool,
-  Scale,
-  TrendingUp,
-  FlaskConical,
-  LayoutGrid,
-  Bot,
-  Award,
-  Target,
-  Search,
-  BookOpen,
-  HeartPulse,
-  Wrench,
-  Stethoscope,
-  Briefcase as JobIcon,
-  Bell,
-  CheckCircle,
-  Clock,
-  Bookmark
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import {
+  ArrowRight, Search, Bot, Award, Target, Building2, CalendarDays,
+  Briefcase, BookOpen, TrendingUp, FlaskConical, Scale, PenTool,
+  BriefcaseMedical, Wrench, Stethoscope, HeartPulse, Settings,
+  GraduationCap, Landmark, Leaf, Pill, Users, Cpu, Hotel, Globe,
+  Bell, CheckCircle, Clock, Bookmark, ChevronRight, Sparkles,
+  MapPin, Star, Zap, BarChart2, UserCheck, Code2, Database, Cloud,
+  Shield, Brain, Layers, LayoutGrid, RefreshCw
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -33,358 +16,619 @@ interface HomeProps {
   onOpenCounselor: () => void;
 }
 
+// All 21 categories with icons and colors
+const CATEGORIES = [
+  { name: 'Engineering', icon: Settings, color: 'text-blue-600 bg-blue-50 border-blue-100', nav: 'colleges', query: 'Engineering' },
+  { name: 'Medical', icon: BriefcaseMedical, color: 'text-emerald-600 bg-emerald-50 border-emerald-100', nav: 'colleges', query: 'Medical' },
+  { name: 'Management', icon: Briefcase, color: 'text-amber-600 bg-amber-50 border-amber-100', nav: 'colleges', query: 'Management' },
+  { name: 'Design', icon: PenTool, color: 'text-purple-600 bg-purple-50 border-purple-100', nav: 'colleges', query: 'Design' },
+  { name: 'Law', icon: Scale, color: 'text-teal-600 bg-teal-50 border-teal-100', nav: 'colleges', query: 'Law' },
+  { name: 'Commerce', icon: TrendingUp, color: 'text-orange-600 bg-orange-50 border-orange-100', nav: 'colleges', query: 'Commerce' },
+  { name: 'Science', icon: FlaskConical, color: 'text-indigo-600 bg-indigo-50 border-indigo-100', nav: 'colleges', query: 'Science' },
+  { name: 'Arts', icon: Layers, color: 'text-rose-600 bg-rose-50 border-rose-100', nav: 'streams', query: 'Arts' },
+  { name: 'Architecture', icon: Landmark, color: 'text-cyan-600 bg-cyan-50 border-cyan-100', nav: 'exams', query: 'Architecture' },
+  { name: 'Agriculture', icon: Leaf, color: 'text-lime-600 bg-lime-50 border-lime-100', nav: 'exams', query: 'Agriculture' },
+  { name: 'Pharmacy', icon: Pill, color: 'text-pink-600 bg-pink-50 border-pink-100', nav: 'exams', query: 'Pharmacy' },
+  { name: 'Nursing', icon: HeartPulse, color: 'text-red-600 bg-red-50 border-red-100', nav: 'exams', query: 'Nursing' },
+  { name: 'Paramedical', icon: Stethoscope, color: 'text-sky-600 bg-sky-50 border-sky-100', nav: 'exams', query: 'Paramedical' },
+  { name: 'Diploma', icon: BookOpen, color: 'text-violet-600 bg-violet-50 border-violet-100', nav: 'degrees', query: 'Diploma' },
+  { name: 'Polytechnic', icon: Wrench, color: 'text-slate-600 bg-slate-50 border-slate-100', nav: 'degrees', query: 'Polytechnic' },
+  { name: 'ITI', icon: Target, color: 'text-fuchsia-600 bg-fuchsia-50 border-fuchsia-100', nav: 'degrees', query: 'ITI' },
+  { name: 'Vocational', icon: Zap, color: 'text-yellow-600 bg-yellow-50 border-yellow-100', nav: 'streams', query: 'Vocational' },
+  { name: 'Computer Apps', icon: Cpu, color: 'text-blue-700 bg-blue-50 border-blue-100', nav: 'degrees', query: 'Computer Applications' },
+  { name: 'Education', icon: GraduationCap, color: 'text-teal-700 bg-teal-50 border-teal-100', nav: 'streams', query: 'Education' },
+  { name: 'Hospitality', icon: Hotel, color: 'text-amber-700 bg-amber-50 border-amber-100', nav: 'streams', query: 'Hospitality' },
+  { name: 'Social Sciences', icon: Users, color: 'text-green-600 bg-green-50 border-green-100', nav: 'streams', query: 'Social Sciences' },
+];
+
+const EDUCATION_LEVELS = [
+  { label: 'After 10th', icon: '📚', desc: 'PUC, Diploma, ITI, Polytechnic & Vocational', filter: 'POST_10TH', color: 'from-blue-500 to-indigo-600' },
+  { label: 'After 12th / PUC', icon: '🎓', desc: 'Engineering, Medical, Law, Design & more', filter: '12TH_SCIENCE', color: 'from-emerald-500 to-teal-600' },
+  { label: 'After Diploma', icon: '🔧', desc: 'Lateral Entry B.E/B.Tech, Jobs & Higher Ed', filter: 'DIPLOMA', color: 'from-purple-500 to-violet-600' },
+  { label: 'After ITI', icon: '⚙️', desc: 'Apprenticeship, Govt Jobs & further study', filter: 'ITI', color: 'from-orange-500 to-amber-600' },
+  { label: 'After Degree', icon: '💼', desc: 'MBA, M.Tech, MS, Govt Exams, Jobs', filter: 'UG', color: 'from-rose-500 to-red-600' },
+  { label: 'Postgraduate', icon: '🔬', desc: 'Research, PhD, Advanced specializations', filter: 'PG', color: 'from-cyan-500 to-blue-600' },
+];
+
+const STREAMS = [
+  { label: 'Science', sub: 'PCM / PCB / PCMB', color: 'bg-blue-50 border-blue-200 text-blue-800', route: 'streams' },
+  { label: 'Commerce', sub: 'Business / Finance / Accounting', color: 'bg-amber-50 border-amber-200 text-amber-800', route: 'streams' },
+  { label: 'Arts / Humanities', sub: 'History / Polity / Sociology', color: 'bg-rose-50 border-rose-200 text-rose-800', route: 'streams' },
+  { label: 'Technical / Diploma', sub: 'CSE / ECE / Mechanical / Civil', color: 'bg-purple-50 border-purple-200 text-purple-800', route: 'degrees' },
+  { label: 'Vocational', sub: 'Skill-based practical courses', color: 'bg-lime-50 border-lime-200 text-lime-800', route: 'streams' },
+  { label: 'Medical', sub: 'MBBS / BDS / Nursing / Allied Health', color: 'bg-emerald-50 border-emerald-200 text-emerald-800', route: 'exams' },
+];
+
+const TOP_SKILLS = ['Python', 'JavaScript', 'SQL', 'Cloud Computing', 'AI / ML', 'Data Analytics', 'Java', 'React', 'Communication', 'Leadership'];
+
+const AFTER_10TH_PATHWAYS = [
+  { title: '10th → PUC → Degree', steps: ['10th', 'PUC Science/Commerce/Arts', 'Entrance Exam', 'Undergraduate Degree'], color: 'text-blue-600' },
+  { title: '10th → Diploma → B.E', steps: ['10th', 'Diploma (3 years)', 'Lateral Entry (2nd year B.E)', 'B.E / B.Tech'], color: 'text-purple-600' },
+  { title: '10th → ITI → Govt Jobs', steps: ['10th', 'ITI Trade (1-2 years)', 'Apprenticeship', 'Government / Private Jobs'], color: 'text-emerald-600' },
+];
+
+type CategoryCounts = Record<string, { colleges: number; exams: number; jobs: number; mentors: number }>;
+type Summary = { totalColleges: number; totalExams: number; totalJobs: number; totalMentors: number };
+
 export default function Home({ onNavigate, onOpenCounselor }: HomeProps) {
+  const navigate = useNavigate();
   const { currentUser } = useAuth();
-  
-  const userName = currentUser?.displayName || currentUser?.name || 'Kiran';
 
-  const categories = [
-    { name: 'Engineering', count: '45+ Options', icon: Settings, color: 'text-blue-600 bg-blue-50' },
-    { name: 'Medical', count: '25+ Options', icon: BriefcaseMedical, color: 'text-emerald-600 bg-emerald-50' },
-    { name: 'Management', count: '20+ Options', icon: JobIcon, color: 'text-amber-600 bg-amber-50' },
-    { name: 'Design', count: '15+ Options', icon: PenTool, color: 'text-purple-600 bg-purple-50' },
-    { name: 'Law', count: '10+ Options', icon: Scale, color: 'text-teal-600 bg-teal-50' },
-    { name: 'Commerce', count: '18+ Options', icon: TrendingUp, color: 'text-orange-600 bg-orange-50' },
-    { name: 'Science', count: '22+ Options', icon: FlaskConical, color: 'text-indigo-600 bg-indigo-50' },
-    { name: 'Diploma', count: '30+ Courses', icon: BookOpen, color: 'text-rose-600 bg-rose-50' },
-    { name: 'Polytechnic', count: '12+ Options', icon: Wrench, color: 'text-cyan-600 bg-cyan-50' },
-    { name: 'ITI', count: '40+ Trades', icon: Target, color: 'text-fuchsia-600 bg-fuchsia-50' },
-    { name: 'Paramedical', count: '15+ Courses', icon: Stethoscope, color: 'text-sky-600 bg-sky-50' },
-    { name: 'Vocational', count: 'Explore all', icon: HeartPulse, color: 'text-lime-600 bg-lime-50' },
-  ];
+  const [categoryCounts, setCategoryCounts] = useState<CategoryCounts>({});
+  const [summary, setSummary] = useState<Summary>({ totalColleges: 0, totalExams: 0, totalJobs: 0, totalMentors: 0 });
+  const [upcomingExams, setUpcomingExams] = useState<any[]>([]);
+  const [featuredJobs, setFeaturedJobs] = useState<any[]>([]);
+  const [statsLoading, setStatsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<{ type: string; label: string; route: string }[]>([]);
+  const [searchOpen, setSearchOpen] = useState(false);
 
-  const recommendations = [
-    { name: 'Computer Science Engineer', desc: 'High Demand • Great Future', match: '82%', color: 'text-emerald-600', iconColor: 'text-indigo-600 bg-indigo-50' },
-    { name: 'Data Scientist', desc: 'High Growth • Future Ready', match: '78%', color: 'text-emerald-600', iconColor: 'text-blue-600 bg-blue-50' },
-    { name: 'UI/UX Designer', desc: 'Creative • In Demand', match: '72%', color: 'text-emerald-600', iconColor: 'text-purple-600 bg-purple-50' },
-  ];
+  const userName = currentUser?.displayName || currentUser?.name || 'Student';
+  const profileCompletion = currentUser?.profileCompletion ?? null;
+  const careerGoal = currentUser?.careerGoal || currentUser?.careerAspiration || null;
+  const educationLevel = currentUser?.educationLevel || null;
+  const stream = currentUser?.stream || null;
 
-  const opportunities = [
-    { title: 'National Scholarship Test 2026', type: 'Scholarship', date: 'Closes in 5 days', color: 'text-amber-600 bg-amber-50' },
-    { title: 'Tech Internship at Google', type: 'Internship', date: 'Apply by Aug 30', color: 'text-blue-600 bg-blue-50' },
-    { title: 'IIT Madras BS Degree Admission', type: 'Admissions', date: 'Opens Sep 1', color: 'text-purple-600 bg-purple-50' },
-  ];
+  // Fetch stats, exams, jobs in parallel
+  useEffect(() => {
+    const fetchAll = async () => {
+      setStatsLoading(true);
+      try {
+        const [statsRes, summaryRes, examsRes, jobsRes] = await Promise.all([
+          fetch('http://localhost:5000/api/stats/categories').catch(() => null),
+          fetch('http://localhost:5000/api/stats/summary').catch(() => null),
+          fetch('http://localhost:5000/api/exams?status=Active&limit=4').catch(() => null),
+          fetch('http://localhost:5000/api/jobs?limit=3').catch(() => null),
+        ]);
 
-  const savedItems = [
-    { title: 'IIT Bombay', type: 'College', icon: Building2 },
-    { title: 'Software Engineering', type: 'Career', icon: Target },
-    { title: 'JEE Advanced', type: 'Exam', icon: CalendarDays },
-  ];
+        if (statsRes?.ok) setCategoryCounts(await statsRes.json());
+        if (summaryRes?.ok) setSummary(await summaryRes.json());
+        if (examsRes?.ok) setUpcomingExams(await examsRes.json());
+        if (jobsRes?.ok) {
+          const jobData = await jobsRes.json();
+          setFeaturedJobs(Array.isArray(jobData) ? jobData : jobData.jobs || []);
+        }
+      } catch (err) {
+        console.error('Home fetch error:', err);
+      }
+      setStatsLoading(false);
+    };
+    fetchAll();
+  }, []);
 
-  const reminders = [
-    { title: 'Complete Profile Details', time: 'Today', urgent: true },
-    { title: 'Register for Aptitude Test', time: 'Tomorrow', urgent: false },
-    { title: 'Upload 10th Marksheet', time: 'In 3 days', urgent: false },
+  // Live search
+  useEffect(() => {
+    if (!searchQuery.trim()) { setSearchResults([]); setSearchOpen(false); return; }
+    const q = searchQuery.toLowerCase();
+    const results: { type: string; label: string; route: string }[] = [];
+
+    CATEGORIES.forEach(c => {
+      if (c.name.toLowerCase().includes(q)) results.push({ type: 'Category', label: c.name, route: `/${c.nav}?category=${c.query}` });
+    });
+    STREAMS.forEach(s => {
+      if (s.label.toLowerCase().includes(q)) results.push({ type: 'Stream', label: s.label, route: `/${s.route}` });
+    });
+    // Common career matches
+    ['Software Engineer','Data Scientist','Doctor','Lawyer','Designer','Accountant','Teacher','Civil Engineer','Mechanical Engineer','Nurse','Pharmacist']
+      .filter(c => c.toLowerCase().includes(q))
+      .forEach(c => results.push({ type: 'Career', label: c, route: '/jobs' }));
+
+    setSearchResults(results.slice(0, 8));
+    setSearchOpen(results.length > 0);
+  }, [searchQuery]);
+
+  const goTo = useCallback((path: string) => { navigate(path); }, [navigate]);
+
+  const getCatCount = (name: string) => {
+    const d = categoryCounts[name];
+    if (!d) return null;
+    return d;
+  };
+
+  const profileCompletionItems = [
+    { label: 'Education Level', done: !!currentUser?.educationLevel },
+    { label: 'Stream', done: !!currentUser?.stream },
+    { label: 'Interests', done: !!(currentUser?.interests && currentUser.interests.length > 0) },
+    { label: 'Skills', done: !!(currentUser?.skills && currentUser.skills.length > 0) },
+    { label: 'Career Goal', done: !!currentUser?.careerGoal },
+    { label: 'Location', done: !!currentUser?.city || !!currentUser?.state },
   ];
+  const completedCount = profileCompletionItems.filter(i => i.done).length;
+  const realProfilePct = Math.round((completedCount / profileCompletionItems.length) * 100);
 
   return (
-    <div className="space-y-6 font-sans pb-10">
-      
-      {/* 1. Hero Banner with Inline Search */}
-      <div className="bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 rounded-3xl p-8 sm:p-10 text-white relative overflow-hidden flex flex-col justify-center min-h-[320px] shadow-lg">
-        <div className="absolute right-0 top-0 bottom-0 w-1/2 hidden md:block opacity-40 mix-blend-overlay" 
-             style={{ 
-               backgroundImage: 'url("https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&q=80")', 
-               backgroundSize: 'cover', 
-               backgroundPosition: 'center',
-               maskImage: 'linear-gradient(to right, transparent, black)'
-             }}>
+    <div className="space-y-8 font-sans pb-16">
+
+      {/* ─── 1. HERO ─────────────────────────────────────────────── */}
+      <div className="bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 rounded-3xl p-8 sm:p-10 text-white relative overflow-hidden flex flex-col justify-center min-h-[300px] shadow-xl">
+        <div className="absolute right-0 top-0 bottom-0 w-1/2 hidden md:block opacity-30"
+          style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&q=80")', backgroundSize: 'cover', backgroundPosition: 'center', maskImage: 'linear-gradient(to right, transparent, black)' }} />
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-blue-500/20 blur-3xl" />
+          <div className="absolute -bottom-16 right-32 w-48 h-48 rounded-full bg-indigo-500/20 blur-3xl" />
         </div>
-        
-        <div className="relative z-10 max-w-xl space-y-4">
-          <div className="flex items-center gap-2 text-blue-200 font-medium">
-            <span>Welcome back, {userName}!</span>
+
+        <div className="relative z-10 max-w-2xl space-y-4">
+          <div className="flex items-center gap-2 text-blue-200 font-medium text-sm">
+            <span>Welcome back, <span className="font-bold text-white">{userName}</span>!</span>
             <span className="text-xl">👋</span>
           </div>
-          
+
           <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight">
-            Your Future Begins Here
+            Your Future <span className="text-blue-300">Begins Here</span>
           </h1>
-          
-          <p className="text-sm sm:text-base text-blue-100/90 leading-relaxed max-w-md pt-2 pb-2">
-            Explore the best career paths, top colleges, exams and opportunities tailored just for you.
+
+          <p className="text-sm sm:text-base text-blue-100/90 leading-relaxed max-w-md">
+            Explore courses, colleges, exams, careers and jobs based on your education level and interests.
           </p>
 
-          {/* Inline Search */}
-          <div className="relative max-w-md w-full my-2">
+          {/* Search */}
+          <div className="relative max-w-lg w-full">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
               <Search className="h-5 w-5 text-slate-400" />
             </div>
             <input
               type="text"
-              className="block w-full pl-11 pr-4 py-3.5 bg-white rounded-xl text-sm placeholder-slate-400 focus:outline-none shadow-lg text-slate-900 font-medium"
-              placeholder="Search careers, colleges, courses, or exams..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              onFocus={() => searchResults.length > 0 && setSearchOpen(true)}
+              onBlur={() => setTimeout(() => setSearchOpen(false), 200)}
+              className="block w-full pl-11 pr-4 py-3.5 bg-white rounded-2xl text-sm placeholder-slate-400 focus:outline-none shadow-xl text-slate-900 font-medium focus:ring-2 focus:ring-blue-400"
+              placeholder="Search careers, colleges, courses, exams, jobs..."
             />
+            {searchOpen && (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-slate-100 z-50 max-h-64 overflow-y-auto">
+                {searchResults.map((r, i) => (
+                  <button
+                    key={i}
+                    onMouseDown={() => { navigate(r.route); setSearchQuery(''); setSearchOpen(false); }}
+                    className="w-full text-left px-4 py-3 flex items-center gap-3 hover:bg-slate-50 border-b border-slate-50 last:border-0 transition-colors"
+                  >
+                    <span className="text-xs font-bold px-2 py-0.5 bg-blue-50 text-blue-600 rounded-full shrink-0">{r.type}</span>
+                    <span className="text-sm font-semibold text-slate-800">{r.label}</span>
+                    <ChevronRight className="w-4 h-4 text-slate-400 ml-auto shrink-0" />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
-          
-          <div className="flex flex-wrap items-center gap-4 pt-2">
-            <button 
-              onClick={() => onNavigate('streams')}
-              className="bg-blue-600 hover:bg-blue-500 text-white font-bold px-6 py-3 rounded-xl flex items-center gap-2 transition-all cursor-pointer shadow-md shadow-blue-900/20"
-            >
+
+          <div className="flex flex-wrap items-center gap-3 pt-1">
+            <button onClick={() => navigate('/streams')} className="bg-blue-600 hover:bg-blue-500 text-white font-bold px-5 py-2.5 rounded-xl flex items-center gap-2 transition-all shadow-md shadow-blue-900/30 text-sm">
               Explore Pathways <ArrowRight className="w-4 h-4" />
             </button>
-            <button 
-              onClick={() => onNavigate('quiz')}
-              className="bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold px-6 py-3 rounded-xl flex items-center gap-2 transition-all cursor-pointer backdrop-blur-sm"
-            >
+            <button onClick={() => navigate('/quiz')} className="bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold px-5 py-2.5 rounded-xl flex items-center gap-2 transition-all text-sm backdrop-blur-sm">
               <Award className="w-4 h-4" /> Take Aptitude Test
+            </button>
+            <button onClick={() => navigate('/colleges')} className="bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition-all backdrop-blur-sm">
+              Find Colleges
+            </button>
+            <button onClick={() => navigate('/jobs')} className="bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition-all backdrop-blur-sm">
+              Find Jobs
             </button>
           </div>
         </div>
       </div>
 
-      {/* 2. Quick Actions */}
-      <div className="flex overflow-x-auto pb-2 gap-3 hide-scrollbar">
+      {/* ─── 2. QUICK ACTIONS ────────────────────────────────────── */}
+      <div className="flex overflow-x-auto pb-1 gap-3 hide-scrollbar">
         {[
-          { label: 'Find a Career', icon: Target, route: 'jobs' },
-          { label: 'Find a College', icon: Building2, route: 'colleges' },
-          { label: 'Explore Courses', icon: BookOpen, route: 'streams' },
-          { label: 'Find Exams', icon: CalendarDays, route: 'exams' },
-          { label: 'Take Aptitude Test', icon: Award, route: 'quiz' },
-          { label: 'Find Jobs', icon: Briefcase, route: 'jobs' },
-        ].map((action, idx) => (
-          <button 
-            key={idx}
-            onClick={() => onNavigate(action.route)}
-            className="flex items-center gap-2 shrink-0 bg-white border border-slate-200 hover:border-blue-300 hover:bg-blue-50 px-5 py-2.5 rounded-full text-sm font-bold text-slate-700 hover:text-blue-700 transition-colors cursor-pointer shadow-sm"
-          >
-            <action.icon className="w-4 h-4" /> {action.label}
+          { label: 'Find a Career', icon: Target, route: '/jobs' },
+          { label: 'Find a College', icon: Building2, route: '/colleges' },
+          { label: 'Explore Courses', icon: BookOpen, route: '/streams' },
+          { label: 'Find Exams', icon: CalendarDays, route: '/exams' },
+          { label: 'Take Aptitude Test', icon: Award, route: '/quiz' },
+          { label: 'Find Jobs', icon: Briefcase, route: '/jobs' },
+          { label: 'Industry Mentors', icon: UserCheck, route: '/mentorship' },
+        ].map((a, i) => (
+          <button key={i} onClick={() => navigate(a.route)}
+            className="flex items-center gap-2 shrink-0 bg-white border border-slate-200 hover:border-blue-300 hover:bg-blue-50 px-5 py-2.5 rounded-full text-sm font-bold text-slate-700 hover:text-blue-700 transition-colors shadow-sm">
+            <a.icon className="w-4 h-4" /> {a.label}
           </button>
         ))}
       </div>
 
-      {/* 3. Career Progress & Metrics Row */}
+      {/* ─── 3. PERSONALIZED STATUS ROW ─────────────────────────── */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        
-        {/* Career Progress Module (Takes 2 cols) */}
+
+        {/* Career Progress — dynamic based on profile */}
         <div className="lg:col-span-2 bg-gradient-to-br from-indigo-600 to-blue-700 rounded-2xl p-5 text-white shadow-sm flex flex-col justify-between relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-10 -mt-10 blur-2xl"></div>
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-10 -mt-10 blur-2xl" />
           <div>
             <div className="flex items-center gap-2 font-bold text-sm mb-1 text-blue-100">
               <TrendingUp className="w-4 h-4" /> Career Progress
             </div>
-            <h3 className="text-2xl font-black mb-1">Software Engineer</h3>
-            <p className="text-xs text-blue-200">Current Level: Class 12th</p>
+            {careerGoal ? (
+              <h3 className="text-2xl font-black mb-1">{careerGoal}</h3>
+            ) : (
+              <h3 className="text-xl font-black mb-1 text-blue-200">Set your career goal →</h3>
+            )}
+            <p className="text-xs text-blue-200">
+              {educationLevel ? `Level: ${educationLevel}` : 'Complete your profile'}
+              {stream ? ` • Stream: ${stream}` : ''}
+            </p>
           </div>
-          
-          <div className="mt-6">
-            <div className="flex justify-between text-xs font-bold mb-2">
-              <span>Career Readiness</span>
-              <span>45%</span>
-            </div>
-            <div className="w-full bg-black/20 h-2.5 rounded-full overflow-hidden">
-              <div className="bg-emerald-400 h-full rounded-full" style={{ width: '45%' }}></div>
-            </div>
-            <div className="flex justify-between text-[10px] text-blue-200 mt-2 font-medium">
-              <span>Aptitude Score: 850</span>
-              <span>Skills Match: Good</span>
-            </div>
+
+          <div className="mt-5">
+            {currentUser ? (
+              <>
+                <div className="flex justify-between text-xs font-bold mb-2">
+                  <span>Profile Completion</span>
+                  <span>{realProfilePct}%</span>
+                </div>
+                <div className="w-full bg-black/20 h-2.5 rounded-full overflow-hidden">
+                  <div className="bg-emerald-400 h-full rounded-full transition-all" style={{ width: `${realProfilePct}%` }} />
+                </div>
+                <div className="mt-3">
+                  <button onClick={() => navigate('/settings')}
+                    className="w-full text-center text-xs font-bold text-white/80 hover:text-white py-1.5 bg-white/10 hover:bg-white/20 rounded-lg transition-colors">
+                    {realProfilePct < 100 ? 'Complete Profile →' : '✓ Profile Complete'}
+                  </button>
+                </div>
+              </>
+            ) : (
+              <button onClick={() => navigate('/login')}
+                className="w-full text-center text-xs font-bold text-white bg-white/20 hover:bg-white/30 rounded-lg py-2 transition-colors">
+                Sign In to personalise →
+              </button>
+            )}
           </div>
         </div>
 
-        {/* Career Match */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex flex-col justify-between">
-          <div className="flex items-center gap-2 text-slate-700 font-bold text-sm mb-4">
-            <div className="p-1.5 bg-blue-50 rounded-lg"><Target className="w-4 h-4 text-blue-600" /></div>
-            Career Match
-          </div>
-          <div className="flex items-end justify-between">
+        {/* Platform Summary Stats */}
+        {[
+          { label: 'Colleges', value: summary.totalColleges, icon: Building2, color: 'text-purple-600 bg-purple-50', route: '/colleges', sub: 'across Karnataka' },
+          { label: 'Exams', value: summary.totalExams, icon: CalendarDays, color: 'text-emerald-600 bg-emerald-50', route: '/exams', sub: 'entrance exams' },
+          { label: 'Jobs', value: summary.totalJobs, icon: Briefcase, color: 'text-blue-600 bg-blue-50', route: '/jobs', sub: 'live openings' },
+        ].map((s, i) => (
+          <div key={i} className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow cursor-pointer group"
+            onClick={() => navigate(s.route)}>
+            <div className="flex items-center gap-2 text-slate-700 font-bold text-sm mb-3">
+              <div className={`p-1.5 rounded-lg ${s.color}`}><s.icon className="w-4 h-4" /></div>
+              {s.label}
+            </div>
             <div>
-              <div className="text-3xl font-black text-slate-900">82%</div>
-              <div className="text-emerald-500 font-bold text-xs mt-1">Great Match! 🎉</div>
+              <div className="text-3xl font-black text-slate-900">
+                {statsLoading ? <RefreshCw className="w-6 h-6 animate-spin text-slate-300" /> : s.value || '—'}
+              </div>
+              <div className="text-slate-400 text-xs mt-1 font-medium">{s.sub}</div>
+            </div>
+            <div className="mt-3 flex items-center gap-1 text-xs font-bold text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity">
+              Explore <ArrowRight className="w-3 h-3" />
             </div>
           </div>
-        </div>
-
-        {/* Colleges Shortlisted */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex flex-col justify-between">
-          <div className="flex items-center gap-2 text-slate-700 font-bold text-sm mb-4">
-            <div className="p-1.5 bg-purple-50 rounded-lg"><Building2 className="w-4 h-4 text-purple-600" /></div>
-            Colleges
-          </div>
-          <div className="flex items-end justify-between">
-            <div>
-              <div className="text-3xl font-black text-slate-900">12</div>
-              <div className="text-slate-500 text-xs mt-1">Saved</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Upcoming Exams */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex flex-col justify-between">
-          <div className="flex items-center gap-2 text-slate-700 font-bold text-sm mb-4">
-            <div className="p-1.5 bg-emerald-50 rounded-lg"><CalendarDays className="w-4 h-4 text-emerald-600" /></div>
-            Exams
-          </div>
-          <div className="flex items-end justify-between">
-            <div>
-              <div className="text-3xl font-black text-slate-900">3</div>
-              <div className="text-slate-500 text-xs mt-1">Upcoming</div>
-            </div>
-          </div>
-        </div>
+        ))}
       </div>
 
-      {/* 4. Explore by Categories */}
+      {/* ─── 4. EDUCATION LEVEL PATHWAYS ────────────────────────── */}
       <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-bold text-slate-900">Explore by Categories</h2>
-          <button onClick={() => onNavigate('streams')} className="text-blue-600 text-xs font-bold flex items-center gap-1 hover:underline">
+          <h2 className="text-xl font-bold text-slate-900">Explore Based on Your Education</h2>
+          <button onClick={() => navigate('/streams')} className="text-blue-600 text-xs font-bold flex items-center gap-1 hover:underline">
             View All <ArrowRight className="w-3 h-3" />
           </button>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          {categories.map((cat, idx) => (
-            <button key={idx} onClick={() => onNavigate('streams')} className="border border-slate-100 hover:border-slate-200 hover:shadow-sm bg-slate-50/50 hover:bg-slate-50 p-4 rounded-2xl flex flex-col items-center justify-center gap-3 transition-all text-center group cursor-pointer">
-              <div className={`p-3 rounded-2xl ${cat.color} group-hover:scale-110 transition-transform`}>
-                <cat.icon className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="font-bold text-slate-800 text-[13px]">{cat.name}</h3>
-                <p className="text-[10px] text-slate-500 mt-1">{cat.count}</p>
-              </div>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+          {EDUCATION_LEVELS.map((lvl, i) => (
+            <button key={i}
+              onClick={() => navigate(`/exams?educationLevel=${lvl.filter}`)}
+              className={`bg-gradient-to-br ${lvl.color} p-4 rounded-2xl flex flex-col items-start text-white group hover:scale-105 transition-transform text-left shadow-sm`}>
+              <span className="text-2xl mb-2">{lvl.icon}</span>
+              <div className="font-bold text-sm leading-tight">{lvl.label}</div>
+              <div className="text-[10px] text-white/80 mt-1 leading-tight line-clamp-2">{lvl.desc}</div>
             </button>
           ))}
         </div>
       </div>
 
-      {/* 5. Two Column Split Layout */}
+      {/* ─── 5. EXPLORE BY CATEGORIES ───────────────────────────── */}
+      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-bold text-slate-900">Explore by Categories</h2>
+          <button onClick={() => navigate('/streams')} className="text-blue-600 text-xs font-bold flex items-center gap-1 hover:underline">
+            View All <ArrowRight className="w-3 h-3" />
+          </button>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
+          {CATEGORIES.map((cat, i) => {
+            const counts = getCatCount(cat.name);
+            return (
+              <button key={i}
+                onClick={() => navigate(`/${cat.nav}?category=${encodeURIComponent(cat.query)}`)}
+                className={`border ${cat.color} hover:shadow-md bg-white p-3 rounded-2xl flex flex-col items-center justify-center gap-2 transition-all text-center group cursor-pointer`}>
+                <div className={`p-2.5 rounded-xl ${cat.color} group-hover:scale-110 transition-transform`}>
+                  <cat.icon className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-800 text-[12px] leading-tight">{cat.name}</h3>
+                  {statsLoading ? (
+                    <p className="text-[9px] text-slate-400 mt-0.5">Loading...</p>
+                  ) : counts ? (
+                    <p className="text-[9px] text-slate-500 mt-0.5">{counts.colleges > 0 ? `${counts.colleges} Colleges` : counts.exams > 0 ? `${counts.exams} Exams` : 'Explore →'}</p>
+                  ) : (
+                    <p className="text-[9px] text-slate-400 mt-0.5">Explore →</p>
+                  )}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ─── 6. MAIN CONTENT SPLIT ──────────────────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* LEFT COLUMN */}
+
+        {/* LEFT: Upcoming Exams + Jobs + After-10th + Stream Explorer */}
         <div className="lg:col-span-2 space-y-6">
-          
-          {/* Recommended Careers */}
-          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-bold text-slate-900">Recommended Careers</h2>
-              <button onClick={() => onNavigate('jobs')} className="text-blue-600 text-xs font-bold flex items-center gap-1 hover:underline">
+
+          {/* Upcoming Exams */}
+          <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <CalendarDays className="w-5 h-5 text-emerald-600" /> Upcoming Exams
+              </h2>
+              <button onClick={() => navigate('/exams')} className="text-blue-600 text-xs font-bold flex items-center gap-1 hover:underline">
                 View All <ArrowRight className="w-3 h-3" />
               </button>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {recommendations.map((rec, idx) => (
-                <div key={idx} className="flex items-center justify-between border border-slate-100 p-4 rounded-2xl bg-slate-50/50">
-                  <div className="flex items-center gap-3">
-                    <div className={`p-2.5 rounded-xl ${rec.iconColor} shrink-0`}>
-                      <Target className="w-5 h-5" />
+            {statsLoading ? (
+              <div className="flex justify-center py-8"><RefreshCw className="w-6 h-6 animate-spin text-slate-300" /></div>
+            ) : upcomingExams.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {upcomingExams.map((exam, i) => (
+                  <div key={i} className="p-4 rounded-2xl border border-slate-100 bg-slate-50/50 hover:border-blue-200 hover:bg-blue-50/30 transition-colors cursor-pointer group"
+                    onClick={() => navigate('/exams')}>
+                    <div className="flex justify-between items-start mb-2">
+                      <span className="font-bold text-slate-900 text-sm leading-tight">{exam.name}</span>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${exam.status === 'Active' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
+                        {exam.status === 'Active' ? 'ACTIVE' : exam.status?.toUpperCase() || 'TBA'}
+                      </span>
                     </div>
-                    <div>
-                      <h3 className="font-bold text-slate-800 text-sm">{rec.name}</h3>
-                      <p className="text-[10px] font-semibold text-slate-500 mt-0.5">{rec.desc}</p>
+                    <div className="flex gap-2 text-[10px] font-semibold mb-2">
+                      <span className="bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded">{exam.category}</span>
+                      <span className="bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded">{exam.level}</span>
+                    </div>
+                    {exam.importantDates?.examDate && (
+                      <p className="text-[10px] text-slate-500">Exam: {exam.importantDates.examDate}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-slate-500 text-sm mb-3">No verified exam data available currently.</p>
+                <button onClick={() => navigate('/exams')} className="text-blue-600 text-sm font-bold hover:underline">Browse All Exams →</button>
+              </div>
+            )}
+          </div>
+
+          {/* Featured Jobs */}
+          <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <Briefcase className="w-5 h-5 text-blue-600" /> Explore Jobs
+              </h2>
+              <button onClick={() => navigate('/jobs')} className="text-blue-600 text-xs font-bold flex items-center gap-1 hover:underline">
+                View All <ArrowRight className="w-3 h-3" />
+              </button>
+            </div>
+            {statsLoading ? (
+              <div className="flex justify-center py-8"><RefreshCw className="w-6 h-6 animate-spin text-slate-300" /></div>
+            ) : featuredJobs.length > 0 ? (
+              <div className="space-y-3">
+                {featuredJobs.slice(0, 3).map((job, i) => (
+                  <div key={i} className="p-4 rounded-2xl border border-slate-100 bg-slate-50/50 hover:border-blue-200 hover:bg-blue-50/30 transition-colors cursor-pointer flex items-center justify-between gap-4 group"
+                    onClick={() => navigate('/jobs')}>
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center shrink-0 font-bold text-blue-700 text-sm">
+                        {(job.company || job.title || 'J').charAt(0)}
+                      </div>
+                      <div>
+                        <div className="font-bold text-sm text-slate-900">{job.title}</div>
+                        <div className="text-xs text-slate-500">{job.company} • {job.location || 'Remote'}</div>
+                      </div>
+                    </div>
+                    <div className="text-xs text-blue-600 font-bold opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                      Apply <ArrowRight className="w-3 h-3 inline" />
                     </div>
                   </div>
-                  <div className={`font-black text-xs ${rec.color} bg-emerald-50 px-2 py-1 rounded-md`}>
-                    {rec.match}
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-slate-500 text-sm mb-3">No verified job data available currently.</p>
+                <button onClick={() => navigate('/jobs')} className="text-blue-600 text-sm font-bold hover:underline">Browse Job Explorer →</button>
+              </div>
+            )}
+          </div>
+
+          {/* After 10th Pathways */}
+          <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-lg font-bold text-slate-900">What Can I Do After 10th?</h2>
+              <button onClick={() => navigate('/streams')} className="text-blue-600 text-xs font-bold flex items-center gap-1 hover:underline">
+                Explore All <ArrowRight className="w-3 h-3" />
+              </button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {AFTER_10TH_PATHWAYS.map((p, i) => (
+                <div key={i} className="p-4 border border-slate-100 rounded-2xl bg-slate-50/50 hover:shadow-md transition-shadow cursor-pointer"
+                  onClick={() => navigate('/streams')}>
+                  <h3 className={`font-bold text-sm mb-3 ${p.color}`}>{p.title}</h3>
+                  <div className="space-y-1.5">
+                    {p.steps.map((step, j) => (
+                      <div key={j} className="flex items-center gap-2">
+                        {j < p.steps.length - 1 ? (
+                          <div className="flex flex-col items-center">
+                            <div className="w-2 h-2 rounded-full bg-slate-300" />
+                            <div className="w-px h-4 bg-slate-200" />
+                          </div>
+                        ) : (
+                          <Star className="w-2 h-2 text-amber-400 fill-amber-400 shrink-0" />
+                        )}
+                        <span className={`text-xs ${j === p.steps.length - 1 ? 'font-bold text-slate-800' : 'text-slate-500'}`}>{step}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Latest Opportunities & Recent Items Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            
-            {/* Latest Opportunities */}
-            <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
-              <h2 className="text-base font-bold text-slate-900 mb-5">Latest Opportunities</h2>
-              <div className="space-y-4">
-                {opportunities.map((opp, idx) => (
-                  <div key={idx} className="flex items-start gap-3">
-                    <div className={`p-2 rounded-lg ${opp.color} shrink-0 mt-0.5`}>
-                      <Award className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-slate-800 text-sm leading-tight">{opp.title}</h4>
-                      <div className="flex gap-2 text-[11px] font-medium mt-1.5">
-                        <span className="text-slate-500">{opp.type}</span>
-                        <span className="text-slate-300">•</span>
-                        <span className="text-blue-600">{opp.date}</span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+          {/* Stream Explorer */}
+          <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-lg font-bold text-slate-900">Explore by Stream</h2>
             </div>
-
-            {/* Saved Items */}
-            <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
-              <div className="flex justify-between items-center mb-5">
-                <h2 className="text-base font-bold text-slate-900">Recent & Saved</h2>
-                <button onClick={() => onNavigate('settings')} className="text-blue-600 hover:bg-blue-50 p-1.5 rounded-lg"><ArrowRight className="w-4 h-4" /></button>
-              </div>
-              <div className="space-y-3">
-                {savedItems.map((item, idx) => (
-                  <div key={idx} className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 bg-slate-50 hover:border-slate-200 transition-colors cursor-pointer">
-                    <div className="p-2 bg-white rounded-lg shadow-sm">
-                      <item.icon className="w-4 h-4 text-slate-600" />
-                    </div>
-                    <div>
-                      <div className="font-bold text-sm text-slate-800">{item.title}</div>
-                      <div className="text-[10px] text-slate-500 font-medium">{item.type}</div>
-                    </div>
-                    <div className="ml-auto">
-                      <Bookmark className="w-4 h-4 text-blue-600 fill-blue-600/20" />
-                    </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              {STREAMS.map((s, i) => (
+                <button key={i} onClick={() => navigate(`/${s.route}`)}
+                  className={`border ${s.color} p-4 rounded-2xl text-left hover:shadow-md transition-shadow cursor-pointer group`}>
+                  <div className="font-bold text-sm">{s.label}</div>
+                  <div className="text-[10px] opacity-70 mt-1">{s.sub}</div>
+                  <div className="mt-2 text-[10px] font-bold flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    Explore <ArrowRight className="w-3 h-3" />
                   </div>
-                ))}
-              </div>
+                </button>
+              ))}
             </div>
-
           </div>
 
         </div>
 
-        {/* RIGHT COLUMN */}
+        {/* RIGHT SIDEBAR */}
         <div className="space-y-6">
-          
-          {/* Profile Completion */}
+
+          {/* Profile Status — Real data */}
           <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
             <h2 className="text-base font-bold text-slate-900 mb-4">Profile Status</h2>
-            <div className="flex items-end justify-between mb-2">
-              <span className="text-3xl font-black text-blue-600">43%</span>
-              <span className="text-xs font-bold text-slate-500 mb-1">Incomplete</span>
-            </div>
-            <div className="w-full bg-slate-100 h-2 rounded-full mb-4 overflow-hidden">
-              <div className="bg-blue-600 h-full rounded-full" style={{ width: '43%' }}></div>
-            </div>
-            <p className="text-xs text-slate-600 mb-4 font-medium leading-relaxed">
-              You are missing <strong>Education Details</strong> and <strong>Location Preferences</strong>. Add them to improve recommendations.
-            </p>
-            <button onClick={() => onNavigate('settings')} className="w-full bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-xs py-2.5 rounded-xl transition-colors">
-              Continue Profile
-            </button>
+            {currentUser ? (
+              <>
+                <div className="flex items-end justify-between mb-2">
+                  <span className="text-3xl font-black text-blue-600">{realProfilePct}%</span>
+                  <span className="text-xs font-bold text-slate-500 mb-1">{realProfilePct === 100 ? 'Complete ✓' : 'Incomplete'}</span>
+                </div>
+                <div className="w-full bg-slate-100 h-2 rounded-full mb-4 overflow-hidden">
+                  <div className="bg-blue-600 h-full rounded-full transition-all" style={{ width: `${realProfilePct}%` }} />
+                </div>
+                <div className="space-y-2 mb-4">
+                  {profileCompletionItems.map((item, i) => (
+                    <div key={i} className="flex items-center justify-between text-xs">
+                      <span className={item.done ? 'text-slate-700 font-medium' : 'text-slate-400'}>{item.label}</span>
+                      {item.done
+                        ? <CheckCircle className="w-3.5 h-3.5 text-emerald-500" />
+                        : <div className="w-3.5 h-3.5 rounded-full border-2 border-slate-200" />}
+                    </div>
+                  ))}
+                </div>
+                {realProfilePct < 100 && (
+                  <button onClick={() => navigate('/settings')} className="w-full bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-xs py-2.5 rounded-xl transition-colors">
+                    Complete Profile →
+                  </button>
+                )}
+              </>
+            ) : (
+              <div className="text-center py-4">
+                <p className="text-sm text-slate-500 mb-3">Sign in to see your profile status.</p>
+                <button onClick={() => navigate('/login')} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm py-2.5 rounded-xl transition-colors">
+                  Sign In
+                </button>
+              </div>
+            )}
           </div>
 
-          {/* Reminders & Deadlines */}
+          {/* Recommended Careers */}
           <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
-            <h2 className="text-base font-bold text-slate-900 mb-5 flex items-center gap-2">
-              <Bell className="w-4 h-4 text-rose-500" /> Reminders
-            </h2>
-            <div className="space-y-4">
-              {reminders.map((rem, idx) => (
-                <div key={idx} className="flex items-start gap-3">
-                  <div className={`mt-0.5 p-1 rounded-full ${rem.urgent ? 'bg-rose-100 text-rose-600' : 'bg-slate-100 text-slate-400'}`}>
-                    {rem.urgent ? <Clock className="w-3 h-3" /> : <CheckCircle className="w-3 h-3" />}
+            <h2 className="text-base font-bold text-slate-900 mb-4">Recommended Careers</h2>
+            {currentUser?.careerGoal || currentUser?.interests?.length ? (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between border border-slate-100 p-3 rounded-xl bg-slate-50/50 hover:border-blue-200 cursor-pointer transition-colors"
+                  onClick={() => navigate('/jobs')}>
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-indigo-50"><Code2 className="w-4 h-4 text-indigo-600" /></div>
+                    <div>
+                      <div className="font-bold text-sm text-slate-800">{careerGoal || 'Software Engineer'}</div>
+                      <div className="text-[10px] text-slate-500">Based on your profile</div>
+                    </div>
                   </div>
-                  <div>
-                    <div className={`text-sm font-bold ${rem.urgent ? 'text-slate-900' : 'text-slate-600'}`}>{rem.title}</div>
-                    <div className={`text-[10px] font-bold mt-0.5 ${rem.urgent ? 'text-rose-600' : 'text-slate-400'}`}>{rem.time}</div>
-                  </div>
+                  <ChevronRight className="w-4 h-4 text-slate-400" />
                 </div>
+                <button onClick={() => navigate('/jobs')} className="w-full text-blue-600 text-xs font-bold py-2 hover:underline">
+                  Explore All Careers →
+                </button>
+              </div>
+            ) : (
+              <div className="text-center py-4">
+                <Brain className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                <p className="text-sm text-slate-500 mb-3">Take the Aptitude Assessment to get personalized career recommendations.</p>
+                <button onClick={() => navigate('/quiz')} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm py-2.5 rounded-xl transition-colors">
+                  Take Aptitude Test →
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Skills in Demand */}
+          <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
+            <h2 className="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
+              <BarChart2 className="w-4 h-4 text-blue-600" /> Skills in Demand
+            </h2>
+            <div className="flex flex-wrap gap-2">
+              {TOP_SKILLS.map((skill, i) => (
+                <button key={i} onClick={() => navigate(`/jobs?search=${encodeURIComponent(skill)}`)}
+                  className="px-2.5 py-1 bg-slate-100 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 border border-transparent text-slate-600 text-[11px] font-bold rounded-lg transition-colors cursor-pointer">
+                  {skill}
+                </button>
               ))}
             </div>
           </div>
 
-          {/* AI Counselor Banner */}
+          {/* Industry Mentors */}
+          <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-base font-bold text-slate-900">Industry Mentors</h2>
+              <button onClick={() => navigate('/mentorship')} className="text-blue-600 text-xs font-bold flex items-center gap-1 hover:underline">
+                Find Mentor <ArrowRight className="w-3 h-3" />
+              </button>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              {['Engineering', 'Medical', 'Finance', 'Design', 'Law', 'IT'].map((cat, i) => (
+                <button key={i} onClick={() => navigate(`/mentorship?search=${cat}`)}
+                  className="py-2 px-3 bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-200 rounded-xl text-xs font-bold text-slate-700 hover:text-blue-700 transition-colors text-left">
+                  {cat}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* AI Counselor */}
           <div className="bg-gradient-to-b from-slate-900 to-slate-800 rounded-3xl p-6 text-white shadow-lg relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/20 rounded-full -mr-10 -mt-10 blur-2xl"></div>
+            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/20 rounded-full -mr-10 -mt-10 blur-2xl" />
             <div className="bg-white/10 w-fit p-3 rounded-2xl mb-4 backdrop-blur-md border border-white/10">
               <Bot className="w-6 h-6 text-emerald-400" />
             </div>
             <h3 className="text-lg font-bold mb-2">Need Guidance?</h3>
-            <p className="text-xs text-slate-300 mb-6 leading-relaxed">
+            <p className="text-xs text-slate-300 mb-5 leading-relaxed">
               Chat with our AI Counselor for personalized college, course, and exam recommendations based on your profile.
             </p>
             <button onClick={onOpenCounselor} className="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold text-sm py-3 rounded-xl transition-colors shadow-lg shadow-emerald-500/20">
@@ -393,7 +637,30 @@ export default function Home({ onNavigate, onOpenCounselor }: HomeProps) {
           </div>
 
         </div>
+      </div>
 
+      {/* ─── 7. EXPLORE KARNATAKA COLLEGES ──────────────────────── */}
+      <div className="bg-gradient-to-r from-indigo-50 via-blue-50 to-slate-50 rounded-3xl p-6 sm:p-8 border border-indigo-100 shadow-sm">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+              <MapPin className="w-5 h-5 text-blue-600" /> Explore Karnataka Colleges
+            </h2>
+            <p className="text-xs text-slate-500 mt-1">Filter colleges by district, stream, and category</p>
+          </div>
+          <button onClick={() => navigate('/colleges')} className="text-blue-600 text-xs font-bold flex items-center gap-1 hover:underline">
+            All Colleges <ArrowRight className="w-3 h-3" />
+          </button>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {['Bengaluru', 'Mysuru', 'Mangaluru', 'Belagavi', 'Hubballi', 'Dharwad', 'Tumakuru', 'Shivamogga', 'Kalaburagi', 'Vijayapura', 'Ballari', 'Hassan', 'Udupi'].map((dist, i) => (
+            <button key={i}
+              onClick={() => navigate(`/colleges?district=${encodeURIComponent(dist)}`)}
+              className="px-4 py-2 bg-white border border-slate-200 hover:border-blue-300 hover:bg-blue-50 rounded-full text-sm font-semibold text-slate-700 hover:text-blue-700 transition-colors shadow-sm">
+              {dist}
+            </button>
+          ))}
+        </div>
       </div>
 
     </div>

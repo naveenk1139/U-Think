@@ -100,7 +100,7 @@ export default function JobFinder({ initialRole }: { initialRole?: string | null
         await saveJob({
           jobId: job.jobId,
           source: job.source || 'Unknown',
-          sourceJobId: job.sourceJobId || job.jobId,
+          sourceJobId: (job as any).sourceJobId || job.jobId,
           title: job.title,
           company: job.company,
           companyLogo: job.companyLogo,

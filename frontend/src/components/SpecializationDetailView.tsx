@@ -1,6 +1,8 @@
 import React from 'react';
 import { ArrowLeft, BookOpen } from 'lucide-react';
-import { SPECS_DB } from './ExamsDirectory'; // Adjust if needed, or pass the spec as a prop
+
+// SPECS_DB moved to static data — specializations will be re-integrated via backend
+const SPECS_DB: any[] = [];
 
 interface SpecializationDetailViewProps {
   specId: string;

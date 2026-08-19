@@ -75,7 +75,7 @@ export default function SavedJobs() {
     if (statusFilter !== 'All' && j.status !== statusFilter) return false;
     if (query) {
       const search = query.toLowerCase();
-      if (!j.title.toLowerCase().includes(search) && !j.company.toLowerCase().includes(search)) return false;
+      if (!j.title?.toLowerCase().includes(search) && !j.company?.toLowerCase().includes(search)) return false;
     }
     return true;
   });
@@ -164,7 +164,7 @@ export default function SavedJobs() {
                   {job.companyLogo ? (
                     <img src={job.companyLogo} alt={job.company} className="w-full h-full object-contain p-1" />
                   ) : (
-                    <div className="w-full h-full bg-slate-900 text-white flex items-center justify-center font-serif">{job.company.substring(0, 3)}</div>
+                    <div className="w-full h-full bg-slate-900 text-white flex items-center justify-center font-serif">{(job.company || '?').substring(0, 3)}</div>
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -200,7 +200,7 @@ export default function SavedJobs() {
               <div className="px-5 pb-4 flex-1">
                 <div className="flex flex-wrap gap-y-2 gap-x-4 text-xs font-medium text-slate-600 mb-4">
                   <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5 text-slate-400" /> {job.location}</span>
-                  <span className="flex items-center gap-1"><IndianRupee className="w-3.5 h-3.5 text-slate-400" /> {job.salary}</span>
+                  <span className="flex items-center gap-1"><IndianRupee className="w-3.5 h-3.5 text-slate-400" /> {(job as any).salary || 'Salary not specified'}</span>
                 </div>
 
                 {/* Notes Section */}
