@@ -1,7 +1,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import Mentor from '../models/Mentor';
-import MentorSession from '../models/MentorSession';
-import { generateGeminiResponse } from '../services/geminiService';
+import Mentor from '../models/Mentor.js';
+import MentorSession from '../models/MentorSession.js';
+import { generateGeminiResponse } from '../services/geminiService.js';
 
 const router = Router();
 
