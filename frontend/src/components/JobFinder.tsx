@@ -208,12 +208,12 @@ export default function JobFinder({ initialRole }: { initialRole?: string | null
   }, [filteredJobs, totalJobs, query]);
 
   return (
-    <div className="animate-fade-in p-6 bg-slate-50 min-h-screen font-sans">
+    <div className="animate-fade-in p-6 bg-background min-h-screen font-sans">
       
       {/* Top Banner */}
       <div className="bg-[#0A2540] rounded-2xl p-8 text-white relative overflow-hidden mb-8 shadow-md">
         <div className="relative z-10">
-          <span className="bg-blue-600/30 text-blue-200 text-xs font-bold px-3 py-1 rounded-md uppercase tracking-wide">
+          <span className="bg-primary/30 text-blue-200 text-xs font-bold px-3 py-1 rounded-md uppercase tracking-wide">
             Job Explorer
           </span>
           <h1 className="text-3xl font-bold mt-4 tracking-tight">
@@ -226,32 +226,32 @@ export default function JobFinder({ initialRole }: { initialRole?: string | null
           <div className="flex flex-wrap gap-3 mt-6">
             <button 
               onClick={() => setSourceFilter(sourceFilter === 'linkedin' ? null : 'linkedin')}
-              className={`bg-white px-3 py-1.5 rounded-md text-xs font-bold flex items-center gap-1 shadow-sm transition-transform hover:scale-105 cursor-pointer ${sourceFilter === 'linkedin' ? 'ring-2 ring-blue-600 text-blue-800' : 'text-blue-700'}`}>
+              className={`bg-card px-3 py-1.5 rounded-md text-xs font-bold flex items-center gap-1 shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none transition-transform hover:scale-105 cursor-pointer ${sourceFilter === 'linkedin' ? 'ring-2 ring-primary text-blue-800' : 'text-primary-hover'}`}>
               <span className="font-extrabold text-[14px]">in</span> LinkedIn
             </button>
             <button 
               onClick={() => setSourceFilter(sourceFilter === 'naukri' ? null : 'naukri')}
-              className={`bg-white px-3 py-1.5 rounded-md text-xs font-bold shadow-sm transition-transform hover:scale-105 cursor-pointer ${sourceFilter === 'naukri' ? 'ring-2 ring-blue-500 text-blue-700' : 'text-blue-500'}`}>
+              className={`bg-card px-3 py-1.5 rounded-md text-xs font-bold shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none transition-transform hover:scale-105 cursor-pointer ${sourceFilter === 'naukri' ? 'ring-2 ring-primary text-primary-hover' : 'text-blue-500'}`}>
               naukri.com
             </button>
             <button 
               onClick={() => setSourceFilter(sourceFilter === 'indeed' ? null : 'indeed')}
-              className={`bg-white px-3 py-1.5 rounded-md text-xs font-bold shadow-sm transition-transform hover:scale-105 cursor-pointer ${sourceFilter === 'indeed' ? 'ring-2 ring-[#2164f4] text-[#1c55d0]' : 'text-[#2164f4]'}`}>
+              className={`bg-card px-3 py-1.5 rounded-md text-xs font-bold shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none transition-transform hover:scale-105 cursor-pointer ${sourceFilter === 'indeed' ? 'ring-2 ring-[#2164f4] text-[#1c55d0]' : 'text-[#2164f4]'}`}>
               indeed
             </button>
             <button 
               onClick={() => setSourceFilter(sourceFilter === 'apna' ? null : 'apna')}
-              className={`bg-white px-3 py-1.5 rounded-md text-xs font-bold shadow-sm transition-transform hover:scale-105 cursor-pointer ${sourceFilter === 'apna' ? 'ring-2 ring-emerald-600 text-emerald-800' : 'text-emerald-600'}`}>
+              className={`bg-card px-3 py-1.5 rounded-md text-xs font-bold shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none transition-transform hover:scale-105 cursor-pointer ${sourceFilter === 'apna' ? 'ring-2 ring-emerald-600 text-emerald-800' : 'text-emerald-600'}`}>
               apna
             </button>
             <button 
               onClick={() => setSourceFilter(sourceFilter === 'workindia' ? null : 'workindia')}
-              className={`bg-white px-3 py-1.5 rounded-md text-xs font-bold shadow-sm transition-transform hover:scale-105 cursor-pointer ${sourceFilter === 'workindia' ? 'ring-2 ring-indigo-700 text-indigo-900' : 'text-indigo-700'}`}>
+              className={`bg-card px-3 py-1.5 rounded-md text-xs font-bold shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none transition-transform hover:scale-105 cursor-pointer ${sourceFilter === 'workindia' ? 'ring-2 ring-indigo-700 text-indigo-900' : 'text-indigo-700'}`}>
               WORKINDIA
             </button>
             <button 
               onClick={() => setSourceFilter(sourceFilter === 'jobhai' ? null : 'jobhai')}
-              className={`bg-white px-3 py-1.5 rounded-md text-xs font-bold shadow-sm transition-transform hover:scale-105 cursor-pointer ${sourceFilter === 'jobhai' ? 'ring-2 ring-green-600 text-green-800' : 'text-green-600'}`}>
+              className={`bg-card px-3 py-1.5 rounded-md text-xs font-bold shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none transition-transform hover:scale-105 cursor-pointer ${sourceFilter === 'jobhai' ? 'ring-2 ring-green-600 text-green-800' : 'text-green-600'}`}>
               JobHai
             </button>
             {sourceFilter && (
@@ -273,12 +273,12 @@ export default function JobFinder({ initialRole }: { initialRole?: string | null
         
         {/* Left Category Sidebar */}
         <div className="space-y-2 hidden lg:block">
-          <h3 className="font-bold text-slate-900 text-base mb-4 px-2">Categories</h3>
+          <h3 className="font-bold text-text-primary text-base mb-4 px-2">Categories</h3>
           {['All Jobs', 'Technology', 'Engineering', 'Healthcare', 'Management', 'Finance', 'Sales & Marketing', 'Design', 'Education'].map(cat => (
             <button
               key={cat}
               onClick={() => { setCategory(cat); setPage(1); }}
-              className={`w-full text-left px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors flex justify-between items-center ${category === cat ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-200/50 hover:text-slate-900'}`}
+              className={`w-full text-left px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors flex justify-between items-center ${category === cat ? 'bg-primary text-white shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none' : 'text-text-secondary hover:border-border/50 hover:text-text-primary'}`}
             >
               {cat}
               {category === cat && <ChevronRight className="w-4 h-4 opacity-80" />}
@@ -294,7 +294,7 @@ export default function JobFinder({ initialRole }: { initialRole?: string | null
             <select 
               value={category} 
               onChange={(e) => { setCategory(e.target.value); setPage(1); }}
-              className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-700 outline-none"
+              className="w-full px-4 py-3 bg-card border border-border rounded-xl text-sm font-bold text-text-primary outline-none"
             >
               {['All Jobs', 'Technology', 'Engineering', 'Healthcare', 'Management', 'Finance', 'Sales & Marketing', 'Design', 'Education'].map(cat => (
                 <option key={cat} value={cat}>{cat}</option>
@@ -303,36 +303,36 @@ export default function JobFinder({ initialRole }: { initialRole?: string | null
           </div>
 
           {/* Search & Filter Bar */}
-          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
-            <h3 className="font-bold text-slate-900 text-base">Search & Filter Jobs</h3>
+          <div className="bg-card border border-border rounded-2xl p-5 shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none space-y-4">
+            <h3 className="font-bold text-text-primary text-base">Search & Filter Jobs</h3>
             
             <div className="flex flex-wrap lg:flex-nowrap gap-3">
               <div className="flex-1 min-w-[200px]">
-                <label className="block text-[11px] font-semibold text-slate-500 mb-1">Role / Keyword</label>
+                <label className="block text-[11px] font-semibold text-text-muted mb-1">Role / Keyword</label>
                 <input 
                   type="text" 
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="e.g. python developer"
-                  className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                  className="w-full px-3 py-2 bg-card border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-blue-500 outline-none transition-all"
                 />
               </div>
               <div className="flex-1 min-w-[150px]">
-                <label className="block text-[11px] font-semibold text-slate-500 mb-1">Location</label>
+                <label className="block text-[11px] font-semibold text-text-muted mb-1">Location</label>
                 <input 
                   type="text" 
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
                   placeholder="Bangalore"
-                  className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                  className="w-full px-3 py-2 bg-card border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-blue-500 outline-none transition-all"
                 />
               </div>
               <div className="flex-1 min-w-[120px]">
-                <label className="block text-[11px] font-semibold text-slate-500 mb-1">Job Type</label>
+                <label className="block text-[11px] font-semibold text-text-muted mb-1">Job Type</label>
                 <select 
                   value={jobType}
                   onChange={(e) => setJobType(e.target.value)}
-                  className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all appearance-none"
+                  className="w-full px-3 py-2 bg-card border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none transition-all appearance-none"
                 >
                   <option value="all">Any Type</option>
                   <option value="Full Time">Full Time</option>
@@ -342,11 +342,11 @@ export default function JobFinder({ initialRole }: { initialRole?: string | null
                 </select>
               </div>
               <div className="flex-1 min-w-[140px]">
-                <label className="block text-[11px] font-semibold text-slate-500 mb-1">Experience</label>
+                <label className="block text-[11px] font-semibold text-text-muted mb-1">Experience</label>
                 <select 
                   value={experience}
                   onChange={(e) => setExperience(e.target.value)}
-                  className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all appearance-none"
+                  className="w-full px-3 py-2 bg-card border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none transition-all appearance-none"
                 >
                   <option value="all">Any Experience</option>
                   <option value="Fresher">Fresher</option>
@@ -356,16 +356,16 @@ export default function JobFinder({ initialRole }: { initialRole?: string | null
                 </select>
               </div>
               <div className="flex items-end">
-                <button onClick={fetchJobs} className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2 rounded-lg text-sm flex items-center gap-2 h-[38px] transition-colors w-full lg:w-auto justify-center">
+                <button onClick={fetchJobs} className="bg-primary hover:bg-primary-hover text-white font-medium px-6 py-2 rounded-lg text-sm flex items-center gap-2 h-[38px] transition-colors w-full lg:w-auto justify-center">
                   <Search className="w-4 h-4" /> Search
                 </button>
               </div>
             </div>
 
             {/* Filter Pills */}
-            <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+            <div className="flex items-center justify-between pt-2 border-t border-border">
               <div className="flex flex-wrap gap-2">
-                <button className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5">
+                <button className="bg-primary text-white px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5">
                   <Filter className="w-3.5 h-3.5" /> All Filters
                 </button>
 
@@ -373,14 +373,14 @@ export default function JobFinder({ initialRole }: { initialRole?: string | null
                 <div className="relative">
                   <button 
                     onClick={() => setActiveDropdown(activeDropdown === 'workMode' ? null : 'workMode')}
-                    className={`bg-white border text-xs font-medium px-3 py-1.5 rounded-lg flex items-center gap-1 transition-colors ${secWorkMode !== 'all' ? 'border-blue-500 text-blue-700 bg-blue-50' : 'border-slate-200 text-slate-700 hover:bg-slate-50'}`}
+                    className={`bg-card border text-xs font-medium px-3 py-1.5 rounded-lg flex items-center gap-1 transition-colors ${secWorkMode !== 'all' ? 'border-blue-500 text-primary-hover bg-blue-50' : 'border-border text-text-primary hover:bg-background'}`}
                   >
-                    {secWorkMode === 'all' ? 'Work Mode' : secWorkMode} <ChevronDown className="w-3 h-3 text-slate-400" />
+                    {secWorkMode === 'all' ? 'Work Mode' : secWorkMode} <ChevronDown className="w-3 h-3 text-text-muted" />
                   </button>
                   {activeDropdown === 'workMode' && (
-                    <div className="absolute top-full left-0 mt-1 w-40 bg-white border border-slate-200 rounded-lg shadow-xl z-20 py-1">
+                    <div className="absolute top-full left-0 mt-1 w-40 bg-card border border-border rounded-lg shadow-xl z-20 py-1">
                        {['all', 'Remote', 'On-site', 'Hybrid'].map(mode => (
-                         <button key={mode} onClick={() => { setSecWorkMode(mode); setActiveDropdown(null); }} className="w-full text-left px-4 py-2 text-xs hover:bg-slate-50 text-slate-700">
+                         <button key={mode} onClick={() => { setSecWorkMode(mode); setActiveDropdown(null); }} className="w-full text-left px-4 py-2 text-xs hover:bg-background text-text-primary">
                            {mode === 'all' ? 'Any Mode' : mode}
                          </button>
                        ))}
@@ -388,25 +388,25 @@ export default function JobFinder({ initialRole }: { initialRole?: string | null
                   )}
                 </div>
 
-                <button className="bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1">
-                  Salary <ChevronDown className="w-3 h-3 text-slate-400" />
+                <button className="bg-card border border-border text-text-primary hover:bg-background px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1">
+                  Salary <ChevronDown className="w-3 h-3 text-text-muted" />
                 </button>
-                <button className="bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1">
-                  Skills <ChevronDown className="w-3 h-3 text-slate-400" />
+                <button className="bg-card border border-border text-text-primary hover:bg-background px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1">
+                  Skills <ChevronDown className="w-3 h-3 text-text-muted" />
                 </button>
 
                 {/* Date Posted Dropdown */}
                 <div className="relative">
                   <button 
                     onClick={() => setActiveDropdown(activeDropdown === 'date' ? null : 'date')}
-                    className={`bg-white border text-xs font-medium px-3 py-1.5 rounded-lg flex items-center gap-1 transition-colors ${secDatePosted !== 'all' ? 'border-blue-500 text-blue-700 bg-blue-50' : 'border-slate-200 text-slate-700 hover:bg-slate-50'}`}
+                    className={`bg-card border text-xs font-medium px-3 py-1.5 rounded-lg flex items-center gap-1 transition-colors ${secDatePosted !== 'all' ? 'border-blue-500 text-primary-hover bg-blue-50' : 'border-border text-text-primary hover:bg-background'}`}
                   >
-                    {secDatePosted === 'all' ? 'Date Posted' : secDatePosted} <ChevronDown className="w-3 h-3 text-slate-400" />
+                    {secDatePosted === 'all' ? 'Date Posted' : secDatePosted} <ChevronDown className="w-3 h-3 text-text-muted" />
                   </button>
                   {activeDropdown === 'date' && (
-                    <div className="absolute top-full left-0 mt-1 w-40 bg-white border border-slate-200 rounded-lg shadow-xl z-20 py-1">
+                    <div className="absolute top-full left-0 mt-1 w-40 bg-card border border-border rounded-lg shadow-xl z-20 py-1">
                        {['all', 'Past 24 hours', 'Past Week', 'Past Month'].map(date => (
-                         <button key={date} onClick={() => { setSecDatePosted(date); setActiveDropdown(null); }} className="w-full text-left px-4 py-2 text-xs hover:bg-slate-50 text-slate-700">
+                         <button key={date} onClick={() => { setSecDatePosted(date); setActiveDropdown(null); }} className="w-full text-left px-4 py-2 text-xs hover:bg-background text-text-primary">
                            {date === 'all' ? 'Any Time' : date}
                          </button>
                        ))}
@@ -414,22 +414,22 @@ export default function JobFinder({ initialRole }: { initialRole?: string | null
                   )}
                 </div>
 
-                <button className="bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1">
-                  Company <ChevronDown className="w-3 h-3 text-slate-400" />
+                <button className="bg-card border border-border text-text-primary hover:bg-background px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1">
+                  Company <ChevronDown className="w-3 h-3 text-text-muted" />
                 </button>
-                <button className="bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1 border-dashed">
+                <button className="bg-card border border-border text-text-primary hover:bg-background px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1 border-dashed">
                   More Filters
                 </button>
               </div>
-              <div className="text-xs font-medium text-slate-600 flex items-center gap-1 shrink-0 ml-4 relative">
+              <div className="text-xs font-medium text-text-secondary flex items-center gap-1 shrink-0 ml-4 relative">
                 Sort by: 
-                <button onClick={() => setActiveDropdown(activeDropdown === 'sort' ? null : 'sort')} className="text-slate-900 font-semibold cursor-pointer flex items-center gap-1">
+                <button onClick={() => setActiveDropdown(activeDropdown === 'sort' ? null : 'sort')} className="text-text-primary font-semibold cursor-pointer flex items-center gap-1">
                   {sortOrder} <ChevronDown className="w-3 h-3" />
                 </button>
                 {activeDropdown === 'sort' && (
-                  <div className="absolute top-full right-0 mt-1 w-36 bg-white border border-slate-200 rounded-lg shadow-xl z-20 py-1 text-left">
-                     <button onClick={() => { setSortOrder('Most Relevant'); setActiveDropdown(null); }} className="w-full text-left px-4 py-2 text-xs hover:bg-slate-50 text-slate-700">Most Relevant</button>
-                     <button onClick={() => { setSortOrder('Recent'); setActiveDropdown(null); }} className="w-full text-left px-4 py-2 text-xs hover:bg-slate-50 text-slate-700">Recent</button>
+                  <div className="absolute top-full right-0 mt-1 w-36 bg-card border border-border rounded-lg shadow-xl z-20 py-1 text-left">
+                     <button onClick={() => { setSortOrder('Most Relevant'); setActiveDropdown(null); }} className="w-full text-left px-4 py-2 text-xs hover:bg-background text-text-primary">Most Relevant</button>
+                     <button onClick={() => { setSortOrder('Recent'); setActiveDropdown(null); }} className="w-full text-left px-4 py-2 text-xs hover:bg-background text-text-primary">Recent</button>
                   </div>
                 )}
               </div>
@@ -437,10 +437,10 @@ export default function JobFinder({ initialRole }: { initialRole?: string | null
           </div>
 
           {/* Results Summary */}
-          <div className="flex items-center justify-between text-sm text-slate-600 font-medium">
+          <div className="flex items-center justify-between text-sm text-text-secondary font-medium">
             <div>
               {loading ? (
-                <span className="flex items-center gap-2 text-blue-600"><Loader className="w-4 h-4 animate-spin" /> Fetching...</span>
+                <span className="flex items-center gap-2 text-primary"><Loader className="w-4 h-4 animate-spin" /> Fetching...</span>
               ) : (
                 `Showing ${jobs.length > 0 ? (page - 1) * limit + 1 : 0} - ${Math.min(page * limit, totalJobs)} of ${totalJobs > 0 ? totalJobs : filteredJobs.length} jobs`
               )}
@@ -456,13 +456,13 @@ export default function JobFinder({ initialRole }: { initialRole?: string | null
                  <button 
                    onClick={() => setPage(p => Math.max(1, p - 1))}
                    disabled={page === 1}
-                   className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-600 disabled:opacity-50"><ChevronLeft className="w-4 h-4" />
+                   className="w-8 h-8 flex items-center justify-center text-text-muted hover:text-text-secondary disabled:opacity-50"><ChevronLeft className="w-4 h-4" />
                  </button>
-                 <span className="text-sm font-medium text-slate-600 px-2">Page {page} {totalJobs > page * limit ? `of ${Math.ceil(totalJobs / limit)}` : ''}</span>
+                 <span className="text-sm font-medium text-text-secondary px-2">Page {page} {totalJobs > page * limit ? `of ${Math.ceil(totalJobs / limit)}` : ''}</span>
                  <button 
                    onClick={() => setPage(p => p + 1)}
                    disabled={totalJobs <= page * limit}
-                   className="w-8 h-8 flex items-center justify-center text-slate-600 hover:text-slate-900 disabled:opacity-50"><ChevronRight className="w-4 h-4" />
+                   className="w-8 h-8 flex items-center justify-center text-text-secondary hover:text-text-primary disabled:opacity-50"><ChevronRight className="w-4 h-4" />
                  </button>
                </div>
             </div>
@@ -475,21 +475,21 @@ export default function JobFinder({ initialRole }: { initialRole?: string | null
           )}
 
           {!loading && filteredJobs.length === 0 && !error && (
-            <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center shadow-sm">
+            <div className="bg-card rounded-2xl border border-border p-12 text-center shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none">
               {providers.every(p => p.status !== 'Configured') ? (
                 <>
                   <AlertTriangle className="w-12 h-12 text-amber-500 mx-auto mb-4" />
-                  <h3 className="font-bold text-slate-900 text-lg">No live job providers are configured yet.</h3>
-                  <p className="text-sm text-slate-500 max-w-sm mx-auto mt-2">
+                  <h3 className="font-bold text-text-primary text-lg">No live job providers are configured yet.</h3>
+                  <p className="text-sm text-text-muted max-w-sm mx-auto mt-2">
                     Connect an authorized job provider in the Admin panel to display real jobs.
                   </p>
-                  <div className="mt-8 text-left bg-slate-50 rounded-xl border border-slate-200 p-5 max-w-md mx-auto">
-                    <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Current Provider Status</h4>
+                  <div className="mt-8 text-left bg-background rounded-xl border border-border p-5 max-w-md mx-auto">
+                    <h4 className="text-xs font-bold text-text-muted uppercase tracking-wider mb-3">Current Provider Status</h4>
                     <ul className="space-y-2">
                       {providers.map((p, idx) => (
                         <li key={idx} className="flex justify-between items-center text-sm">
-                          <span className="font-medium text-slate-700">{p.name}</span>
-                          <span className={`text-xs font-bold px-2 py-1 rounded-md ${p.status === 'Configured' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-600'}`}>{p.status}</span>
+                          <span className="font-medium text-text-primary">{p.name}</span>
+                          <span className={`text-xs font-bold px-2 py-1 rounded-md ${p.status === 'Configured' ? 'bg-emerald-100 text-emerald-700' : 'border-border text-text-secondary'}`}>{p.status}</span>
                         </li>
                       ))}
                     </ul>
@@ -497,9 +497,9 @@ export default function JobFinder({ initialRole }: { initialRole?: string | null
                 </>
               ) : (
                 <>
-                  <Briefcase className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-                  <h3 className="font-semibold text-slate-900">No jobs found</h3>
-                  <p className="text-sm text-slate-500 mt-2 max-w-sm mx-auto">
+                  <Briefcase className="w-12 h-12 text-text-muted mx-auto mb-4" />
+                  <h3 className="font-semibold text-text-primary">No jobs found</h3>
+                  <p className="text-sm text-text-muted mt-2 max-w-sm mx-auto">
                     Try adjusting your search filters or keywords.
                   </p>
                 </>
@@ -520,10 +520,10 @@ export default function JobFinder({ initialRole }: { initialRole?: string | null
               <div 
                 key={job.jobId} 
                 onClick={() => setSelectedJob(job)}
-                className="bg-white border border-slate-200 rounded-2xl p-5 hover:border-blue-300 hover:shadow-md transition-all cursor-pointer relative group flex gap-5"
+                className="bg-card border border-border rounded-2xl p-5 hover:border-blue-300 hover:shadow-md transition-all cursor-pointer relative group flex gap-5"
               >
                 {/* Logo */}
-                <div className="w-14 h-14 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center shrink-0 overflow-hidden text-xl font-bold text-slate-400">
+                <div className="w-14 h-14 rounded-xl bg-background border border-border flex items-center justify-center shrink-0 overflow-hidden text-xl font-bold text-text-muted">
                   {job.companyLogo ? (
                     <img src={job.companyLogo} alt={job.company} className="w-full h-full object-contain p-2" />
                   ) : (
@@ -536,57 +536,57 @@ export default function JobFinder({ initialRole }: { initialRole?: string | null
                   <div className="flex justify-between items-start">
                     <div>
                       <div className="flex items-center gap-3 mb-1">
-                        <h3 className="text-lg font-bold text-slate-900 leading-tight">{job.title}</h3>
+                        <h3 className="text-lg font-bold text-text-primary leading-tight">{job.title}</h3>
                         <span className="bg-green-50 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-green-200">
                           {matchScore}% Match
                         </span>
                       </div>
-                      <div className="flex items-center gap-1.5 text-sm font-medium text-slate-600">
+                      <div className="flex items-center gap-1.5 text-sm font-medium text-text-secondary">
                         {job.company} <CheckCircle2 className="w-4 h-4 text-blue-500 fill-blue-50" />
                       </div>
                     </div>
                     <button 
                       onClick={(e) => handleToggleSave(e, job)}
-                      className={`p-1 transition-colors ${savedJobIds.has(job.jobId) ? 'text-blue-600' : 'text-slate-400 hover:text-slate-600'}`}
+                      className={`p-1 transition-colors ${savedJobIds.has(job.jobId) ? 'text-primary' : 'text-text-muted hover:text-text-secondary'}`}
                     >
                       <Bookmark className="w-5 h-5" fill={savedJobIds.has(job.jobId) ? 'currentColor' : 'none'} />
                     </button>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-3 text-xs font-medium text-slate-600">
-                    <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5 text-slate-400" /> {job.location}</span>
-                    <span className="text-slate-300">•</span>
-                    <span className="flex items-center gap-1"><Briefcase className="w-3.5 h-3.5 text-slate-400" /> {typeStr}</span>
-                    <span className="text-slate-300">•</span>
-                    <span className="flex items-center gap-1"><Building className="w-3.5 h-3.5 text-slate-400" /> {expStr}</span>
+                  <div className="flex flex-wrap items-center gap-3 text-xs font-medium text-text-secondary">
+                    <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5 text-text-muted" /> {job.location}</span>
+                    <span className="text-text-muted">•</span>
+                    <span className="flex items-center gap-1"><Briefcase className="w-3.5 h-3.5 text-text-muted" /> {typeStr}</span>
+                    <span className="text-text-muted">•</span>
+                    <span className="flex items-center gap-1"><Building className="w-3.5 h-3.5 text-text-muted" /> {expStr}</span>
                   </div>
 
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-xs font-bold text-slate-900 mr-2">{salaryStr}</span>
+                    <span className="text-xs font-bold text-text-primary mr-2">{salaryStr}</span>
                     {(job.skills && job.skills.length > 0 ? job.skills : ['Python', 'Django', 'SQL', 'Git', 'REST API']).slice(0, 4).map((skill, idx) => (
-                      <span key={idx} className="bg-slate-50 text-slate-600 border border-slate-200 text-[11px] font-semibold px-2.5 py-1 rounded-md">
+                      <span key={idx} className="bg-background text-text-secondary border border-border text-[11px] font-semibold px-2.5 py-1 rounded-md">
                         {skill}
                       </span>
                     ))}
-                    <span className="text-[11px] font-semibold text-slate-400 bg-slate-50 px-2.5 py-1 rounded-md border border-slate-100">+2</span>
+                    <span className="text-[11px] font-semibold text-text-muted bg-background px-2.5 py-1 rounded-md border border-border">+2</span>
                   </div>
 
                   <div className="flex items-center justify-between pt-2">
-                    <div className="flex items-center gap-3 text-[11px] font-medium text-slate-500">
+                    <div className="flex items-center gap-3 text-[11px] font-medium text-text-muted">
                       <span>{Math.floor(Math.random() * 24) + 1} hours ago</span>
-                      <span className="text-slate-300">•</span>
-                      <span className="flex items-center gap-1 bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded font-bold">
+                      <span className="text-text-muted">•</span>
+                      <span className="flex items-center gap-1 bg-blue-50 text-primary-hover px-1.5 py-0.5 rounded font-bold">
                         in {job.source || 'LinkedIn'}
                       </span>
                     </div>
 
                     <div className="flex items-center gap-3">
-                      <button className="text-blue-600 border border-blue-600 hover:bg-blue-50 px-4 py-1.5 rounded-lg text-sm font-bold transition-colors">
+                      <button className="text-primary border border-primary hover:bg-blue-50 px-4 py-1.5 rounded-lg text-sm font-bold transition-colors">
                         View Details
                       </button>
                       <button 
                         onClick={(e) => { e.stopPropagation(); handleApply(job); }}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-lg text-sm font-bold transition-colors flex items-center gap-1.5"
+                        className="bg-primary hover:bg-primary-hover text-white px-4 py-1.5 rounded-lg text-sm font-bold transition-colors flex items-center gap-1.5"
                       >
                         Apply Now <ExternalLink className="w-3.5 h-3.5" />
                       </button>
@@ -604,9 +604,9 @@ export default function JobFinder({ initialRole }: { initialRole?: string | null
         <div className="space-y-6">
           
           {/* AI Match Widget */}
-          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-            <h3 className="font-bold text-slate-900 mb-6 flex items-center gap-2">
-               <span className="text-blue-600">AI</span> Match {selectedJob ? 'Analysis' : 'for You'}
+          <div className="bg-card border border-border rounded-2xl p-6 shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none">
+            <h3 className="font-bold text-text-primary mb-6 flex items-center gap-2">
+               <span className="text-primary">AI</span> Match {selectedJob ? 'Analysis' : 'for You'}
             </h3>
 
             <div className="flex flex-col items-center justify-center mb-6">
@@ -617,19 +617,19 @@ export default function JobFinder({ initialRole }: { initialRole?: string | null
                   <circle cx="56" cy="56" r="48" className="stroke-blue-600 transition-all duration-1000 ease-out" strokeWidth="8" fill="none" strokeDasharray="301" strokeDashoffset={301 - (301 * (selectedJob?.matchAnalysis?.score || jobInsights.aiMatchScore)) / 100} strokeLinecap="round" />
                 </svg>
                 <div className="text-center">
-                  <div className="text-2xl font-extrabold text-slate-900">{selectedJob?.matchAnalysis?.score || jobInsights.aiMatchScore}%</div>
-                  <div className="text-[10px] font-bold text-slate-500 uppercase">Match Score</div>
+                  <div className="text-2xl font-extrabold text-text-primary">{selectedJob?.matchAnalysis?.score || jobInsights.aiMatchScore}%</div>
+                  <div className="text-[10px] font-bold text-text-muted uppercase">Match Score</div>
                 </div>
               </div>
-              <p className="text-xs text-slate-600 text-center mt-4 font-medium">
+              <p className="text-xs text-text-secondary text-center mt-4 font-medium">
                 {selectedJob ? 'Based on your profile vs job requirements.' : "Great match! You're a strong fit for these roles."}
               </p>
             </div>
 
-            <div className="space-y-4 border-t border-slate-100 pt-4">
+            <div className="space-y-4 border-t border-border pt-4">
               {selectedJob?.matchAnalysis?.rationale ? (
                 <div>
-                  <h4 className="text-xs font-bold text-slate-900 mb-2">Analysis Rationale</h4>
+                  <h4 className="text-xs font-bold text-text-primary mb-2">Analysis Rationale</h4>
                   <ul className="space-y-2">
                     {selectedJob.matchAnalysis.rationale.map((rat, idx) => (
                       <li key={idx} className={`flex items-start gap-2 text-xs font-medium ${rat.startsWith('✓') ? 'text-green-700' : 'text-amber-600'}`}>
@@ -641,10 +641,10 @@ export default function JobFinder({ initialRole }: { initialRole?: string | null
               ) : (
                 <>
                   <div>
-                    <h4 className="text-xs font-bold text-slate-900 mb-2">Top Matched Skills</h4>
+                    <h4 className="text-xs font-bold text-text-primary mb-2">Top Matched Skills</h4>
                     <ul className="space-y-1.5">
                       {jobInsights.topMatchedSkills.map(skill => (
-                        <li key={skill} className="flex items-center gap-2 text-xs font-medium text-slate-700">
+                        <li key={skill} className="flex items-center gap-2 text-xs font-medium text-text-primary">
                           <CheckCircle2 className="w-3.5 h-3.5 text-green-500" /> {skill}
                         </li>
                       ))}
@@ -652,10 +652,10 @@ export default function JobFinder({ initialRole }: { initialRole?: string | null
                   </div>
 
                   <div>
-                    <h4 className="text-xs font-bold text-slate-900 mb-2">Skills to Improve</h4>
+                    <h4 className="text-xs font-bold text-text-primary mb-2">Skills to Improve</h4>
                     <ul className="space-y-1.5">
                       {jobInsights.skillsToImprove.map(skill => (
-                        <li key={skill} className="flex items-center gap-2 text-xs font-medium text-slate-700">
+                        <li key={skill} className="flex items-center gap-2 text-xs font-medium text-text-primary">
                           <AlertCircle className="w-3.5 h-3.5 text-amber-500" /> {skill}
                         </li>
                       ))}
@@ -667,59 +667,59 @@ export default function JobFinder({ initialRole }: { initialRole?: string | null
           </div>
 
           {/* Job Insights Widget */}
-          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-            <h3 className="font-bold text-slate-900 mb-4">Job Insights</h3>
+          <div className="bg-card border border-border rounded-2xl p-6 shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none">
+            <h3 className="font-bold text-text-primary mb-4">Job Insights</h3>
             <ul className="space-y-4">
               <li className="flex justify-between items-center text-sm">
-                <span className="text-slate-500 font-medium flex items-center gap-2"><Briefcase className="w-4 h-4 text-slate-400" /> Total Jobs</span>
-                <span className="font-bold text-slate-900">{jobInsights.total}</span>
+                <span className="text-text-muted font-medium flex items-center gap-2"><Briefcase className="w-4 h-4 text-text-muted" /> Total Jobs</span>
+                <span className="font-bold text-text-primary">{jobInsights.total}</span>
               </li>
               <li className="flex justify-between items-center text-sm">
-                <span className="text-slate-500 font-medium flex items-center gap-2"><Calendar className="w-4 h-4 text-slate-400" /> Jobs Added Today</span>
-                <span className="font-bold text-slate-900">{jobInsights.addedToday}</span>
+                <span className="text-text-muted font-medium flex items-center gap-2"><Calendar className="w-4 h-4 text-text-muted" /> Jobs Added Today</span>
+                <span className="font-bold text-text-primary">{jobInsights.addedToday}</span>
               </li>
               <li className="flex justify-between items-center text-sm">
-                <span className="text-slate-500 font-medium flex items-center gap-2"><Star className="w-4 h-4 text-slate-400" /> Top Skill</span>
-                <span className="font-bold text-slate-900">{jobInsights.topSkill}</span>
+                <span className="text-text-muted font-medium flex items-center gap-2"><Star className="w-4 h-4 text-text-muted" /> Top Skill</span>
+                <span className="font-bold text-text-primary">{jobInsights.topSkill}</span>
               </li>
               <li className="flex justify-between items-center text-sm">
-                <span className="text-slate-500 font-medium flex items-center gap-2"><IndianRupee className="w-4 h-4 text-slate-400" /> Avg. Salary</span>
-                <span className="font-bold text-slate-900">₹{jobInsights.avgSalary} LPA</span>
+                <span className="text-text-muted font-medium flex items-center gap-2"><IndianRupee className="w-4 h-4 text-text-muted" /> Avg. Salary</span>
+                <span className="font-bold text-text-primary">₹{jobInsights.avgSalary} LPA</span>
               </li>
             </ul>
-            <div className="border-t border-slate-100 mt-4 pt-4">
-               <button className="text-blue-600 font-bold text-xs flex items-center gap-1 hover:underline">
+            <div className="border-t border-border mt-4 pt-4">
+               <button className="text-primary font-bold text-xs flex items-center gap-1 hover:underline">
                  View Full Insights <ArrowRight className="w-3 h-3" />
                </button>
             </div>
           </div>
 
           {/* Job Alerts Widget */}
-          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-            <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
-               <AlertCircle className="w-5 h-5 text-blue-600" /> Job Alerts
+          <div className="bg-card border border-border rounded-2xl p-6 shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none">
+            <h3 className="font-bold text-text-primary mb-4 flex items-center gap-2">
+               <AlertCircle className="w-5 h-5 text-primary" /> Job Alerts
             </h3>
             
             <div className="flex items-start justify-between">
               <div className="flex gap-3">
-                <div className="mt-0.5"><AlertCircle className="w-4 h-4 text-slate-400" /></div>
+                <div className="mt-0.5"><AlertCircle className="w-4 h-4 text-text-muted" /></div>
                 <div>
-                  <h4 className="text-sm font-bold text-slate-900 capitalize">
+                  <h4 className="text-sm font-bold text-text-primary capitalize">
                     {query || 'Any Role'} in {location || 'Any Location'}
                   </h4>
-                  <p className="text-xs text-slate-500 font-medium mt-0.5">Weekly • Email</p>
+                  <p className="text-xs text-text-muted font-medium mt-0.5">Weekly • Email</p>
                 </div>
               </div>
               <button 
                 onClick={() => setJobAlerts(!jobAlerts)} 
-                className={`transition-colors cursor-pointer ${jobAlerts ? 'text-blue-600' : 'text-slate-300'}`}
+                className={`transition-colors cursor-pointer ${jobAlerts ? 'text-primary' : 'text-text-muted'}`}
               >
                 <ToggleRight className="w-8 h-8" />
               </button>
             </div>
 
-            <div className="border-t border-slate-100 mt-5 pt-4">
-               <button className="text-blue-600 font-bold text-xs flex items-center gap-1 hover:underline">
+            <div className="border-t border-border mt-5 pt-4">
+               <button className="text-primary font-bold text-xs flex items-center gap-1 hover:underline">
                  Manage Alerts <ArrowRight className="w-3 h-3" />
                </button>
             </div>

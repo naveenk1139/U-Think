@@ -183,14 +183,14 @@ export default function AICounselorModal({ isOpen, onClose }: AICounselorModalPr
 
   return (
     <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 z-[100] animate-fade-in font-sans">
-      <div className="bg-white rounded-2xl w-full max-w-5xl shadow-2xl border border-slate-100 flex overflow-hidden h-[90vh]">
+      <div className="bg-card rounded-2xl w-full max-w-5xl shadow-2xl border border-border flex overflow-hidden h-[90vh]">
         
         {/* Sidebar */}
-        <div className={`bg-slate-50 border-r border-slate-200 flex flex-col transition-all duration-300 ${sidebarOpen ? 'w-64' : 'w-0 overflow-hidden'}`}>
-          <div className="p-4 border-b border-slate-200 flex items-center justify-between min-w-[16rem]">
+        <div className={`bg-background border-r border-border flex flex-col transition-all duration-300 ${sidebarOpen ? 'w-64' : 'w-0 overflow-hidden'}`}>
+          <div className="p-4 border-b border-border flex items-center justify-between min-w-[16rem]">
             <button 
               onClick={createNewChat}
-              className="flex-1 flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-semibold text-sm transition-colors shadow-sm cursor-pointer"
+              className="flex-1 flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-4 py-2.5 rounded-xl font-semibold text-sm transition-colors shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none cursor-pointer"
             >
               <MessageSquarePlus className="w-4 h-4" />
               New Chat
@@ -199,35 +199,35 @@ export default function AICounselorModal({ isOpen, onClose }: AICounselorModalPr
           
           <div className="flex-1 overflow-y-auto min-w-[16rem]">
             <div className="p-2 space-y-1">
-              <p className="px-3 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Chat History</p>
+              <p className="px-3 py-2 text-[10px] font-bold text-text-muted uppercase tracking-wider">Chat History</p>
               {conversations.map(conv => (
                 <div 
                   key={conv._id} 
                   onClick={() => loadConversation(conv._id)}
-                  className={`group flex items-center justify-between px-3 py-2.5 rounded-lg cursor-pointer text-sm transition-colors ${activeConversationId === conv._id ? 'bg-slate-200 text-slate-900 font-semibold' : 'text-slate-600 hover:bg-slate-100'}`}
+                  className={`group flex items-center justify-between px-3 py-2.5 rounded-lg cursor-pointer text-sm transition-colors ${activeConversationId === conv._id ? 'border-border text-text-primary font-semibold' : 'text-text-secondary hover:bg-background-secondary'}`}
                 >
                   <span className="truncate flex-1">{conv.title}</span>
                   <button 
                     onClick={(e) => deleteConversation(conv._id, e)}
-                    className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-red-500 rounded transition-opacity cursor-pointer"
+                    className="opacity-0 group-hover:opacity-100 p-1 text-text-muted hover:text-red-500 rounded transition-opacity cursor-pointer"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </div>
               ))}
               {conversations.length === 0 && (
-                <p className="px-3 py-4 text-xs text-slate-400 text-center">No history yet</p>
+                <p className="px-3 py-4 text-xs text-text-muted text-center">No history yet</p>
               )}
             </div>
           </div>
           
-          <div className="p-4 border-t border-slate-200 min-w-[16rem]">
+          <div className="p-4 border-t border-border min-w-[16rem]">
             <button 
               onClick={() => {
                 onClose();
                 window.location.href = '/settings';
               }}
-              className="flex items-center gap-2 text-slate-600 hover:text-slate-900 text-sm font-medium transition-colors w-full p-2 rounded-lg hover:bg-slate-100 cursor-pointer"
+              className="flex items-center gap-2 text-text-secondary hover:text-text-primary text-sm font-medium transition-colors w-full p-2 rounded-lg hover:bg-background-secondary cursor-pointer"
             >
               <Settings className="w-4 h-4" />
               Counselor Settings
@@ -236,30 +236,30 @@ export default function AICounselorModal({ isOpen, onClose }: AICounselorModalPr
         </div>
 
         {/* Main Chat Area */}
-        <div className="flex-1 flex flex-col min-w-0 bg-white">
+        <div className="flex-1 flex flex-col min-w-0 bg-card">
           
           {/* Header */}
-          <div className="bg-white border-b border-slate-200 p-3 sm:p-4 flex items-center justify-between sticky top-0 z-10">
+          <div className="bg-card border-b border-border p-3 sm:p-4 flex items-center justify-between sticky top-0 z-10">
             <div className="flex items-center gap-3">
               <button 
                 onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="p-1.5 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg cursor-pointer transition-colors"
+                className="p-1.5 text-text-muted hover:text-text-primary hover:bg-background-secondary rounded-lg cursor-pointer transition-colors"
               >
                 <Menu className="w-5 h-5" />
               </button>
-              <div className="bg-blue-600 p-1.5 rounded-lg flex items-center justify-center shadow-md">
+              <div className="bg-primary p-1.5 rounded-lg flex items-center justify-center shadow-md">
                 <Sparkles className="w-4 h-4 text-white" />
               </div>
               <div>
-                <h3 className="font-bold text-sm sm:text-base text-slate-800 flex items-center gap-2">
+                <h3 className="font-bold text-sm sm:text-base text-text-primary flex items-center gap-2">
                   U THINK AI Career Counselor
                 </h3>
-                <p className="text-[10px] sm:text-xs text-slate-500 font-medium">Personalized career guidance for your future</p>
+                <p className="text-[10px] sm:text-xs text-text-muted font-medium">Personalized career guidance for your future</p>
               </div>
             </div>
             <button
               onClick={onClose}
-              className="text-slate-400 hover:text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-full p-1.5 cursor-pointer transition-colors"
+              className="text-text-muted hover:text-text-secondary bg-background-secondary hover:border-border rounded-full p-1.5 cursor-pointer transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
@@ -270,28 +270,28 @@ export default function AICounselorModal({ isOpen, onClose }: AICounselorModalPr
             
             {!currentUser ? (
               <div className="h-full flex flex-col items-center justify-center text-center max-w-md mx-auto animate-fade-in pb-10">
-                <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mb-6 shadow-sm border border-blue-100">
-                  <Bot className="w-8 h-8 text-blue-600" />
+                <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mb-6 shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none border border-blue-100">
+                  <Bot className="w-8 h-8 text-primary" />
                 </div>
-                <h2 className="text-xl font-bold text-slate-800 mb-2">Login Required</h2>
-                <p className="text-sm text-slate-500 mb-8">Please log in or create an account to use the AI Career Counselor and get personalized guidance.</p>
+                <h2 className="text-xl font-bold text-text-primary mb-2">Login Required</h2>
+                <p className="text-sm text-text-muted mb-8">Please log in or create an account to use the AI Career Counselor and get personalized guidance.</p>
                 <button
                   onClick={() => {
                     onClose();
                     window.location.href = '/login';
                   }}
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl transition-colors shadow-md"
+                  className="bg-primary hover:bg-primary-hover text-white font-bold py-3 px-8 rounded-xl transition-colors shadow-md"
                 >
                   Log In Now
                 </button>
               </div>
             ) : messages.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-center max-w-md mx-auto animate-fade-in pb-10">
-                <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mb-6 shadow-sm border border-blue-100">
-                  <Bot className="w-8 h-8 text-blue-600" />
+                <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mb-6 shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none border border-blue-100">
+                  <Bot className="w-8 h-8 text-primary" />
                 </div>
-                <h2 className="text-xl font-bold text-slate-800 mb-2">What should I help you with?</h2>
-                <p className="text-sm text-slate-500 mb-8">I'm connected to the U THINK database and can provide personalized career and college advice based on your profile.</p>
+                <h2 className="text-xl font-bold text-text-primary mb-2">What should I help you with?</h2>
+                <p className="text-sm text-text-muted mb-8">I'm connected to the U THINK database and can provide personalized career and college advice based on your profile.</p>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
                   {[
@@ -305,9 +305,9 @@ export default function AICounselorModal({ isOpen, onClose }: AICounselorModalPr
                     <button
                       key={i}
                       onClick={() => handleSubmit(undefined, btn.text)}
-                      className="bg-white border border-slate-200 hover:border-blue-400 hover:shadow-sm text-slate-700 p-3 rounded-xl text-sm font-medium transition-all text-left flex items-center gap-3 cursor-pointer group"
+                      className="bg-card border border-border hover:border-blue-400 hover:shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none text-text-primary p-3 rounded-xl text-sm font-medium transition-all text-left flex items-center gap-3 cursor-pointer group"
                     >
-                      <span className="text-lg bg-slate-50 p-1.5 rounded-lg group-hover:scale-110 transition-transform">{btn.icon}</span>
+                      <span className="text-lg bg-background p-1.5 rounded-lg group-hover:scale-110 transition-transform">{btn.icon}</span>
                       {btn.text}
                     </button>
                   ))}
@@ -321,22 +321,22 @@ export default function AICounselorModal({ isOpen, onClose }: AICounselorModalPr
                     <div className="flex gap-3 max-w-[85%] sm:max-w-[75%]">
                       
                       {!isUser && (
-                        <div className="w-8 h-8 bg-blue-600 text-white rounded-lg flex items-center justify-center shrink-0 shadow-sm mt-1">
+                        <div className="w-8 h-8 bg-primary text-white rounded-lg flex items-center justify-center shrink-0 shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none mt-1">
                           <Bot className="w-5 h-5" />
                         </div>
                       )}
                       
                       <div className={`rounded-2xl px-5 py-3.5 text-sm sm:text-base leading-relaxed ${
                         isUser
-                          ? 'bg-blue-600 text-white rounded-br-none shadow-sm'
-                          : 'bg-slate-50 text-slate-800 border border-slate-200 rounded-bl-none shadow-sm'
+                          ? 'bg-primary text-white rounded-br-none shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none'
+                          : 'bg-background text-text-primary border border-border rounded-bl-none shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none'
                       }`}>
                         {isUser ? (
                           <div className="whitespace-pre-wrap font-medium">{msg.content}</div>
                         ) : (
-                          <div className="prose prose-sm prose-slate max-w-none prose-p:leading-relaxed prose-headings:font-bold prose-a:text-blue-600">
+                          <div className="prose prose-sm prose-slate max-w-none prose-p:leading-relaxed prose-headings:font-bold prose-a:text-primary">
                             {msg.content === '' && isStreaming && idx === messages.length - 1 ? (
-                              <div className="flex items-center gap-2 text-slate-400">
+                              <div className="flex items-center gap-2 text-text-muted">
                                 <Loader2 className="w-4 h-4 animate-spin" />
                                 <span className="animate-pulse">Thinking...</span>
                               </div>
@@ -348,7 +348,7 @@ export default function AICounselorModal({ isOpen, onClose }: AICounselorModalPr
                       </div>
 
                       {isUser && (
-                        <div className="w-8 h-8 bg-slate-800 text-white rounded-lg flex items-center justify-center shrink-0 shadow-sm mt-1 font-bold text-xs">
+                        <div className="w-8 h-8 bg-slate-800 text-white rounded-lg flex items-center justify-center shrink-0 shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none mt-1 font-bold text-xs">
                           {currentUser?.name?.substring(0, 2).toUpperCase() || 'ME'}
                         </div>
                       )}
@@ -360,10 +360,10 @@ export default function AICounselorModal({ isOpen, onClose }: AICounselorModalPr
           </div>
 
           {/* Input Area */}
-          <div className="p-4 bg-white border-t border-slate-200">
+          <div className="p-4 bg-card border-t border-border">
             <form onSubmit={(e) => handleSubmit(e)} className="max-w-4xl mx-auto relative">
               <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
-                <button type="button" className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors cursor-pointer" title="Upload Document">
+                <button type="button" className="p-2 text-text-muted hover:text-primary hover:bg-blue-50 rounded-full transition-colors cursor-pointer" title="Upload Document">
                   <Paperclip className="w-5 h-5" />
                 </button>
               </div>
@@ -374,22 +374,22 @@ export default function AICounselorModal({ isOpen, onClose }: AICounselorModalPr
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
                 disabled={isStreaming || !currentUser}
-                className="w-full bg-slate-50 border border-slate-200 hover:border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 rounded-2xl pl-14 pr-24 py-4 text-[15px] font-medium text-slate-800 transition-all outline-none disabled:opacity-50"
+                className="w-full bg-background border border-border hover:border-border focus:border-blue-500 focus:ring-4 focus:ring-primary/10 rounded-2xl pl-14 pr-24 py-4 text-[15px] font-medium text-text-primary transition-all outline-none disabled:opacity-50"
               />
               <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
-                <button type="button" disabled={isStreaming || !currentUser} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors cursor-pointer" title="Voice Input">
+                <button type="button" disabled={isStreaming || !currentUser} className="p-2 text-text-muted hover:text-primary hover:bg-blue-50 rounded-full transition-colors cursor-pointer" title="Voice Input">
                   <Mic className="w-5 h-5" />
                 </button>
                 <button
                   type="submit"
                   disabled={!inputText.trim() || isStreaming || !currentUser}
-                  className="bg-blue-600 hover:bg-blue-700 text-white p-2.5 rounded-xl cursor-pointer transition-colors disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
+                  className="bg-primary hover:bg-primary-hover text-white p-2.5 rounded-xl cursor-pointer transition-colors disabled:opacity-40 disabled:cursor-not-allowed shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none"
                 >
                   <ArrowRight className="w-5 h-5" />
                 </button>
               </div>
             </form>
-            <p className="text-center text-[11px] text-slate-400 font-medium mt-2">
+            <p className="text-center text-[11px] text-text-muted font-medium mt-2">
               AI Counselor uses Gemini API and your U THINK profile to generate personalized responses. It can make mistakes. Check important information.
             </p>
           </div>

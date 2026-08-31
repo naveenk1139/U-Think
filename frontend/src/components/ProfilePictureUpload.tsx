@@ -78,7 +78,7 @@ export function ProfilePictureUpload({ currentPhotoURL, onPhotoUpdated, size = '
       <img 
         src={currentPhotoURL && currentPhotoURL.startsWith('/uploads') ? `http://localhost:5000${currentPhotoURL}` : (currentPhotoURL || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=250")} 
         alt="Profile" 
-        className={size === 'lg' ? "w-24 h-24 rounded-full border-4 border-blue-50 shadow-md object-cover" : "w-12 h-12 rounded-full border-2 border-blue-50 shadow-sm object-cover"}
+        className={size === 'lg' ? "w-24 h-24 rounded-full border-4 border-blue-50 shadow-md object-cover" : "w-12 h-12 rounded-full border-2 border-blue-50 shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none object-cover"}
       />
       <div className="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
         <Camera className="w-6 h-6 text-white" />

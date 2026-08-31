@@ -30,49 +30,49 @@ export default function AdminJobPanel() {
 
 
   return (
-    <div className="space-y-6 animate-fade-in p-6 bg-slate-50 min-h-screen">
+    <div className="space-y-6 animate-fade-in p-6 bg-background min-h-screen">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+          <h2 className="text-2xl font-bold text-text-primary flex items-center gap-2">
             <Database className="w-6 h-6 text-indigo-600" /> Job Provider Admin
           </h2>
-          <p className="text-sm text-slate-500 mt-1">Manage external job sources and local seed data.</p>
+          <p className="text-sm text-text-muted mt-1">Manage external job sources and local seed data.</p>
         </div>
       </div>
 
-      <div className="flex gap-4 border-b border-slate-200">
+      <div className="flex gap-4 border-b border-border">
         <button 
           onClick={() => setActiveTab('providers')}
-          className={`pb-3 text-sm font-bold ${activeTab === 'providers' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-500'}`}
+          className={`pb-3 text-sm font-bold ${activeTab === 'providers' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-text-muted'}`}
         >
           Provider Status
         </button>
         <button 
            onClick={() => setActiveTab('import')}
-           className={`pb-3 text-sm font-bold ${activeTab === 'import' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-500'}`}
+           className={`pb-3 text-sm font-bold ${activeTab === 'import' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-text-muted'}`}
         >
           Import Jobs
         </button>
       </div>
 
       {activeTab === 'providers' && (
-        <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+        <div className="bg-card rounded-2xl border border-border overflow-hidden shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none">
           {loading ? (
-             <div className="p-12 flex justify-center"><Loader className="w-8 h-8 animate-spin text-slate-400" /></div>
+             <div className="p-12 flex justify-center"><Loader className="w-8 h-8 animate-spin text-text-muted" /></div>
           ) : (
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-slate-50 border-b border-slate-200">
-                  <th className="p-4 text-xs font-bold text-slate-500 uppercase">Provider Name</th>
-                  <th className="p-4 text-xs font-bold text-slate-500 uppercase">Connection Status</th>
-                  <th className="p-4 text-xs font-bold text-slate-500 uppercase text-right">Action</th>
+                <tr className="bg-background border-b border-border">
+                  <th className="p-4 text-xs font-bold text-text-muted uppercase">Provider Name</th>
+                  <th className="p-4 text-xs font-bold text-text-muted uppercase">Connection Status</th>
+                  <th className="p-4 text-xs font-bold text-text-muted uppercase text-right">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-border">
                 {providers.map((p, i) => (
-                  <tr key={i} className="hover:bg-slate-50">
-                    <td className="p-4 font-bold text-slate-800">{p.name}</td>
-                    <td className="p-4 flex items-center gap-2 text-sm font-medium text-slate-600">
+                  <tr key={i} className="hover:bg-background">
+                    <td className="p-4 font-bold text-text-primary">{p.name}</td>
+                    <td className="p-4 flex items-center gap-2 text-sm font-medium text-text-secondary">
                       {renderIcon(p.status)} {p.status}
                     </td>
                     <td className="p-4 text-right">
@@ -89,16 +89,16 @@ export default function AdminJobPanel() {
       )}
 
       {activeTab === 'import' && (
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm max-w-2xl">
-          <h3 className="font-bold text-slate-800 mb-4">Manual Job Import</h3>
-          <p className="text-sm text-slate-500 mb-6">Import seed jobs to the local Admin database for demonstration and testing purposes.</p>
+        <div className="bg-card p-6 rounded-2xl border border-border shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none max-w-2xl">
+          <h3 className="font-bold text-text-primary mb-4">Manual Job Import</h3>
+          <p className="text-sm text-text-muted mb-6">Import seed jobs to the local Admin database for demonstration and testing purposes.</p>
           
           <form className="space-y-4">
             <div>
-              <label className="block text-xs font-bold text-slate-600 mb-1">Job JSON Array</label>
+              <label className="block text-xs font-bold text-text-secondary mb-1">Job JSON Array</label>
               <textarea 
                 rows={10} 
-                className="w-full border border-slate-200 rounded-xl p-3 text-sm font-mono focus:ring-2 focus:ring-indigo-500"
+                className="w-full border border-border rounded-xl p-3 text-sm font-mono focus:ring-2 focus:ring-indigo-500"
                 placeholder={'[{\n  "title": "Software Engineer",\n  "company": "Tech Corp",\n  "location": "Bengaluru"\n}]'}
               />
             </div>

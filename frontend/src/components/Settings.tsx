@@ -48,13 +48,13 @@ export default function Settings() {
   return (
     <div className="font-sans pb-10 max-w-6xl mx-auto w-full">
       <div className="mb-8">
-        <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Settings</h1>
-        <p className="text-slate-500 mt-2 text-sm">Manage your account, preferences, and personalized experience.</p>
+        <h1 className="text-3xl font-extrabold text-text-primary tracking-tight">Settings</h1>
+        <p className="text-text-muted mt-2 text-sm">Manage your account, preferences, and personalized experience.</p>
       </div>
 
       <div className="flex flex-col md:flex-row gap-8 items-start">
         {/* Settings Navigation Sidebar */}
-        <div className="w-full md:w-64 shrink-0 bg-white border border-slate-100 rounded-2xl p-3 shadow-sm sticky top-28">
+        <div className="w-full md:w-64 shrink-0 bg-card border border-border rounded-2xl p-3 shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none sticky top-28">
           <nav className="flex flex-col space-y-1">
             {SETTINGS_CATEGORIES.map((cat) => (
               <button
@@ -62,11 +62,11 @@ export default function Settings() {
                 onClick={() => setActiveTab(cat.id)}
                 className={`flex items-center gap-3 w-full text-left px-4 py-3 rounded-xl transition-all cursor-pointer ${
                   activeTab === cat.id 
-                    ? 'bg-blue-600 text-white shadow-md shadow-blue-200' 
-                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                    ? 'bg-primary text-white shadow-md shadow-blue-200' 
+                    : 'text-text-secondary hover:bg-background hover:text-text-primary'
                 }`}
               >
-                <cat.icon className={`w-4 h-4 ${activeTab === cat.id ? 'text-white' : 'text-slate-400'}`} />
+                <cat.icon className={`w-4 h-4 ${activeTab === cat.id ? 'text-white' : 'text-text-muted'}`} />
                 <span className="text-[13px] font-bold">{cat.label}</span>
               </button>
             ))}

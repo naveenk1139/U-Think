@@ -1,5 +1,58 @@
 @import "tailwindcss";
 
+@theme {
+  --color-background: var(--background);
+  --color-background-secondary: var(--background-secondary);
+  --color-card: var(--card);
+  --color-card-hover: var(--card-hover);
+  --color-border: var(--border);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-card-secondary: var(--card-secondary);
+  --color-border-secondary: var(--border-secondary);
+  --color-input: var(--input);
+  --color-input-border: var(--input-border);
+}
+
+@layer base {
+  :root {
+    --background: #f8fafc;
+    --background-secondary: #f1f5f9;
+    --card: #ffffff;
+    --card-secondary: #f8fafc;
+    --card-hover: #f8fafc;
+    --border: #e2e8f0;
+    --border-secondary: #e2e8f0;
+    --primary: #2563eb;
+    --primary-hover: #1d4ed8;
+    --text-primary: #0f172a;
+    --text-secondary: #334155;
+    --text-muted: #64748b;
+    --input: #ffffff;
+    --input-border: #e2e8f0;
+  }
+
+  .dark {
+    --background: #071225;
+    --background-secondary: #0B1930;
+    --card: #0F1E36;
+    --card-secondary: #111F35;
+    --card-hover: #162A48;
+    --border: #243A5A;
+    --border-secondary: #29405F;
+    --primary: #2563EB;
+    --primary-hover: #3B82F6;
+    --text-primary: #F8FAFC;
+    --text-secondary: #CBD5E1;
+    --text-muted: #94A3B8;
+    --input: #101F36;
+    --input-border: #2A4263;
+  }
+}
+
 /* Hide scrollbars for scrollbar-none utility */
 .scrollbar-none::-webkit-scrollbar {
   display: none !important;
@@ -74,14 +127,4 @@
   animation: float-gentle 4s ease-in-out infinite;
 }
 
-/* Global Dark Mode Hack since the app lacks native dark utility classes */
-html.dark {
-  filter: invert(1) hue-rotate(180deg);
-}
-html.dark img, 
-html.dark video, 
-html.dark [style*="background-image"], 
-html.dark svg {
-  filter: invert(1) hue-rotate(180deg);
-}
-
+/* Removed Global Dark Mode Hack in favor of semantic CSS variables */

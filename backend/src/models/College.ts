@@ -28,6 +28,8 @@ export interface ICollege extends Document {
   admissionProcess?: string;
   admissionLink?: string;
   entranceExams: string[];
+  acceptedExamsRef?: mongoose.Types.ObjectId[];
+  offeredBranchesRef?: mongoose.Types.ObjectId[];
   eligibility?: string;
   fees?: {
     tuition?: string;
@@ -87,6 +89,8 @@ const CollegeSchema: Schema = new Schema({
   admissionProcess: { type: String },
   admissionLink: { type: String },
   entranceExams: [{ type: String }],
+  acceptedExamsRef: [{ type: Schema.Types.ObjectId, ref: 'Exam' }],
+  offeredBranchesRef: [{ type: Schema.Types.ObjectId, ref: 'Branch' }],
   eligibility: { type: String },
   fees: {
     tuition: { type: String },

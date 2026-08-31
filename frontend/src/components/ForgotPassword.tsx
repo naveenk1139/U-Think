@@ -98,20 +98,20 @@ export const ForgotPassword: React.FC<ForgotPasswordProps> = ({ onNavigate }) =>
   };
 
   return (
-    <div className="min-h-screen bg-slate-50/70 flex flex-col justify-center items-center p-4">
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-[0_2px_8px_rgba(0,0,0,0.04)] w-full max-w-[420px] p-5 sm:p-8">
+    <div className="min-h-screen bg-background/70 flex flex-col justify-center items-center p-4">
+      <div className="bg-card rounded-2xl border border-border shadow-[0_2px_8px_rgba(0,0,0,0.04)] w-full max-w-[420px] p-5 sm:p-8">
         <button
           type="button"
           onClick={() => step > 1 ? setStep((s) => s - 1 as any) : onNavigate('login')}
-          className="flex items-center gap-1.5 text-slate-500 hover:text-slate-800 text-[13px] font-medium mb-6 cursor-pointer transition-colors"
+          className="flex items-center gap-1.5 text-text-muted hover:text-text-primary text-[13px] font-medium mb-6 cursor-pointer transition-colors"
         >
           <ArrowLeft className="w-4 h-4" /> Back
         </button>
 
-        <h2 className="text-2xl font-bold text-slate-900 mb-1.5 tracking-tight">
+        <h2 className="text-2xl font-bold text-text-primary mb-1.5 tracking-tight">
           Forgot Password
         </h2>
-        <p className="text-[15px] text-slate-600 mb-6 font-normal">
+        <p className="text-[15px] text-text-secondary mb-6 font-normal">
           {step === 1 && "Enter your registered email or mobile number to reset your password."}
           {step === 2 && "Enter the 6-digit code sent to your email/mobile."}
           {step === 3 && "Create a new strong password."}
@@ -135,17 +135,17 @@ export const ForgotPassword: React.FC<ForgotPasswordProps> = ({ onNavigate }) =>
         {step === 1 && (
           <form onSubmit={handleRequestOtp} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-[13px] font-semibold text-slate-700">Email or Mobile Number</label>
+              <label className="text-[13px] font-semibold text-text-primary">Email or Mobile Number</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-slate-400" />
+                  <Mail className="h-5 w-5 text-text-muted" />
                 </div>
                 <input
                   type="text"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@example.com or +91..."
-                  className="w-full pl-11 pr-4 py-3 bg-white border border-slate-300 rounded-xl text-[15px] focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-colors text-slate-700"
+                  className="w-full pl-11 pr-4 py-3 bg-card border border-border rounded-xl text-[15px] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors text-text-primary"
                   required
                 />
               </div>
@@ -153,7 +153,7 @@ export const ForgotPassword: React.FC<ForgotPasswordProps> = ({ onNavigate }) =>
             <button
               type="submit"
               disabled={submitting || !email}
-              className="w-full bg-[#2563EB] hover:bg-blue-700 text-white font-medium py-3 rounded-xl transition-colors shadow-sm text-[16px] cursor-pointer disabled:opacity-50"
+              className="w-full bg-[#2563EB] hover:bg-primary-hover text-white font-medium py-3 rounded-xl transition-colors shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none text-[16px] cursor-pointer disabled:opacity-50"
             >
               {submitting ? 'Sending...' : 'Send OTP'}
             </button>
@@ -176,15 +176,15 @@ export const ForgotPassword: React.FC<ForgotPasswordProps> = ({ onNavigate }) =>
                   onKeyDown={(e) => handleOtpKeyDown(i, e)}
                   onFocus={(e) => e.target.select()}
                   className={`w-10 h-12 sm:w-12 sm:h-14 text-center text-xl sm:text-2xl font-bold rounded-xl border-2 transition-all outline-none
-                    ${val ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-slate-300 bg-white text-slate-900'}
-                    focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20`}
+                    ${val ? 'border-primary bg-blue-50 text-primary-hover' : 'border-border bg-card text-text-primary'}
+                    focus:border-primary focus:ring-2 focus:ring-primary/20`}
                 />
               ))}
             </div>
             <button
               type="submit"
               disabled={otpValues.join('').length < OTP_LENGTH}
-              className="w-full bg-[#2563EB] hover:bg-blue-700 text-white font-medium py-3 rounded-xl transition-colors shadow-sm text-[16px] cursor-pointer disabled:opacity-50"
+              className="w-full bg-[#2563EB] hover:bg-primary-hover text-white font-medium py-3 rounded-xl transition-colors shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none text-[16px] cursor-pointer disabled:opacity-50"
             >
               Verify OTP
             </button>
@@ -195,34 +195,34 @@ export const ForgotPassword: React.FC<ForgotPasswordProps> = ({ onNavigate }) =>
         {step === 3 && !successMsg && (
           <form onSubmit={handleResetPassword} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-[13px] font-semibold text-slate-700">New Password</label>
+              <label className="text-[13px] font-semibold text-text-primary">New Password</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-slate-400" />
+                  <Lock className="h-5 w-5 text-text-muted" />
                 </div>
                 <input
                   type="password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-11 pr-4 py-3 bg-white border border-slate-300 rounded-xl text-[15px] focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-colors text-slate-700 font-medium"
+                  className="w-full pl-11 pr-4 py-3 bg-card border border-border rounded-xl text-[15px] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors text-text-primary font-medium"
                   required
                   minLength={6}
                 />
               </div>
             </div>
             <div className="space-y-1.5">
-              <label className="text-[13px] font-semibold text-slate-700">Confirm Password</label>
+              <label className="text-[13px] font-semibold text-text-primary">Confirm Password</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-slate-400" />
+                  <Lock className="h-5 w-5 text-text-muted" />
                 </div>
                 <input
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-11 pr-4 py-3 bg-white border border-slate-300 rounded-xl text-[15px] focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-colors text-slate-700 font-medium"
+                  className="w-full pl-11 pr-4 py-3 bg-card border border-border rounded-xl text-[15px] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors text-text-primary font-medium"
                   required
                   minLength={6}
                 />
@@ -231,7 +231,7 @@ export const ForgotPassword: React.FC<ForgotPasswordProps> = ({ onNavigate }) =>
             <button
               type="submit"
               disabled={submitting}
-              className="w-full bg-[#2563EB] hover:bg-blue-700 text-white font-medium py-3 rounded-xl transition-colors shadow-sm text-[16px] mt-3 cursor-pointer disabled:opacity-50"
+              className="w-full bg-[#2563EB] hover:bg-primary-hover text-white font-medium py-3 rounded-xl transition-colors shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none text-[16px] mt-3 cursor-pointer disabled:opacity-50"
             >
               {submitting ? 'Resetting...' : 'Reset Password'}
             </button>

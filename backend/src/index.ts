@@ -5,6 +5,19 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { connectDB } from './config/db.js';
 
+// Pre-register all models to prevent MissingSchemaError on dynamic populate
+import './models/EducationLevel.js';
+import './models/Pathway.js';
+import './models/Stream.js';
+import './models/Subject.js';
+import './models/SubjectCombination.js';
+import './models/Course.js';
+import './models/Branch.js';
+import './models/Specialization.js';
+import './models/College.js';
+import './models/Career.js';
+import './models/Exam.js';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -26,6 +39,8 @@ import assessmentRoutes from './routes/assessmentRoutes.js';
 import mentorRoutes from './routes/mentorRoutes.js';
 import degreeRoutes from './routes/degreeRoutes.js';
 import statsRoutes from './routes/statsRoutes.js';
+import branchRoutes from './routes/branchRoutes.js';
+import { getPathwayTree, getPathwayStats, getFilteredPathways } from './controllers/pathwayController.js';
 
 // Middleware
 import { errorHandler } from './middleware/errorHandler.js';
@@ -78,6 +93,12 @@ app.use('/api/assessment', assessmentRoutes);
 app.use('/api/mentors', mentorRoutes);
 app.use('/api/degrees', degreeRoutes);
 app.use('/api/stats', statsRoutes);
+app.use('/api/branches', branchRoutes);
+
+// Public Catalog API
+app.get('/api/education-catalog', getPathwayTree);
+app.get('/api/education-catalog/stats', getPathwayStats);
+app.get('/api/education-catalog/search', getFilteredPathways);
 
 // ─── Global Error Handler ─────────────────────────────────────────
 app.use(errorHandler);

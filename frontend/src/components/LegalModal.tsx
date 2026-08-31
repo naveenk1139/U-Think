@@ -13,14 +13,14 @@ export const LegalModal: React.FC<LegalModalProps> = ({ isOpen, onClose, title, 
 
   return (
     <div className="fixed inset-0 bg-slate-900/50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-2xl p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto shadow-xl">
+      <div className="bg-card rounded-2xl p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto shadow-xl">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-slate-900">{title}</h2>
-          <button onClick={onClose} className="text-slate-500 hover:text-slate-900">
+          <h2 className="text-xl font-bold text-text-primary">{title}</h2>
+          <button onClick={onClose} className="text-text-muted hover:text-text-primary">
             <X className="w-6 h-6" />
           </button>
         </div>
-        <div className="prose prose-slate prose-sm text-slate-600">
+        <div className="prose prose-slate prose-sm text-text-secondary">
           {children}
         </div>
       </div>

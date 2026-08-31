@@ -4,7 +4,6 @@ import { LegalModal } from './components/LegalModal';
 import Sidebar from './components/Sidebar';
 import TopBar from './components/TopBar';
 import Home from './components/Home';
-import StreamsList from './components/StreamsList';
 import AptitudeQuiz from './AptitudeQuiz';
 import JobFinder from './components/JobFinder';
 import SavedJobs from './components/SavedJobs';
@@ -12,6 +11,10 @@ import PathwaysExplorer from './components/PathwaysExplorer';
 import MentorshipProgram from './components/MentorshipProgram';
 import AICounselorModal from './components/AICounselorModal';
 import ExamsDirectory from './components/ExamsDirectory';
+import ExamDetail from './components/ExamDetail';
+import DegreeDetail from './components/DegreeDetail';
+import BranchDetail from './components/BranchDetail';
+import CourseDetail from './components/CourseDetail';
 
 import CollegesDirectory from './components/CollegesDirectory';
 import StudentDashboard from './components/StudentDashboard';
@@ -96,7 +99,7 @@ function AppShell() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50/70 text-slate-800 flex selection:bg-blue-100 selection:text-blue-800">
+    <div className="min-h-screen bg-background text-text-primary flex selection:bg-blue-100 selection:text-blue-800">
 
       {/* Sidebar */}
       <Sidebar />
@@ -108,7 +111,7 @@ function AppShell() {
         <TopBar />
 
         {/* Main Content */}
-        <main className="flex-1 max-w-7xl w-full mx-auto px-8 py-8">
+        <main className="flex-1 w-full px-4 sm:px-8 py-8">
 
         {/* System Live Banner */}
         {location.pathname !== '/' && (
@@ -131,14 +134,17 @@ function AppShell() {
         )}
 
         {/* Routed Pages */}
-        <div className="bg-white/40 rounded-3xl min-h-[500px]">
+        <div className="bg-card/40 rounded-3xl min-h-[500px]">
           <Routes>
             <Route path="/" element={<Home onNavigate={(tab) => navigate(`/${tab === 'home' ? '' : tab}`)} onOpenCounselor={() => setIsCounselorOpen(true)} />} />
-            <Route path="/streams" element={<StreamsList />} />
+            <Route path="/streams" element={<PathwaysExplorer />} />
             <Route path="/colleges" element={<CollegesDirectory />} />
-            <Route path="/exams" element={<ExamsDirectory key="exams-tab" initialTab="exams" onNavigateToSpec={navigateToSpecializationDetail} onNavigateToJobExplorer={navigateToJobExplorer} />} />
-            <Route path="/degrees" element={<ExamsDirectory key="degrees-tab" initialTab="degrees" onNavigateToSpec={navigateToSpecializationDetail} onNavigateToJobExplorer={navigateToJobExplorer} />} />
-            <Route path="/specializations" element={<ExamsDirectory key="specializations-tab" initialTab="specializations" onNavigateToSpec={navigateToSpecializationDetail} onNavigateToJobExplorer={navigateToJobExplorer} />} />
+            <Route path="/branches/:slug" element={<BranchDetail />} />
+            <Route path="/exams" element={<ExamsDirectory key="exams-tab" initialTab="exams" />} />
+            <Route path="/exams/:examId" element={<ExamDetail />} />
+            <Route path="/degrees" element={<ExamsDirectory key="degrees-tab" initialTab="degrees" />} />
+            <Route path="/degrees/:degreeId" element={<DegreeDetail />} />
+            <Route path="/specializations" element={<ExamsDirectory key="specializations-tab" initialTab="specializations" />} />
             <Route
               path="/specialization_detail"
               element={
@@ -158,6 +164,11 @@ function AppShell() {
             <Route path="/jobs" element={<JobFinder initialRole={selectedJobRole} />} />
             <Route path="/saved-jobs" element={<SavedJobs />} />
             <Route path="/pathways" element={<PathwaysExplorer />} />
+            <Route path="/pathways/:levelSlug" element={<PathwaysExplorer />} />
+            <Route path="/pathways/:levelSlug/:pathwaySlug" element={<PathwaysExplorer />} />
+            <Route path="/pathways/:levelSlug/:pathwaySlug/:streamSlug" element={<PathwaysExplorer />} />
+            <Route path="/pathways/:levelSlug/:pathwaySlug/:streamSlug/:comboSlug" element={<PathwaysExplorer />} />
+            <Route path="/courses/:courseSlug" element={<CourseDetail />} />
             <Route path="/applications" element={<ApplicationTracker />} />
             <Route path="/admin/jobs" element={<AdminJobPanel />} />
             <Route path="/mentorship" element={<MentorshipProgram />} />
@@ -172,41 +183,41 @@ function AppShell() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-slate-100 mt-16 font-sans">
+      <footer className="bg-card border-t border-border mt-16 font-sans">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="space-y-4 col-span-1 md:col-span-2">
               <div className="flex items-center gap-2">
-                <div className="bg-blue-600 text-white p-2 rounded-xl">
+                <div className="bg-primary text-white p-2 rounded-xl">
                   <Compass className="w-5 h-5" />
                 </div>
-                <span className="text-base font-extrabold text-slate-900 tracking-tight">U THINK India</span>
+                <span className="text-base font-extrabold text-text-primary tracking-tight">U THINK India</span>
               </div>
-              <p className="text-xs text-slate-500 leading-relaxed max-w-sm">
+              <p className="text-xs text-text-muted leading-relaxed max-w-sm">
                 A modern technical platform assisting students and young graduates with verified options, career analysis, simulated industry professionals, and aptitude tools after passing their 10th-grade secondary certifications.
               </p>
             </div>
 
             <div className="space-y-3">
-              <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Platform modules</h4>
-              <ul className="space-y-2 text-xs font-medium text-slate-600 font-sans">
-                <li><button onClick={() => navigate('/')} className="hover:text-blue-600 cursor-pointer font-bold">🏠 Home & Mission</button></li>
-                <li><button onClick={() => navigate('/streams')} className="hover:text-blue-600 cursor-pointer">Academic Streams</button></li>
-                <li><button onClick={() => navigate('/quiz')} className="hover:text-blue-600 cursor-pointer">Aptitude Assessment</button></li>
-                <li><button onClick={() => navigate('/jobs')} className="hover:text-blue-600 cursor-pointer">Job Explorer</button></li>
+              <h4 className="text-xs font-bold text-text-muted uppercase tracking-wider">Platform modules</h4>
+              <ul className="space-y-2 text-xs font-medium text-text-secondary font-sans">
+                <li><button onClick={() => navigate('/')} className="hover:text-primary cursor-pointer font-bold">🏠 Home & Mission</button></li>
+                <li><button onClick={() => navigate('/streams')} className="hover:text-primary cursor-pointer">Academic Streams</button></li>
+                <li><button onClick={() => navigate('/quiz')} className="hover:text-primary cursor-pointer">Aptitude Assessment</button></li>
+                <li><button onClick={() => navigate('/jobs')} className="hover:text-primary cursor-pointer">Job Explorer</button></li>
               </ul>
             </div>
 
             <div className="space-y-3">
-              <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Counselor Channels</h4>
-              <ul className="space-y-2 text-xs font-medium text-slate-600">
-                <li><button onClick={() => setIsCounselorOpen(true)} className="hover:text-blue-600 cursor-pointer text-left">💬 Chat with AI Advisor (NEET/JEE info)</button></li>
-                <li><button onClick={() => navigate('/mentorship')} className="hover:text-blue-600 cursor-pointer text-left">🤝 Connect with Industry Mentors</button></li>
+              <h4 className="text-xs font-bold text-text-muted uppercase tracking-wider">Counselor Channels</h4>
+              <ul className="space-y-2 text-xs font-medium text-text-secondary">
+                <li><button onClick={() => setIsCounselorOpen(true)} className="hover:text-primary cursor-pointer text-left">💬 Chat with AI Advisor (NEET/JEE info)</button></li>
+                <li><button onClick={() => navigate('/mentorship')} className="hover:text-primary cursor-pointer text-left">🤝 Connect with Industry Mentors</button></li>
               </ul>
             </div>
           </div>
 
-          <div className="border-t border-slate-100 mt-10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-slate-400 font-medium">
+          <div className="border-t border-border mt-10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-text-muted font-medium">
             <p>© {new Date().getFullYear()} U THINK. All rights reserved. Empowering post-10th student careers.</p>
             <div className="flex gap-4">
               <button onClick={() => setLegalModal({ isOpen: true, type: 'terms' })} className="hover:underline">Terms of Guidance</button>

@@ -1,0 +1,291 @@
+[
+  {
+    "_id": "6a94248b2d44333befb914fa",
+    "name": "After 10th",
+    "slug": "after-10th",
+    "order": 1,
+    "active": true,
+    "createdAt": "2026-08-30T12:39:39.878Z",
+    "updatedAt": "2026-08-30T12:39:39.878Z",
+    "__v": 0,
+    "pathways": [
+      {
+        "_id": "6a94248b2d44333befb914fe",
+        "educationLevelId": "6a94248b2d44333befb914fa",
+        "name": "12th / PUC / Intermediate",
+        "slug": "12th-intermediate",
+        "duration": "2 Years",
+        "order": 1,
+        "active": true,
+        "createdAt": "2026-08-30T12:39:39.883Z",
+        "updatedAt": "2026-08-30T12:39:39.883Z",
+        "__v": 0,
+        "streams": [
+          {
+            "_id": "6a94248b2d44333befb91500",
+            "pathwayId": "6a94248b2d44333befb914fe",
+            "name": "Science",
+            "slug": "12th-science",
+            "aliases": "",
+            "duration": "2 Years",
+            "typicalStructure": "I PUC II PUC",
+            "order": 1,
+            "active": true,
+            "createdAt": "2026-08-30T12:39:39.886Z",
+            "updatedAt": "2026-08-30T12:39:39.886Z",
+            "__v": 0,
+            "courseCount": 0,
+            "comboCount": 7
+          },
+          {
+            "_id": "6a94248b2d44333befb91502",
+            "pathwayId": "6a94248b2d44333befb914fe",
+            "name": "Commerce",
+            "slug": "12th-commerce",
+            "aliases": "",
+            "duration": "2 Years",
+            "typicalStructure": "",
+            "order": 2,
+            "active": true,
+            "createdAt": "2026-08-30T12:39:39.888Z",
+            "updatedAt": "2026-08-30T12:39:39.888Z",
+            "__v": 0,
+            "courseCount": 0,
+            "comboCount": 5
+          },
+          {
+            "_id": "6a94248b2d44333befb91504",
+            "pathwayId": "6a94248b2d44333befb914fe",
+            "name": "Arts / Humanities",
+            "slug": "12th-arts",
+            "aliases": "",
+            "duration": "2 Years",
+            "typicalStructure": "",
+            "order": 3,
+            "active": true,
+            "createdAt": "2026-08-30T12:39:39.889Z",
+            "updatedAt": "2026-08-30T12:39:39.889Z",
+            "__v": 0,
+            "courseCount": 0,
+            "comboCount": 8
+          }
+        ]
+      },
+      {
+        "_id": "6a94248b2d44333befb91506",
+        "educationLevelId": "6a94248b2d44333befb914fa",
+        "name": "Diploma / Polytechnic",
+        "slug": "diploma-polytechnic",
+        "duration": "3 Years",
+        "order": 2,
+        "active": true,
+        "createdAt": "2026-08-30T12:39:39.89Z",
+        "updatedAt": "2026-08-30T12:39:39.89Z",
+        "__v": 0,
+        "streams": [
+          {
+            "_id": "6a94248b2d44333befb91508",
+            "pathwayId": "6a94248b2d44333befb91506",
+            "name": "Engineering",
+            "slug": "diploma-eng",
+            "aliases": "",
+            "typicalStructure": "",
+            "order": 1,
+            "active": true,
+            "createdAt": "2026-08-30T12:39:39.891Z",
+            "updatedAt": "2026-08-30T12:39:39.891Z",
+            "__v": 0,
+            "courseCount": 0,
+            "comboCount": 11
+          },
+          {
+            "_id": "6a94248b2d44333befb9150a",
+            "pathwayId": "6a94248b2d44333befb91506",
+            "name": "Non-Engineering",
+            "slug": "diploma-non-eng",
+            "aliases": "",
+            "typicalStructure": "",
+            "order": 2,
+            "active": true,
+            "createdAt": "2026-08-30T12:39:39.893Z",
+            "updatedAt": "2026-08-30T12:39:39.893Z",
+            "__v": 0,
+            "courseCount": 0,
+            "comboCount": 3
+          },
+          {
+            "_id": "6a94248b2d44333befb9150c",
+            "pathwayId": "6a94248b2d44333befb91506",
+            "name": "Specialised Diploma",
+            "slug": "diploma-spec",
+            "aliases": "",
+            "typicalStructure": "",
+            "order": 3,
+            "active": true,
+            "createdAt": "2026-08-30T12:39:39.894Z",
+            "updatedAt": "2026-08-30T12:39:39.894Z",
+            "__v": 0,
+            "courseCount": 0,
+            "comboCount": 4
+          }
+        ]
+      },
+      {
+        "_id": "6a94248b2d44333befb9150e",
+        "educationLevelId": "6a94248b2d44333befb914fa",
+        "name": "ITI (Industrial Training Institute)",
+        "slug": "iti",
+        "duration": "1-2 Years",
+        "order": 3,
+        "active": true,
+        "createdAt": "2026-08-30T12:39:39.895Z",
+        "updatedAt": "2026-08-30T12:39:39.895Z",
+        "__v": 0,
+        "streams": [
+          {
+            "_id": "6a94248b2d44333befb91510",
+            "pathwayId": "6a94248b2d44333befb9150e",
+            "name": "ITI Trades",
+            "slug": "iti-trades",
+            "aliases": "",
+            "typicalStructure": "",
+            "order": 1,
+            "active": true,
+            "createdAt": "2026-08-30T12:39:39.897Z",
+            "updatedAt": "2026-08-30T12:39:39.897Z",
+            "__v": 0,
+            "courseCount": 0,
+            "comboCount": 12
+          }
+        ]
+      },
+      {
+        "_id": "6a94248b2d44333befb91512",
+        "educationLevelId": "6a94248b2d44333befb914fa",
+        "name": "Paramedical / Allied Health",
+        "slug": "paramedical",
+        "duration": "2-3 Years",
+        "order": 4,
+        "active": true,
+        "createdAt": "2026-08-30T12:39:39.898Z",
+        "updatedAt": "2026-08-30T12:39:39.898Z",
+        "__v": 0,
+        "streams": [
+          {
+            "_id": "6a94248b2d44333befb91514",
+            "pathwayId": "6a94248b2d44333befb91512",
+            "name": "Paramedical Programs",
+            "slug": "para-programs",
+            "aliases": "",
+            "typicalStructure": "",
+            "order": 1,
+            "active": true,
+            "createdAt": "2026-08-30T12:39:39.899Z",
+            "updatedAt": "2026-08-30T12:39:39.899Z",
+            "__v": 0,
+            "courseCount": 0,
+            "comboCount": 10
+          }
+        ]
+      },
+      {
+        "_id": "6a94248b2d44333befb91516",
+        "educationLevelId": "6a94248b2d44333befb914fa",
+        "name": "Vocational / Skill Education",
+        "slug": "vocational",
+        "duration": "Varies",
+        "order": 5,
+        "active": true,
+        "createdAt": "2026-08-30T12:39:39.9Z",
+        "updatedAt": "2026-08-30T12:39:39.9Z",
+        "__v": 0,
+        "streams": [
+          {
+            "_id": "6a94248b2d44333befb91518",
+            "pathwayId": "6a94248b2d44333befb91516",
+            "name": "Vocational Sectors",
+            "slug": "voc-sectors",
+            "aliases": "",
+            "typicalStructure": "",
+            "order": 1,
+            "active": true,
+            "createdAt": "2026-08-30T12:39:39.901Z",
+            "updatedAt": "2026-08-30T12:39:39.901Z",
+            "__v": 0,
+            "courseCount": 0,
+            "comboCount": 10
+          }
+        ]
+      },
+      {
+        "_id": "6a94248b2d44333befb9151a",
+        "educationLevelId": "6a94248b2d44333befb914fa",
+        "name": "Apprenticeship / Skill Training",
+        "slug": "apprenticeship",
+        "duration": "Varies",
+        "order": 6,
+        "active": true,
+        "createdAt": "2026-08-30T12:39:39.903Z",
+        "updatedAt": "2026-08-30T12:39:39.903Z",
+        "__v": 0,
+        "streams": [
+          {
+            "_id": "6a94248b2d44333befb9151c",
+            "pathwayId": "6a94248b2d44333befb9151a",
+            "name": "Apprenticeship Sectors",
+            "slug": "app-sectors",
+            "aliases": "",
+            "typicalStructure": "",
+            "order": 1,
+            "active": true,
+            "createdAt": "2026-08-30T12:39:39.906Z",
+            "updatedAt": "2026-08-30T12:39:39.906Z",
+            "__v": 0,
+            "courseCount": 0,
+            "comboCount": 6
+          }
+        ]
+      },
+      {
+        "_id": "6a94248b2d44333befb9151e",
+        "educationLevelId": "6a94248b2d44333befb914fa",
+        "name": "Other Recognised Pathways",
+        "slug": "other-pathways",
+        "duration": "Varies",
+        "order": 7,
+        "active": true,
+        "createdAt": "2026-08-30T12:39:39.908Z",
+        "updatedAt": "2026-08-30T12:39:39.908Z",
+        "__v": 0,
+        "streams": [
+          {
+            "_id": "6a94248b2d44333befb91520",
+            "pathwayId": "6a94248b2d44333befb9151e",
+            "name": "Alternative Pathways",
+            "slug": "other-streams",
+            "aliases": "",
+            "typicalStructure": "",
+            "order": 1,
+            "active": true,
+            "createdAt": "2026-08-30T12:39:39.91Z",
+            "updatedAt": "2026-08-30T12:39:39.91Z",
+            "__v": 0,
+            "courseCount": 0,
+            "comboCount": 4
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "_id": "6a94248b2d44333befb914fc",
+    "name": "After 12th",
+    "slug": "after-12th",
+    "order": 2,
+    "active": true,
+    "createdAt": "2026-08-30T12:39:39.881Z",
+    "updatedAt": "2026-08-30T12:39:39.881Z",
+    "__v": 0,
+    "pathways": []
+  }
+]

@@ -206,27 +206,27 @@ export const Login: React.FC<LoginProps> = ({ onNavigate, initialMode = 'login' 
   };
 
   return (
-    <div className="min-h-screen bg-slate-50/70 flex flex-col justify-center items-center p-4">
+    <div className="min-h-screen bg-background/70 flex flex-col justify-center items-center p-4">
 
       {/* Logo */}
       <div className="flex flex-col items-center mb-10">
-        <div className="bg-blue-600 p-3.5 rounded-2xl mb-5 shadow-sm">
+        <div className="bg-primary p-3.5 rounded-2xl mb-5 shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none">
           <BrainCircuit className="w-9 h-9 text-white" />
         </div>
-        <h1 className="text-2xl font-bold text-blue-700 tracking-tight mb-2">U THINK</h1>
-        <p className="text-[15px] text-slate-700 font-medium">Empowering Your Career Journey</p>
+        <h1 className="text-2xl font-bold text-primary-hover tracking-tight mb-2">U THINK</h1>
+        <p className="text-[15px] text-text-primary font-medium">Empowering Your Career Journey</p>
       </div>
 
       {/* Card */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-[0_2px_8px_rgba(0,0,0,0.04)] w-full max-w-[420px] p-5 sm:p-8">
+      <div className="bg-card rounded-2xl border border-border shadow-[0_2px_8px_rgba(0,0,0,0.04)] w-full max-w-[420px] p-5 sm:p-8">
 
         {/* ═══════════════ STEP 1: Credentials ═══════════════ */}
         {step === 'credentials' && (
           <>
-            <h2 className="text-2xl font-bold text-slate-900 mb-1.5 tracking-tight">
+            <h2 className="text-2xl font-bold text-text-primary mb-1.5 tracking-tight">
               {isLogin ? 'Welcome Back' : 'Create an Account'}
             </h2>
-            <p className="text-[15px] text-slate-600 mb-6 font-normal">
+            <p className="text-[15px] text-text-secondary mb-6 font-normal">
               {isLogin ? 'Sign in to continue your path' : 'Sign up to start your journey'}
             </p>
 
@@ -241,17 +241,17 @@ export const Login: React.FC<LoginProps> = ({ onNavigate, initialMode = 'login' 
               {!isLogin && (
                 <div className="space-y-4">
                   <div className="space-y-1.5">
-                    <label className="text-[13px] font-semibold text-slate-700">Full Name</label>
+                    <label className="text-[13px] font-semibold text-text-primary">Full Name</label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                        <UserIcon className="h-5 w-5 text-slate-400" />
+                        <UserIcon className="h-5 w-5 text-text-muted" />
                       </div>
                       <input
                         type="text"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         placeholder="John Doe"
-                        className="w-full pl-11 pr-4 py-3 bg-white border border-slate-300 rounded-xl text-[15px] focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-colors text-slate-700 placeholder-slate-500"
+                        className="w-full pl-11 pr-4 py-3 bg-card border border-border rounded-xl text-[15px] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors text-text-primary placeholder-slate-500"
                         required={!isLogin}
                       />
                     </div>
@@ -260,41 +260,41 @@ export const Login: React.FC<LoginProps> = ({ onNavigate, initialMode = 'login' 
               )}
 
               <div className="space-y-1.5">
-                <label className="text-[13px] font-semibold text-slate-700">Email Address</label>
+                <label className="text-[13px] font-semibold text-text-primary">Email Address</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                    <Mail className="h-5 w-5 text-slate-400" />
+                    <Mail className="h-5 w-5 text-text-muted" />
                   </div>
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="name@example.com"
-                    className="w-full pl-11 pr-4 py-3 bg-white border border-slate-300 rounded-xl text-[15px] focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-colors text-slate-700 placeholder-slate-500"
+                    className="w-full pl-11 pr-4 py-3 bg-card border border-border rounded-xl text-[15px] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors text-text-primary placeholder-slate-500"
                     required
                   />
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[13px] font-semibold text-slate-700">Password</label>
+                <label className="text-[13px] font-semibold text-text-primary">Password</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                    <Lock className="h-5 w-5 text-slate-400" />
+                    <Lock className="h-5 w-5 text-text-muted" />
                   </div>
                   <input
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className={`w-full pl-11 pr-11 py-3 bg-white border border-slate-300 rounded-xl text-[15px] focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-colors text-slate-700 font-medium placeholder-slate-500 ${!showPassword && 'tracking-widest'}`}
+                    className={`w-full pl-11 pr-11 py-3 bg-card border border-border rounded-xl text-[15px] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors text-text-primary font-medium placeholder-slate-500 ${!showPassword && 'tracking-widest'}`}
                     required
                     minLength={6}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-text-muted hover:text-text-secondary transition-colors cursor-pointer"
                   >
                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
@@ -303,24 +303,24 @@ export const Login: React.FC<LoginProps> = ({ onNavigate, initialMode = 'login' 
 
               {!isLogin && (
                 <div className="space-y-1.5">
-                  <label className="text-[13px] font-semibold text-slate-700">Confirm Password</label>
+                  <label className="text-[13px] font-semibold text-text-primary">Confirm Password</label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                      <Lock className="h-5 w-5 text-slate-400" />
+                      <Lock className="h-5 w-5 text-text-muted" />
                     </div>
                     <input
                       type={showConfirmPassword ? "text" : "password"}
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       placeholder="••••••••"
-                      className={`w-full pl-11 pr-11 py-3 bg-white border border-slate-300 rounded-xl text-[15px] focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-colors text-slate-700 font-medium placeholder-slate-500 ${!showConfirmPassword && 'tracking-widest'}`}
+                      className={`w-full pl-11 pr-11 py-3 bg-card border border-border rounded-xl text-[15px] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors text-text-primary font-medium placeholder-slate-500 ${!showConfirmPassword && 'tracking-widest'}`}
                       required
                       minLength={6}
                     />
                     <button
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+                      className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-text-muted hover:text-text-secondary transition-colors cursor-pointer"
                     >
                       {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
@@ -335,14 +335,14 @@ export const Login: React.FC<LoginProps> = ({ onNavigate, initialMode = 'login' 
                       id="remember-me"
                       name="remember-me"
                       type="checkbox"
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300 rounded"
+                      className="h-4 w-4 text-primary focus:ring-primary border-border rounded"
                     />
-                    <label htmlFor="remember-me" className="ml-2 block text-[13px] text-slate-700">
+                    <label htmlFor="remember-me" className="ml-2 block text-[13px] text-text-primary">
                       Remember me
                     </label>
                   </div>
                   <div className="text-[13px]">
-                    <button type="button" onClick={() => onNavigate('forgot-password')} className="font-semibold text-blue-600 hover:text-blue-500 cursor-pointer">
+                    <button type="button" onClick={() => onNavigate('forgot-password')} className="font-semibold text-primary hover:text-blue-500 cursor-pointer">
                       Forgot password?
                     </button>
                   </div>
@@ -352,17 +352,17 @@ export const Login: React.FC<LoginProps> = ({ onNavigate, initialMode = 'login' 
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full bg-[#2563EB] hover:bg-blue-700 text-white font-medium py-3 rounded-xl transition-colors shadow-sm text-[16px] mt-3 cursor-pointer disabled:opacity-50"
+                className="w-full bg-[#2563EB] hover:bg-primary-hover text-white font-medium py-3 rounded-xl transition-colors shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none text-[16px] mt-3 cursor-pointer disabled:opacity-50"
               >
                 {submitting ? 'Sending OTP...' : isLogin ? 'Continue' : 'Continue'}
               </button>
             </form>
 
-            <p className="mt-8 text-center text-sm font-medium text-slate-600">
+            <p className="mt-8 text-center text-sm font-medium text-text-secondary">
               {isLogin ? (
-                <>Don't have an account? <button type="button" onClick={() => switchMode(false)} className="text-blue-600 hover:text-blue-700 hover:underline cursor-pointer font-bold">Sign up for free</button></>
+                <>Don't have an account? <button type="button" onClick={() => switchMode(false)} className="text-primary hover:text-primary-hover hover:underline cursor-pointer font-bold">Sign up for free</button></>
               ) : (
-                <>Already have an account? <button type="button" onClick={() => switchMode(true)} className="text-blue-600 hover:text-blue-700 hover:underline cursor-pointer font-bold">Sign in</button></>
+                <>Already have an account? <button type="button" onClick={() => switchMode(true)} className="text-primary hover:text-primary-hover hover:underline cursor-pointer font-bold">Sign in</button></>
               )}
             </p>
           </>
@@ -375,7 +375,7 @@ export const Login: React.FC<LoginProps> = ({ onNavigate, initialMode = 'login' 
             <button
               type="button"
               onClick={() => { setStep('credentials'); setErrorMsg(''); setOtpValues(Array(OTP_LENGTH).fill('')); }}
-              className="flex items-center gap-1.5 text-slate-500 hover:text-slate-800 text-[13px] font-medium mb-6 cursor-pointer transition-colors"
+              className="flex items-center gap-1.5 text-text-muted hover:text-text-primary text-[13px] font-medium mb-6 cursor-pointer transition-colors"
             >
               <ArrowLeft className="w-4 h-4" /> Back
             </button>
@@ -388,16 +388,16 @@ export const Login: React.FC<LoginProps> = ({ onNavigate, initialMode = 'login' 
                 </div>
               ) : (
                 <div className="bg-blue-50 p-4 rounded-2xl mb-4">
-                  <ShieldCheck className="w-9 h-9 text-blue-600" />
+                  <ShieldCheck className="w-9 h-9 text-primary" />
                 </div>
               )}
-              <h2 className="text-xl font-bold text-slate-900 mb-1 tracking-tight text-center">
+              <h2 className="text-xl font-bold text-text-primary mb-1 tracking-tight text-center">
                 {otpSuccess ? 'Verified!' : 'Check your email'}
               </h2>
-              <p className="text-[14px] text-slate-500 text-center leading-relaxed">
+              <p className="text-[14px] text-text-muted text-center leading-relaxed">
                 {otpSuccess
                   ? 'Taking you to your dashboard…'
-                  : <>We sent a 6-digit code to<br /><span className="font-semibold text-slate-700">{pendingEmail}</span></>}
+                  : <>We sent a 6-digit code to<br /><span className="font-semibold text-text-primary">{pendingEmail}</span></>}
               </p>
             </div>
 
@@ -426,9 +426,9 @@ export const Login: React.FC<LoginProps> = ({ onNavigate, initialMode = 'login' 
                         onFocus={(e) => e.target.select()}
                         className={`w-10 h-12 sm:w-12 sm:h-14 text-center text-xl sm:text-2xl font-bold rounded-xl border-2 transition-all outline-none
                           ${val
-                            ? 'border-blue-600 bg-blue-50 text-blue-700'
-                            : 'border-slate-300 bg-white text-slate-900'}
-                          focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20`}
+                            ? 'border-primary bg-blue-50 text-primary-hover'
+                            : 'border-border bg-card text-text-primary'}
+                          focus:border-primary focus:ring-2 focus:ring-primary/20`}
                         aria-label={`OTP digit ${i + 1}`}
                       />
                     ))}
@@ -437,8 +437,8 @@ export const Login: React.FC<LoginProps> = ({ onNavigate, initialMode = 'login' 
                   {/* Countdown */}
                   <div className="text-center mb-4">
                     {countdown > 0 ? (
-                      <p className="text-[13px] text-slate-500">
-                        Code expires in <span className="font-bold text-slate-700 tabular-nums">{formatTime(countdown)}</span>
+                      <p className="text-[13px] text-text-muted">
+                        Code expires in <span className="font-bold text-text-primary tabular-nums">{formatTime(countdown)}</span>
                       </p>
                     ) : (
                       <p className="text-[13px] text-red-500 font-semibold">Code expired. Please resend.</p>
@@ -448,7 +448,7 @@ export const Login: React.FC<LoginProps> = ({ onNavigate, initialMode = 'login' 
                   <button
                     type="submit"
                     disabled={submitting || countdown <= 0 || otpValues.join('').length < OTP_LENGTH}
-                    className="w-full bg-[#2563EB] hover:bg-blue-700 text-white font-medium py-3 rounded-xl transition-colors shadow-sm text-[16px] cursor-pointer disabled:opacity-40"
+                    className="w-full bg-[#2563EB] hover:bg-primary-hover text-white font-medium py-3 rounded-xl transition-colors shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none text-[16px] cursor-pointer disabled:opacity-40"
                   >
                     {submitting ? 'Verifying…' : 'Verify & Continue'}
                   </button>
@@ -456,16 +456,16 @@ export const Login: React.FC<LoginProps> = ({ onNavigate, initialMode = 'login' 
 
                 {/* Resend */}
                 <div className="mt-5 text-center">
-                  <p className="text-[13px] text-slate-500">
+                  <p className="text-[13px] text-text-muted">
                     Didn't receive it?{' '}
                     {resendCooldown > 0 ? (
-                      <span className="text-slate-400 font-medium">Resend in {resendCooldown}s</span>
+                      <span className="text-text-muted font-medium">Resend in {resendCooldown}s</span>
                     ) : (
                       <button
                         type="button"
                         onClick={handleResend}
                         disabled={countdown <= 0 && resendCooldown > 0}
-                        className="inline-flex items-center gap-1 text-blue-600 hover:underline font-bold cursor-pointer"
+                        className="inline-flex items-center gap-1 text-primary hover:underline font-bold cursor-pointer"
                       >
                         <RefreshCw className="w-3.5 h-3.5" /> Resend OTP
                       </button>
@@ -478,9 +478,9 @@ export const Login: React.FC<LoginProps> = ({ onNavigate, initialMode = 'login' 
         )}
       </div>
 
-      <div className="mt-10 flex gap-6 text-xs font-semibold text-slate-500">
-        <a href="#" className="hover:text-slate-800 transition-colors">Privacy Policy</a>
-        <a href="#" className="hover:text-slate-800 transition-colors">Terms of Service</a>
+      <div className="mt-10 flex gap-6 text-xs font-semibold text-text-muted">
+        <a href="#" className="hover:text-text-primary transition-colors">Privacy Policy</a>
+        <a href="#" className="hover:text-text-primary transition-colors">Terms of Service</a>
       </div>
     </div>
   );

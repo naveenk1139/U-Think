@@ -41,7 +41,7 @@ export default function Header({ onOpenCounselor }: HeaderProps) {
   const avatarSrc = customPhotoURL || currentUser?.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=2563EB&color=fff&size=64`;
 
   return (
-    <header id="app-header" className="sticky top-0 z-40 bg-white border-b border-slate-100 shadow-xs">
+    <header id="app-header" className="sticky top-0 z-40 bg-card border-b border-border shadow-xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
 
@@ -50,7 +50,7 @@ export default function Header({ onOpenCounselor }: HeaderProps) {
             <img 
               src="/logo.png" 
               alt="U THINK Logo" 
-              className="h-16 w-auto object-contain drop-shadow-sm hover:scale-105 transition-transform duration-300"
+              className="h-16 w-auto object-contain drop-shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none hover:scale-105 transition-transform duration-300"
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
                 target.onerror = null; // Prevent infinite loops
@@ -72,11 +72,11 @@ export default function Header({ onOpenCounselor }: HeaderProps) {
                   onClick={() => goTo(item.path)}
                   className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
                     isActive
-                      ? 'bg-blue-50 text-blue-700 shadow-2xs'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                      ? 'bg-blue-50 text-primary-hover shadow-2xs'
+                      : 'text-text-secondary hover:text-text-primary hover:bg-background'
                   }`}
                 >
-                  <Icon className={`h-4 w-4 ${isActive ? 'text-blue-600' : 'text-slate-400'}`} />
+                  <Icon className={`h-4 w-4 ${isActive ? 'text-primary' : 'text-text-muted'}`} />
                   {item.label}
                 </button>
               );
@@ -86,7 +86,7 @@ export default function Header({ onOpenCounselor }: HeaderProps) {
           {/* Right: User & AI Counselor */}
           <div className="flex items-center gap-4">
             {currentUser ? (
-              <div className="hidden sm:flex items-center gap-3 pr-2 border-r border-slate-200 shrink-0">
+              <div className="hidden sm:flex items-center gap-3 pr-2 border-r border-border shrink-0">
                 <img
                   onClick={() => goTo('/dashboard')}
                   src={avatarSrc}
@@ -96,13 +96,13 @@ export default function Header({ onOpenCounselor }: HeaderProps) {
                 <div className="flex flex-col items-start justify-center shrink-0">
                   <button
                     onClick={() => goTo('/dashboard')}
-                    className="text-sm font-bold text-slate-700 hover:text-blue-600 cursor-pointer transition-colors leading-tight whitespace-nowrap"
+                    className="text-sm font-bold text-text-primary hover:text-primary cursor-pointer transition-colors leading-tight whitespace-nowrap"
                   >
                     {displayName}
                   </button>
                   <button
                     onClick={logout}
-                    className="text-[11px] font-semibold text-slate-500 hover:text-red-600 cursor-pointer transition-colors whitespace-nowrap"
+                    className="text-[11px] font-semibold text-text-muted hover:text-red-600 cursor-pointer transition-colors whitespace-nowrap"
                   >
                     Logout
                   </button>
@@ -111,7 +111,7 @@ export default function Header({ onOpenCounselor }: HeaderProps) {
             ) : (
               <button
                 onClick={() => goTo('/login')}
-                className="hidden sm:block text-xs font-semibold text-blue-600 hover:text-blue-800 bg-blue-50 px-3 py-2 rounded-lg transition-colors cursor-pointer"
+                className="hidden sm:block text-xs font-semibold text-primary hover:text-blue-800 bg-blue-50 px-3 py-2 rounded-lg transition-colors cursor-pointer"
               >
                 Sign In
               </button>
@@ -120,7 +120,7 @@ export default function Header({ onOpenCounselor }: HeaderProps) {
             <button
               id="btn-trigger-counselor"
               onClick={onOpenCounselor}
-              className="flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-xl transition-all shadow-sm cursor-pointer whitespace-nowrap shrink-0"
+              className="flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-xl transition-all shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none cursor-pointer whitespace-nowrap shrink-0"
             >
               <MessageSquareCode className="h-4 w-4 text-emerald-400 shrink-0" />
               Ask AI Counselor
@@ -130,7 +130,7 @@ export default function Header({ onOpenCounselor }: HeaderProps) {
       </div>
 
       {/* Mobile Nav */}
-      <div className="lg:hidden bg-slate-50 border-t border-slate-100 overflow-x-auto">
+      <div className="lg:hidden bg-background border-t border-border overflow-x-auto">
         <div className="flex items-center px-4 py-2 gap-2 min-w-max">
           {navItems.map((item) => {
             const Icon = item.icon;
@@ -143,8 +143,8 @@ export default function Header({ onOpenCounselor }: HeaderProps) {
                 onClick={() => goTo(item.path)}
                 className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
                   isActive
-                    ? 'bg-blue-600 text-white shadow-sm'
-                    : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
+                    ? 'bg-primary text-white shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none'
+                    : 'bg-card border border-border text-text-primary hover:bg-background'
                 }`}
               >
                 <Icon className="h-3.5 w-3.5" />

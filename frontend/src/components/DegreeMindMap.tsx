@@ -260,15 +260,15 @@ export default function DegreeMindMap({
       
       {/* Instructions Overlay */}
       <div className="absolute top-6 left-8 z-20">
-        <div className="inline-flex items-center px-3 py-1 bg-[#0F172A] text-blue-400 text-[10px] font-black uppercase tracking-widest rounded-full mb-3 border border-blue-500/20 shadow-sm">
+        <div className="inline-flex items-center px-3 py-1 bg-[#0F172A] text-blue-400 text-[10px] font-black uppercase tracking-widest rounded-full mb-3 border border-blue-500/20 shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none">
           Interactive Sandbox
         </div>
         <h2 className="text-2xl font-black text-white tracking-tight">Concentric Degrees Mind Map</h2>
-        <p className="text-slate-400 text-xs mt-1 max-w-md">Drag any node freely to reorganize your personal learning path. Click to filter.</p>
+        <p className="text-text-muted text-xs mt-1 max-w-md">Drag any node freely to reorganize your personal learning path. Click to filter.</p>
       </div>
       
-      <div className="absolute top-8 right-8 z-20 text-xs text-slate-500 font-medium hidden sm:block">
-        Orbiting Nodes: <span className="font-bold text-white">{CATEGORIES.length} Categories</span> <span className="text-slate-700">|</span> <span className="text-blue-400 font-bold">Draggable</span>
+      <div className="absolute top-8 right-8 z-20 text-xs text-text-muted font-medium hidden sm:block">
+        Orbiting Nodes: <span className="font-bold text-white">{CATEGORIES.length} Categories</span> <span className="text-text-primary">|</span> <span className="text-blue-400 font-bold">Draggable</span>
       </div>
 
       {dimensions.width > 0 && (
@@ -380,7 +380,7 @@ export default function DegreeMindMap({
                   `}
                 >
                   <span className="text-xs">{cat.icon}</span>
-                  <span className={`text-[11px] font-extrabold whitespace-nowrap tracking-wide select-none ${isActive ? 'text-white' : 'text-slate-300 group-hover:text-slate-100'}`}>
+                  <span className={`text-[11px] font-extrabold whitespace-nowrap tracking-wide select-none ${isActive ? 'text-white' : 'text-text-muted group-hover:text-slate-100'}`}>
                     {cat.name}
                   </span>
                 </div>
@@ -404,7 +404,7 @@ export default function DegreeMindMap({
             `}>
               <span className="text-2xl mb-1 group-hover:scale-110 transition-transform">🎓</span>
               <span className="text-slate-100 font-black text-[11px] tracking-widest">DEGREE</span>
-              <span className="text-slate-500 text-[9px] font-bold tracking-wider mt-0.5">Central Hub</span>
+              <span className="text-text-muted text-[9px] font-bold tracking-wider mt-0.5">Central Hub</span>
               {Object.keys(offsets).length > 0 && (
                 <span className="absolute bottom-2 text-[8px] text-blue-400 font-bold uppercase tracking-wider scale-90 group-hover:scale-100 transition-all">Reset Layout</span>
               )}

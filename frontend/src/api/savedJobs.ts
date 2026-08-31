@@ -11,21 +11,21 @@ export interface SavedJob extends Partial<Job> {
 }
 
 export const saveJob = (jobData: any) => {
-  return api.post('/saved-jobs', jobData);
+  return api.post('/api/saved-jobs', jobData);
 };
 
 export const getSavedJobs = () => {
-  return api.get('/saved-jobs');
+  return api.get('/api/saved-jobs');
 };
 
 export const checkSavedJobs = () => {
-  return api.get('/saved-jobs/check');
+  return api.get('/api/saved-jobs/check');
 };
 
 export const updateSavedJob = (id: string, updates: any) => {
-  return api.put(`/saved-jobs/${id}`, updates);
+  return api.put(`/api/saved-jobs/${id}`, updates);
 };
 
 export const removeSavedJob = (id: string) => {
-  return api.delete(`/saved-jobs/${id}`);
+  return api.delete(`/api/saved-jobs/${id}`);
 };

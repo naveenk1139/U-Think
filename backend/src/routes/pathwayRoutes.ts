@@ -2,9 +2,18 @@ import { Router, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
 import { protect, AuthRequest } from '../middleware/authMiddleware';
 
+import { getPathwayTree, getFilteredPathways, getPathwayStats, searchPathways } from '../controllers/pathwayController';
+
 const router = Router();
 
+// Public routes for Pathway Explorer
+router.get('/tree', getPathwayTree);
+router.get('/filter', getFilteredPathways);
+router.get('/stats', getPathwayStats);
+router.get('/search', searchPathways);
+
 const getSavedPathwayModel = (): mongoose.Model<any> => {
+
   const existing = mongoose.models.SavedPathway as mongoose.Model<any> | undefined;
   if (existing) {
     return existing;

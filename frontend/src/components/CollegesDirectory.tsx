@@ -195,20 +195,20 @@ export default function CollegesDirectory() {
         <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/20 rounded-full -mr-20 -mt-20 blur-3xl"></div>
         <div className="relative z-10 max-w-3xl">
           <h1 className="text-3xl md:text-5xl font-black mb-4">Discover Your Dream College</h1>
-          <p className="text-slate-300 text-lg mb-8">Search, compare, and get AI-powered recommendations for 10,000+ colleges across India.</p>
+          <p className="text-text-muted text-lg mb-8">Search, compare, and get AI-powered recommendations for 10,000+ colleges across India.</p>
           
-          <div className="bg-white rounded-2xl p-2 flex flex-col md:flex-row gap-2 shadow-xl">
-            <div className="flex-1 flex items-center px-4 bg-slate-50 rounded-xl border border-slate-100 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-200 transition-all">
-              <Search className="w-5 h-5 text-slate-400" />
+          <div className="bg-card rounded-2xl p-2 flex flex-col md:flex-row gap-2 shadow-xl">
+            <div className="flex-1 flex items-center px-4 bg-background rounded-xl border border-border focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-200 transition-all">
+              <Search className="w-5 h-5 text-text-muted" />
               <input 
                 type="text" 
                 placeholder="Search colleges, courses, or cities..." 
-                className="w-full bg-transparent border-none focus:outline-none focus:ring-0 text-slate-800 py-4 px-3"
+                className="w-full bg-transparent border-none focus:outline-none focus:ring-0 text-text-primary py-4 px-3"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <button className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-xl transition-colors">
+            <button className="bg-primary hover:bg-primary-hover text-white font-bold py-4 px-8 rounded-xl transition-colors">
               Find Colleges
             </button>
           </div>
@@ -217,20 +217,20 @@ export default function CollegesDirectory() {
             <button 
               onClick={handleNearMeClick}
               disabled={isLocating}
-              className={`px-4 py-2 rounded-lg text-sm font-bold backdrop-blur-sm transition-colors border flex items-center gap-2 ${sortBy === 'Distance' ? 'bg-blue-600 border-blue-500' : 'bg-white/10 hover:bg-white/20 border-white/10'} ${isLocating ? 'opacity-70 cursor-not-allowed' : ''}`}
+              className={`px-4 py-2 rounded-lg text-sm font-bold backdrop-blur-sm transition-colors border flex items-center gap-2 ${sortBy === 'Distance' ? 'bg-primary border-blue-500' : 'bg-card/10 hover:bg-card/20 border-white/10'} ${isLocating ? 'opacity-70 cursor-not-allowed' : ''}`}
             >
               {isLocating ? <Loader2 className="w-4 h-4 animate-spin" /> : <MapPin className="w-4 h-4" />} {isLocating ? 'Locating...' : 'Near Me'}
             </button>
             <button 
               onClick={() => setSortBy('NIRF Ranking')}
-              className={`px-4 py-2 rounded-lg text-sm font-bold backdrop-blur-sm transition-colors border flex items-center gap-2 ${sortBy === 'NIRF Ranking' ? 'bg-blue-600 border-blue-500' : 'bg-white/10 hover:bg-white/20 border-white/10'}`}
+              className={`px-4 py-2 rounded-lg text-sm font-bold backdrop-blur-sm transition-colors border flex items-center gap-2 ${sortBy === 'NIRF Ranking' ? 'bg-primary border-blue-500' : 'bg-card/10 hover:bg-card/20 border-white/10'}`}
             >
               <Star className="w-4 h-4 text-amber-400" /> Top Ranked
             </button>
             <button 
               onClick={handleAiRecommendClick}
               disabled={isAiThinking}
-              className={`px-4 py-2 rounded-lg text-sm font-bold backdrop-blur-sm transition-colors border flex items-center gap-2 ${sortBy === 'AI Match Score' && Object.keys(aiScores).length > 0 ? 'bg-blue-600 border-blue-500' : 'bg-white/10 hover:bg-white/20 border-white/10'} ${isAiThinking ? 'opacity-70 cursor-not-allowed' : ''}`}
+              className={`px-4 py-2 rounded-lg text-sm font-bold backdrop-blur-sm transition-colors border flex items-center gap-2 ${sortBy === 'AI Match Score' && Object.keys(aiScores).length > 0 ? 'bg-primary border-blue-500' : 'bg-card/10 hover:bg-card/20 border-white/10'} ${isAiThinking ? 'opacity-70 cursor-not-allowed' : ''}`}
             >
               {isAiThinking ? <Loader2 className="w-4 h-4 text-emerald-400 animate-spin" /> : <Zap className="w-4 h-4 text-emerald-400" />} {isAiThinking ? 'AI is Thinking...' : 'AI Recommended'}
             </button>
@@ -245,8 +245,8 @@ export default function CollegesDirectory() {
         <div className="lg:col-span-1 space-y-6">
           
           {/* Categories */}
-          <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm">
-            <h3 className="text-sm font-black text-slate-900 mb-4 uppercase tracking-wider flex items-center gap-2">
+          <div className="bg-card border border-border rounded-2xl p-5 shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none">
+            <h3 className="text-sm font-black text-text-primary mb-4 uppercase tracking-wider flex items-center gap-2">
               <BookOpen className="w-4 h-4 text-indigo-500" /> Categories
             </h3>
             <div className="space-y-1">
@@ -255,17 +255,17 @@ export default function CollegesDirectory() {
                   key={cat}
                   onClick={() => setSelectedCategory(cat)}
                   className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm font-bold transition-colors ${
-                    selectedCategory === cat ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:bg-slate-50'
+                    selectedCategory === cat ? 'bg-indigo-50 text-indigo-700' : 'text-text-secondary hover:bg-background'
                   }`}
                 >
                   <span>{cat}</span>
                   {stats?.categories && cat !== 'All' && stats.categories[cat] > 0 && (
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${selectedCategory === cat ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-100 text-slate-500'}`}>
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${selectedCategory === cat ? 'bg-indigo-100 text-indigo-700' : 'bg-background-secondary text-text-muted'}`}>
                       {stats.categories[cat]}
                     </span>
                   )}
                   {cat === 'All' && stats?.total > 0 && (
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${selectedCategory === 'All' ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-100 text-slate-500'}`}>
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${selectedCategory === 'All' ? 'bg-indigo-100 text-indigo-700' : 'bg-background-secondary text-text-muted'}`}>
                       {stats.total}
                     </span>
                   )}
@@ -276,19 +276,19 @@ export default function CollegesDirectory() {
 
           {/* Sub-Category / Branch Filters */}
           {selectedCategory !== 'All' && CATEGORY_BRANCHES[selectedCategory] && (
-            <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm">
-              <h3 className="text-sm font-black text-slate-900 mb-4 uppercase tracking-wider flex items-center gap-2">
+            <div className="bg-card border border-border rounded-2xl p-5 shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none">
+              <h3 className="text-sm font-black text-text-primary mb-4 uppercase tracking-wider flex items-center gap-2">
                 <Briefcase className="w-4 h-4 text-orange-500" /> {selectedCategory} Branches
               </h3>
               <div className="space-y-2">
                 {CATEGORY_BRANCHES[selectedCategory].map(branch => (
-                  <label key={branch} className="flex items-center gap-2 text-sm font-semibold text-slate-700 cursor-pointer">
+                  <label key={branch} className="flex items-center gap-2 text-sm font-semibold text-text-primary cursor-pointer">
                     <input 
                       type="radio" 
                       name={`${selectedCategory}Branch`} 
                       checked={selectedBranch === branch}
                       onChange={() => setSelectedBranch(branch)}
-                      className="w-4 h-4 rounded-full border-slate-300 text-blue-600 focus:ring-blue-500" 
+                      className="w-4 h-4 rounded-full border-border text-primary focus:ring-primary" 
                     /> {branch}
                   </label>
                 ))}
@@ -297,16 +297,16 @@ export default function CollegesDirectory() {
           )}
 
           {/* Advanced Filters */}
-          <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm">
-            <h3 className="text-sm font-black text-slate-900 mb-4 uppercase tracking-wider flex items-center gap-2">
-              <Filter className="w-4 h-4 text-slate-500" /> Filters
+          <div className="bg-card border border-border rounded-2xl p-5 shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none">
+            <h3 className="text-sm font-black text-text-primary mb-4 uppercase tracking-wider flex items-center gap-2">
+              <Filter className="w-4 h-4 text-text-muted" /> Filters
             </h3>
             
             <div className="space-y-5">
               <div>
-                <label className="text-xs font-bold text-slate-500 block mb-2">Location (Karnataka)</label>
+                <label className="text-xs font-bold text-text-muted block mb-2">Location (Karnataka)</label>
                 <select 
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-700 outline-none focus:border-blue-500"
+                  className="w-full bg-background border border-border rounded-xl px-3 py-2.5 text-sm font-semibold text-text-primary outline-none focus:border-blue-500"
                   value={selectedDistrict}
                   onChange={(e) => setSelectedDistrict(e.target.value)}
                 >
@@ -346,42 +346,42 @@ export default function CollegesDirectory() {
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-500 block mb-2">Institution Type</label>
+                <label className="text-xs font-bold text-text-muted block mb-2">Institution Type</label>
                 <div className="space-y-2">
-                  <label className="flex items-center gap-2 text-sm font-semibold text-slate-700 cursor-pointer">
+                  <label className="flex items-center gap-2 text-sm font-semibold text-text-primary cursor-pointer">
                     <input 
                       type="radio" 
                       name="collegeType" 
                       checked={selectedType === 'All'}
                       onChange={() => setSelectedType('All')}
-                      className="w-4 h-4 rounded-full border-slate-300 text-blue-600 focus:ring-blue-500" 
+                      className="w-4 h-4 rounded-full border-border text-primary focus:ring-primary" 
                     /> All
                   </label>
-                  <label className="flex items-center gap-2 text-sm font-semibold text-slate-700 cursor-pointer">
+                  <label className="flex items-center gap-2 text-sm font-semibold text-text-primary cursor-pointer">
                     <input 
                       type="radio" 
                       name="collegeType"
                       checked={selectedType === 'Government'}
                       onChange={() => setSelectedType('Government')}
-                      className="w-4 h-4 rounded-full border-slate-300 text-blue-600 focus:ring-blue-500" 
+                      className="w-4 h-4 rounded-full border-border text-primary focus:ring-primary" 
                     /> Government
                   </label>
-                  <label className="flex items-center gap-2 text-sm font-semibold text-slate-700 cursor-pointer">
+                  <label className="flex items-center gap-2 text-sm font-semibold text-text-primary cursor-pointer">
                     <input 
                       type="radio" 
                       name="collegeType"
                       checked={selectedType === 'Private'}
                       onChange={() => setSelectedType('Private')}
-                      className="w-4 h-4 rounded-full border-slate-300 text-blue-600 focus:ring-blue-500" 
+                      className="w-4 h-4 rounded-full border-border text-primary focus:ring-primary" 
                     /> Private
                   </label>
                 </div>
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-500 block mb-2">Max Fees (Per Year)</label>
+                <label className="text-xs font-bold text-text-muted block mb-2">Max Fees (Per Year)</label>
                 <input type="range" className="w-full" min="0" max="500000" />
-                <div className="flex justify-between text-xs text-slate-400 font-bold mt-1">
+                <div className="flex justify-between text-xs text-text-muted font-bold mt-1">
                   <span>0</span>
                   <span>5L+</span>
                 </div>
@@ -390,12 +390,12 @@ export default function CollegesDirectory() {
           </div>
 
           {/* AI Banner */}
-          <div className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl p-5 text-white shadow-sm">
+          <div className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl p-5 text-white shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none">
             <h3 className="text-sm font-bold mb-2 flex items-center gap-2">
               <Bot className="w-4 h-4" /> Not sure where to apply?
             </h3>
             <p className="text-xs text-blue-100 mb-4">Let our AI match you with colleges based on your budget, scores, and goals.</p>
-            <button className="w-full bg-white text-blue-600 font-bold text-xs py-2.5 rounded-xl hover:bg-slate-50 transition-colors">
+            <button className="w-full bg-card text-primary font-bold text-xs py-2.5 rounded-xl hover:bg-background transition-colors">
               Find My Match
             </button>
           </div>
@@ -405,18 +405,18 @@ export default function CollegesDirectory() {
         {/* 3. Feed */}
         <div className="lg:col-span-3">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-black text-slate-900">
+            <h2 className="text-xl font-black text-text-primary">
               {selectedCategory === 'All' ? 'All Colleges' : `${selectedCategory} Colleges`}
-              <span className="text-slate-400 text-base font-semibold ml-2">
+              <span className="text-text-muted text-base font-semibold ml-2">
                 — Showing {colleges.length > 0 ? 1 : 0}-{colleges.length} of {totalCollegesCount} in Karnataka
               </span>
             </h2>
-            <div className="flex items-center gap-2 text-sm font-bold text-slate-500">
+            <div className="flex items-center gap-2 text-sm font-bold text-text-muted">
               Sort by: 
               <select 
                 value={sortBy} 
                 onChange={(e) => setSortBy(e.target.value)}
-                className="bg-transparent border-none focus:ring-0 text-slate-800 cursor-pointer outline-none"
+                className="bg-transparent border-none focus:ring-0 text-text-primary cursor-pointer outline-none"
               >
                 <option>AI Match Score</option>
                 <option>Distance</option>
@@ -430,14 +430,14 @@ export default function CollegesDirectory() {
           {/* College Cards */}
           <div className="space-y-4">
             {isLoading ? (
-              <div className="flex flex-col items-center justify-center py-20 text-slate-400">
+              <div className="flex flex-col items-center justify-center py-20 text-text-muted">
                 <Loader2 className="w-10 h-10 animate-spin mb-4 text-blue-500" />
                 <p className="font-bold">Loading Karnataka Colleges...</p>
               </div>
             ) : colleges.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-20 text-slate-400">
-                <Building2 className="w-12 h-12 mb-4 text-slate-300" />
-                <p className="font-bold text-lg text-slate-600">No colleges found</p>
+              <div className="flex flex-col items-center justify-center py-20 text-text-muted">
+                <Building2 className="w-12 h-12 mb-4 text-text-muted" />
+                <p className="font-bold text-lg text-text-secondary">No colleges found</p>
                 <p className="text-sm">Try adjusting your filters or search query.</p>
               </div>
             ) : (
@@ -462,12 +462,12 @@ export default function CollegesDirectory() {
                 <div 
                   key={college._id} 
                   onClick={() => setSelectedCollege(college)}
-                  className="bg-white border border-slate-100 rounded-2xl p-4 sm:p-5 shadow-sm hover:shadow-md hover:border-blue-200 transition-all cursor-pointer group"
+                  className="bg-card border border-border rounded-2xl p-4 sm:p-5 shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none hover:shadow-md hover:border-blue-200 transition-all cursor-pointer group"
                 >
                   <div className="flex flex-col sm:flex-row gap-5">
                     <div className="w-full sm:w-48 h-32 rounded-xl overflow-hidden relative shrink-0">
                       <img src={college.image} alt={college.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                      <div className="absolute top-2 left-2 bg-emerald-500 text-white text-[10px] font-black px-2 py-1 rounded shadow-sm border border-emerald-400">
+                      <div className="absolute top-2 left-2 bg-emerald-500 text-white text-[10px] font-black px-2 py-1 rounded shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none border border-emerald-400">
                         {getMatchScore(college)}% MATCH
                       </div>
                     </div>
@@ -476,10 +476,10 @@ export default function CollegesDirectory() {
                       <div className="flex items-start justify-between gap-4">
                         <div>
                           <div className="flex items-center gap-2">
-                            <h3 className="text-lg font-black text-slate-900 group-hover:text-blue-600 transition-colors">{college.name}</h3>
+                            <h3 className="text-lg font-black text-text-primary group-hover:text-primary transition-colors">{college.name}</h3>
                             {college.isVerified && <BadgeCheck className="w-5 h-5 text-blue-500" />}
                           </div>
-                          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1 text-xs font-semibold text-slate-500">
+                          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1 text-xs font-semibold text-text-muted">
                             <span className="flex items-center gap-1">
                               <MapPin className="w-3.5 h-3.5" /> {college.city}, {college.district}
                               {userLocation && (
@@ -494,7 +494,7 @@ export default function CollegesDirectory() {
                         </div>
                         <button 
                           onClick={(e) => toggleSave(college._id, e)}
-                          className={`p-2 rounded-xl border transition-colors ${savedColleges.includes(college._id) ? 'bg-rose-50 border-rose-100 text-rose-500' : 'bg-white border-slate-200 text-slate-400 hover:bg-slate-50'}`}
+                          className={`p-2 rounded-xl border transition-colors ${savedColleges.includes(college._id) ? 'bg-rose-50 border-rose-100 text-rose-500' : 'bg-card border-border text-text-muted hover:bg-background'}`}
                         >
                           <Heart className="w-5 h-5" fill={savedColleges.includes(college._id) ? "currentColor" : "none"} />
                         </button>
@@ -502,24 +502,24 @@ export default function CollegesDirectory() {
 
                       {aiScores[college._id] && sortBy === 'AI Match Score' && (
                         <div className="mt-3 bg-blue-50 border border-blue-100 rounded-lg p-3 text-sm text-blue-800 flex items-start gap-2">
-                          <Bot className="w-4 h-4 mt-0.5 shrink-0 text-blue-600" />
+                          <Bot className="w-4 h-4 mt-0.5 shrink-0 text-primary" />
                           <p>{aiScores[college._id].rationale}</p>
                         </div>
                       )}
 
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4 pt-4 border-t border-slate-100">
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4 pt-4 border-t border-border">
                         <div>
-                          <div className="text-[10px] font-bold text-slate-400 uppercase">Avg Fees</div>
-                          <div className="text-sm font-black text-slate-700">{college.fees?.tuition || 'N/A'}</div>
+                          <div className="text-[10px] font-bold text-text-muted uppercase">Avg Fees</div>
+                          <div className="text-sm font-black text-text-primary">{college.fees?.tuition || 'N/A'}</div>
                         </div>
                         <div>
-                          <div className="text-[10px] font-bold text-slate-400 uppercase">Avg Package</div>
+                          <div className="text-[10px] font-bold text-text-muted uppercase">Avg Package</div>
                           <div className="text-sm font-black text-emerald-600">{college.placement?.avgPackage || 'N/A'}</div>
                         </div>
                         <div className="col-span-2 flex items-center justify-end gap-2">
                           <button 
                             onClick={(e) => toggleCompare(college._id, e)}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${compareList.includes(college._id) ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${compareList.includes(college._id) ? 'bg-primary text-white' : 'bg-background-secondary text-text-secondary hover:border-border'}`}
                           >
                             {compareList.includes(college._id) ? 'Added to Compare' : '+ Compare'}
                           </button>
@@ -536,7 +536,7 @@ export default function CollegesDirectory() {
                 <button 
                   onClick={() => setPage(p => p + 1)}
                   disabled={isLoading}
-                  className="px-6 py-3 bg-white border border-slate-200 hover:border-blue-300 hover:text-blue-600 text-slate-600 rounded-xl font-bold transition-all disabled:opacity-50"
+                  className="px-6 py-3 bg-card border border-border hover:border-blue-300 hover:text-primary text-text-secondary rounded-xl font-bold transition-all disabled:opacity-50"
                 >
                   {isLoading ? 'Loading...' : 'Load More Colleges'}
                 </button>
@@ -549,16 +549,16 @@ export default function CollegesDirectory() {
       {/* 4. College Details Modal */}
       {selectedCollege && (
         <div className="fixed inset-0 z-50 flex justify-end bg-slate-900/50 backdrop-blur-sm">
-          <div className="w-full max-w-4xl bg-white h-full overflow-y-auto animate-in slide-in-from-right duration-300 shadow-2xl flex flex-col">
+          <div className="w-full max-w-4xl bg-card h-full overflow-y-auto animate-in slide-in-from-right duration-300 shadow-2xl flex flex-col">
             
             {/* Modal Header */}
-            <div className="sticky top-0 z-20 bg-white border-b border-slate-100">
+            <div className="sticky top-0 z-20 bg-card border-b border-border">
               <div className="h-48 w-full relative">
                 <img src={selectedCollege.image} alt={selectedCollege.name} className="w-full h-full object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent"></div>
                 <button 
                   onClick={() => setSelectedCollege(null)}
-                  className="absolute top-4 right-4 p-2 bg-white/20 hover:bg-white/30 backdrop-blur-md rounded-full text-white transition-colors"
+                  className="absolute top-4 right-4 p-2 bg-card/20 hover:bg-card/30 backdrop-blur-md rounded-full text-white transition-colors"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -570,7 +570,7 @@ export default function CollegesDirectory() {
                       <span className="flex items-center gap-1"><Star className="w-4 h-4 text-amber-400" /> 4.5/5 Reviews</span>
                     </div>
                   </div>
-                  <button className="hidden sm:block px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg transition-colors">
+                  <button className="hidden sm:block px-6 py-2 bg-primary hover:bg-primary-hover text-white font-bold rounded-xl shadow-lg transition-colors">
                     Apply Now
                   </button>
                 </div>
@@ -582,7 +582,7 @@ export default function CollegesDirectory() {
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
-                    className={`py-4 text-sm font-bold whitespace-nowrap border-b-2 transition-colors ${activeTab === tab ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+                    className={`py-4 text-sm font-bold whitespace-nowrap border-b-2 transition-colors ${activeTab === tab ? 'border-primary text-primary' : 'border-transparent text-text-muted hover:text-text-primary'}`}
                   >
                     {tab.toUpperCase()}
                   </button>
@@ -591,39 +591,39 @@ export default function CollegesDirectory() {
             </div>
 
             {/* Modal Content */}
-            <div className="p-6 md:p-8 flex-1 bg-slate-50">
+            <div className="p-6 md:p-8 flex-1 bg-background">
               {activeTab === 'overview' && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="md:col-span-2 space-y-6">
-                    <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
-                      <h3 className="text-base font-black text-slate-900 mb-4">About College</h3>
-                      <p className="text-sm text-slate-600 leading-relaxed">
+                    <div className="bg-card p-6 rounded-2xl border border-border shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none">
+                      <h3 className="text-base font-black text-text-primary mb-4">About College</h3>
+                      <p className="text-sm text-text-secondary leading-relaxed">
                         {selectedCollege.name} is one of the premier institutions in India, offering cutting-edge infrastructure and world-class faculty. Established in {selectedCollege.establishedYear}, it has consistently ranked among the top colleges.
                       </p>
                     </div>
                     
                     <div className="grid grid-cols-2 gap-4">
-                      <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
-                        <div className="text-[10px] font-bold text-slate-400 uppercase">Established</div>
-                        <div className="font-black text-slate-800">{selectedCollege.establishedYear}</div>
+                      <div className="bg-card p-4 rounded-xl border border-border shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none">
+                        <div className="text-[10px] font-bold text-text-muted uppercase">Established</div>
+                        <div className="font-black text-text-primary">{selectedCollege.establishedYear}</div>
                       </div>
-                      <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
-                        <div className="text-[10px] font-bold text-slate-400 uppercase">Type</div>
-                        <div className="font-black text-slate-800">{selectedCollege.type}</div>
+                      <div className="bg-card p-4 rounded-xl border border-border shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none">
+                        <div className="text-[10px] font-bold text-text-muted uppercase">Type</div>
+                        <div className="font-black text-text-primary">{selectedCollege.type}</div>
                       </div>
-                      <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
-                        <div className="text-[10px] font-bold text-slate-400 uppercase">Accreditation</div>
+                      <div className="bg-card p-4 rounded-xl border border-border shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none">
+                        <div className="text-[10px] font-bold text-text-muted uppercase">Accreditation</div>
                         <div className="font-black text-emerald-600 flex items-center gap-1"><ShieldCheck className="w-3 h-3"/> {selectedCollege.accreditation}</div>
                       </div>
-                      <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
-                        <div className="text-[10px] font-bold text-slate-400 uppercase">NIRF Ranking</div>
-                        <div className="font-black text-blue-600">#{selectedCollege.nirfRank}</div>
+                      <div className="bg-card p-4 rounded-xl border border-border shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none">
+                        <div className="text-[10px] font-bold text-text-muted uppercase">NIRF Ranking</div>
+                        <div className="font-black text-primary">#{selectedCollege.nirfRank}</div>
                       </div>
                     </div>
                   </div>
                   
                   <div className="space-y-6">
-                    <div className="bg-blue-600 p-6 rounded-2xl shadow-lg text-white">
+                    <div className="bg-primary p-6 rounded-2xl shadow-lg text-white">
                       <h3 className="text-sm font-bold mb-4 flex items-center gap-2"><Zap className="w-4 h-4"/> AI Match Analysis</h3>
                       <div className="text-4xl font-black mb-1">{getMatchScore(selectedCollege)}%</div>
                       <div className="text-xs text-blue-100 font-medium mb-4">Excellent Match for your profile!</div>
@@ -638,21 +638,21 @@ export default function CollegesDirectory() {
               )}
 
               {activeTab === 'courses & fees' && (
-                <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
-                  <h3 className="text-base font-black text-slate-900 mb-6">Courses Offered</h3>
+                <div className="bg-card p-6 rounded-2xl border border-border shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none">
+                  <h3 className="text-base font-black text-text-primary mb-6">Courses Offered</h3>
                   <div className="space-y-4">
                     {selectedCollege.courses?.map((course: string, idx: number) => (
-                      <div key={idx} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100 gap-4">
+                      <div key={idx} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-background rounded-xl border border-border gap-4">
                         <div>
-                          <div className="font-bold text-slate-800 text-sm">{course}</div>
-                          <div className="text-xs text-slate-500 mt-1">4 Years • Full Time • On Campus</div>
+                          <div className="font-bold text-text-primary text-sm">{course}</div>
+                          <div className="text-xs text-text-muted mt-1">4 Years • Full Time • On Campus</div>
                         </div>
                         <div className="flex items-center gap-4 text-right">
                           <div>
-                            <div className="text-[10px] font-bold text-slate-400 uppercase">1st Year Fees</div>
-                            <div className="font-black text-slate-900">{selectedCollege.fees?.tuition || 'N/A'}</div>
+                            <div className="text-[10px] font-bold text-text-muted uppercase">1st Year Fees</div>
+                            <div className="font-black text-text-primary">{selectedCollege.fees?.tuition || 'N/A'}</div>
                           </div>
-                          <button className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-700 hover:bg-slate-50">Details</button>
+                          <button className="px-4 py-2 bg-card border border-border rounded-lg text-xs font-bold text-text-primary hover:bg-background">Details</button>
                         </div>
                       </div>
                     ))}
@@ -668,8 +668,8 @@ export default function CollegesDirectory() {
                       <div className="text-2xl font-black text-emerald-700">{selectedCollege.placement?.highestPackage || 'N/A'}</div>
                     </div>
                     <div className="bg-blue-50 border border-blue-100 p-5 rounded-2xl">
-                      <div className="text-[10px] font-bold text-blue-600 uppercase mb-1">Average Package</div>
-                      <div className="text-2xl font-black text-blue-700">{selectedCollege.placement?.avgPackage || 'N/A'}</div>
+                      <div className="text-[10px] font-bold text-primary uppercase mb-1">Average Package</div>
+                      <div className="text-2xl font-black text-primary-hover">{selectedCollege.placement?.avgPackage || 'N/A'}</div>
                     </div>
                     <div className="bg-purple-50 border border-purple-100 p-5 rounded-2xl">
                       <div className="text-[10px] font-bold text-purple-600 uppercase mb-1">Placement Rate</div>
@@ -677,11 +677,11 @@ export default function CollegesDirectory() {
                     </div>
                   </div>
                   
-                  <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
-                    <h3 className="text-base font-black text-slate-900 mb-4">Top Recruiters</h3>
+                  <div className="bg-card p-6 rounded-2xl border border-border shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none">
+                    <h3 className="text-base font-black text-text-primary mb-4">Top Recruiters</h3>
                     <div className="flex flex-wrap gap-3">
                       {selectedCollege.placement?.topRecruiters?.map(company => (
-                        <span key={company} className="px-4 py-2 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold text-slate-600">
+                        <span key={company} className="px-4 py-2 bg-background border border-border rounded-xl text-sm font-bold text-text-secondary">
                           {company}
                         </span>
                       ))}
@@ -691,24 +691,24 @@ export default function CollegesDirectory() {
               )}
 
               {activeTab === 'facilities' && (
-                <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
-                  <h3 className="text-base font-black text-slate-900 mb-6">Campus Facilities</h3>
+                <div className="bg-card p-6 rounded-2xl border border-border shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none">
+                  <h3 className="text-base font-black text-text-primary mb-6">Campus Facilities</h3>
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                     {selectedCollege.hostelAvailable && (
-                      <div className="flex flex-col items-center justify-center p-4 bg-slate-50 rounded-xl border border-slate-100 text-center gap-2">
+                      <div className="flex flex-col items-center justify-center p-4 bg-background rounded-xl border border-border text-center gap-2">
                         <CheckCircle className="w-6 h-6 text-indigo-500" />
-                        <span className="text-xs font-bold text-slate-700">Hostel</span>
+                        <span className="text-xs font-bold text-text-primary">Hostel</span>
                       </div>
                     )}
                     {selectedCollege.scholarshipsAvailable && (
-                      <div className="flex flex-col items-center justify-center p-4 bg-slate-50 rounded-xl border border-slate-100 text-center gap-2">
+                      <div className="flex flex-col items-center justify-center p-4 bg-background rounded-xl border border-border text-center gap-2">
                         <Award className="w-6 h-6 text-amber-500" />
-                        <span className="text-xs font-bold text-slate-700">Scholarships</span>
+                        <span className="text-xs font-bold text-text-primary">Scholarships</span>
                       </div>
                     )}
-                    <div className="flex flex-col items-center justify-center p-4 bg-slate-50 rounded-xl border border-slate-100 text-center gap-2">
+                    <div className="flex flex-col items-center justify-center p-4 bg-background rounded-xl border border-border text-center gap-2">
                       <CheckCircle className="w-6 h-6 text-indigo-500" />
-                      <span className="text-xs font-bold text-slate-700">Library</span>
+                      <span className="text-xs font-bold text-text-primary">Library</span>
                     </div>
                   </div>
                 </div>
@@ -716,10 +716,10 @@ export default function CollegesDirectory() {
               
               {/* Fallback for other tabs */}
               {['admission', 'reviews'].includes(activeTab) && (
-                <div className="bg-white p-12 rounded-2xl border border-slate-100 shadow-sm flex flex-col items-center justify-center text-center">
-                  <BookOpen className="w-12 h-12 text-slate-300 mb-4" />
-                  <h3 className="text-lg font-black text-slate-800">Detailed {activeTab} information</h3>
-                  <p className="text-sm text-slate-500 mt-2 max-w-sm">This section is currently being updated with the latest data for {new Date().getFullYear()} admissions.</p>
+                <div className="bg-card p-12 rounded-2xl border border-border shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none flex flex-col items-center justify-center text-center">
+                  <BookOpen className="w-12 h-12 text-text-muted mb-4" />
+                  <h3 className="text-lg font-black text-text-primary">Detailed {activeTab} information</h3>
+                  <p className="text-sm text-text-muted mt-2 max-w-sm">This section is currently being updated with the latest data for {new Date().getFullYear()} admissions.</p>
                 </div>
               )}
 
@@ -735,7 +735,7 @@ export default function CollegesDirectory() {
             <GitCompare className="w-5 h-5 text-blue-400" />
             <span className="font-bold text-sm">{compareList.length} / 4 Selected</span>
           </div>
-          <button className="px-5 py-2 bg-blue-600 hover:bg-blue-700 rounded-xl text-sm font-bold transition-colors">
+          <button className="px-5 py-2 bg-primary hover:bg-primary-hover rounded-xl text-sm font-bold transition-colors">
             Compare Now
           </button>
         </div>

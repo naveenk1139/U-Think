@@ -115,7 +115,7 @@ export default function MentorshipProgram() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 pt-20 font-sans">
+    <div className="min-h-screen bg-background pt-20 font-sans">
       <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
         
         {/* Header */}
@@ -128,7 +128,7 @@ export default function MentorshipProgram() {
             <p className="text-indigo-200">Connect with verified industry experts and AI Career Personas tailored to your specific education level.</p>
           </div>
           <div className="relative z-10 hidden md:block">
-            <button onClick={() => navigate('/quiz')} className="px-6 py-3 bg-white text-indigo-900 font-bold rounded-xl hover:bg-indigo-50 transition flex items-center space-x-2">
+            <button onClick={() => navigate('/quiz')} className="px-6 py-3 bg-card text-indigo-900 font-bold rounded-xl hover:bg-indigo-50 transition flex items-center space-x-2">
               <span>Take Career Assessment</span>
               <ArrowRight className="h-5 w-5" />
             </button>
@@ -138,21 +138,21 @@ export default function MentorshipProgram() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 h-[calc(100vh-280px)] min-h-[600px]">
           
           {/* Mentors Catalog */}
-          <div className="lg:col-span-5 flex flex-col bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden h-full">
+          <div className="lg:col-span-5 flex flex-col bg-card rounded-3xl border border-border shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none overflow-hidden h-full">
             {/* Filters */}
-            <div className="p-4 border-b border-slate-100 bg-slate-50/50 space-y-3">
+            <div className="p-4 border-b border-border bg-background/50 space-y-3">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-text-muted" />
                 <input
                   type="text"
                   placeholder="Search mentors, careers, skills..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none"
+                  className="w-full pl-10 pr-4 py-2.5 bg-card border border-border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none"
                 />
               </div>
               <div className="flex items-center space-x-2 overflow-x-auto pb-2 scrollbar-hide">
-                <Filter className="h-4 w-4 text-slate-400 shrink-0" />
+                <Filter className="h-4 w-4 text-text-muted shrink-0" />
                 {EDUCATION_LEVELS.map(level => (
                   <button
                     key={level}
@@ -160,7 +160,7 @@ export default function MentorshipProgram() {
                     className={`px-3 py-1.5 text-xs font-semibold rounded-lg shrink-0 transition-colors ${
                       selectedEdu === level 
                         ? 'bg-indigo-600 text-white' 
-                        : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                        : 'bg-card border border-border text-text-secondary hover:bg-background'
                     }`}
                   >
                     {level.replace('_', ' ')}
@@ -176,8 +176,8 @@ export default function MentorshipProgram() {
                   <Loader2 className="h-8 w-8 text-indigo-600 animate-spin" />
                 </div>
               ) : mentors.length === 0 ? (
-                <div className="text-center text-slate-500 py-12">
-                  <Users className="h-12 w-12 mx-auto text-slate-300 mb-3" />
+                <div className="text-center text-text-muted py-12">
+                  <Users className="h-12 w-12 mx-auto text-text-muted mb-3" />
                   <p>No mentors found for this filter.</p>
                 </div>
               ) : (
@@ -188,12 +188,12 @@ export default function MentorshipProgram() {
                     className={`p-5 rounded-2xl border transition-all cursor-pointer ${
                       selectedMentor?.mentorId === mentor.mentorId 
                         ? 'border-indigo-600 bg-indigo-50/30 shadow-md ring-1 ring-indigo-600' 
-                        : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm'
+                        : 'border-border bg-card hover:border-border hover:shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none'
                     }`}
                   >
                     <div className="flex items-start justify-between mb-3">
                       <div>
-                        <h3 className="font-bold text-slate-900 text-lg flex items-center gap-2">
+                        <h3 className="font-bold text-text-primary text-lg flex items-center gap-2">
                           {mentor.name}
                           {mentor.mentorType === 'REAL' ? (
                             <ShieldCheck className="h-4 w-4 text-emerald-500" />
@@ -201,7 +201,7 @@ export default function MentorshipProgram() {
                             <Bot className="h-4 w-4 text-indigo-500" />
                           )}
                         </h3>
-                        <p className="text-sm text-slate-600 font-medium">{mentor.jobTitle} at {mentor.company}</p>
+                        <p className="text-sm text-text-secondary font-medium">{mentor.jobTitle} at {mentor.company}</p>
                       </div>
                       <span className={`text-[10px] font-bold px-2 py-1 rounded-full uppercase ${
                         mentor.mentorType === 'REAL' ? 'bg-emerald-100 text-emerald-700' : 'bg-indigo-100 text-indigo-700'
@@ -211,24 +211,24 @@ export default function MentorshipProgram() {
                     </div>
 
                     <div className="space-y-2 mb-4">
-                      <div className="flex items-center text-xs text-slate-500 gap-2">
-                        <Briefcase className="h-4 w-4 text-slate-400" />
+                      <div className="flex items-center text-xs text-text-muted gap-2">
+                        <Briefcase className="h-4 w-4 text-text-muted" />
                         <span>{mentor.experience} Experience</span>
                       </div>
-                      <div className="flex items-center text-xs text-slate-500 gap-2">
-                        <GraduationCap className="h-4 w-4 text-slate-400" />
+                      <div className="flex items-center text-xs text-text-muted gap-2">
+                        <GraduationCap className="h-4 w-4 text-text-muted" />
                         <span>{mentor.education}</span>
                       </div>
                     </div>
 
                     <div className="flex flex-wrap gap-1.5">
                       {mentor.skills.slice(0, 3).map(skill => (
-                        <span key={skill} className="px-2 py-1 bg-slate-100 text-slate-600 text-[10px] font-semibold rounded-md">
+                        <span key={skill} className="px-2 py-1 bg-background-secondary text-text-secondary text-[10px] font-semibold rounded-md">
                           {skill}
                         </span>
                       ))}
                       {mentor.skills.length > 3 && (
-                        <span className="px-2 py-1 bg-slate-100 text-slate-600 text-[10px] font-semibold rounded-md">
+                        <span className="px-2 py-1 bg-background-secondary text-text-secondary text-[10px] font-semibold rounded-md">
                           +{mentor.skills.length - 3}
                         </span>
                       )}
@@ -240,21 +240,21 @@ export default function MentorshipProgram() {
           </div>
 
           {/* Chat Panel */}
-          <div className="lg:col-span-7 bg-white rounded-3xl border border-slate-200 shadow-sm flex flex-col overflow-hidden h-full">
+          <div className="lg:col-span-7 bg-card rounded-3xl border border-border shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none flex flex-col overflow-hidden h-full">
             {selectedMentor ? (
               <>
-                <div className="p-6 border-b border-slate-100 bg-white flex justify-between items-center">
+                <div className="p-6 border-b border-border bg-card flex justify-between items-center">
                   <div className="flex items-center gap-4">
-                    <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-sm ${
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none ${
                       selectedMentor.mentorType === 'REAL' ? 'bg-emerald-500' : 'bg-indigo-500'
                     }`}>
                       {selectedMentor.name.charAt(0)}
                     </div>
                     <div>
-                      <h2 className="font-bold text-lg text-slate-900 flex items-center gap-2">
+                      <h2 className="font-bold text-lg text-text-primary flex items-center gap-2">
                         {selectedMentor.name}
                       </h2>
-                      <p className="text-sm text-slate-500 flex items-center gap-1">
+                      <p className="text-sm text-text-muted flex items-center gap-1">
                         <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                         Online • {selectedMentor.industry}
                       </p>
@@ -267,16 +267,16 @@ export default function MentorshipProgram() {
                   )}
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-slate-50/50">
+                <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-background/50">
                   {chats[selectedMentor.mentorId]?.map(msg => {
                     const isUser = msg.sender === 'user';
                     return (
                       <div key={msg.id} className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
-                        <div className={`max-w-[80%] rounded-2xl p-4 shadow-sm ${
-                          isUser ? 'bg-indigo-600 text-white rounded-tr-sm' : 'bg-white border border-slate-200 text-slate-800 rounded-tl-sm'
+                        <div className={`max-w-[80%] rounded-2xl p-4 shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none ${
+                          isUser ? 'bg-indigo-600 text-white rounded-tr-sm' : 'bg-card border border-border text-text-primary rounded-tl-sm'
                         }`}>
                           <p className="whitespace-pre-wrap leading-relaxed text-[15px]">{msg.text}</p>
-                          <span className={`text-[10px] block mt-2 ${isUser ? 'text-indigo-200' : 'text-slate-400'}`}>
+                          <span className={`text-[10px] block mt-2 ${isUser ? 'text-indigo-200' : 'text-text-muted'}`}>
                             {msg.timestamp}
                           </span>
                         </div>
@@ -286,7 +286,7 @@ export default function MentorshipProgram() {
                   
                   {isTyping && (
                     <div className="flex justify-start">
-                      <div className="bg-white border border-slate-200 rounded-2xl rounded-tl-sm p-4 shadow-sm flex items-center space-x-2">
+                      <div className="bg-card border border-border rounded-2xl rounded-tl-sm p-4 shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none flex items-center space-x-2">
                         <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" />
                         <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
                         <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }} />
@@ -296,14 +296,14 @@ export default function MentorshipProgram() {
                   <div ref={chatEndRef} />
                 </div>
 
-                <div className="p-4 bg-white border-t border-slate-100">
+                <div className="p-4 bg-card border-t border-border">
                   <form onSubmit={sendMessage} className="flex gap-2">
                     <input
                       type="text"
                       value={inputText}
                       onChange={e => setInputText(e.target.value)}
                       placeholder={`Ask ${selectedMentor.name.split(' ')[0]} for advice...`}
-                      className="flex-1 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-shadow"
+                      className="flex-1 px-4 py-3 bg-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-shadow"
                     />
                     <button
                       type="submit"
@@ -320,7 +320,7 @@ export default function MentorshipProgram() {
                         key={q}
                         type="button"
                         onClick={() => setInputText(q)}
-                        className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-medium rounded-lg shrink-0 transition"
+                        className="px-3 py-1.5 bg-background-secondary hover:border-border text-text-secondary text-xs font-medium rounded-lg shrink-0 transition"
                       >
                         {q}
                       </button>
@@ -329,9 +329,9 @@ export default function MentorshipProgram() {
                 </div>
               </>
             ) : (
-              <div className="flex-1 flex flex-col items-center justify-center text-slate-400 bg-slate-50/50">
-                <Users className="h-16 w-16 mb-4 text-slate-300" />
-                <h3 className="text-xl font-bold text-slate-600 mb-2">No Active Chat</h3>
+              <div className="flex-1 flex flex-col items-center justify-center text-text-muted bg-background/50">
+                <Users className="h-16 w-16 mb-4 text-text-muted" />
+                <h3 className="text-xl font-bold text-text-secondary mb-2">No Active Chat</h3>
                 <p className="text-center max-w-md">Select a mentor from the list to start a personalized career guidance session.</p>
               </div>
             )}

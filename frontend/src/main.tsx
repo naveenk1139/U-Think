@@ -20,10 +20,10 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="min-h-screen flex items-center justify-center bg-background">
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-slate-800 mb-2">Something went wrong.</h1>
-            <button onClick={() => window.location.reload()} className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700">
+            <h1 className="text-2xl font-bold text-text-primary mb-2">Something went wrong.</h1>
+            <button onClick={() => window.location.reload()} className="mt-4 px-6 py-2 bg-primary text-white rounded-xl hover:bg-primary-hover">
               Reload Page
             </button>
           </div>

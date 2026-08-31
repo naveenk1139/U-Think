@@ -37,23 +37,23 @@ export default function Sidebar() {
       onClick={() => navigate(path)}
       className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl font-medium text-sm transition-all duration-200 cursor-pointer ${
         isActive(path) 
-          ? 'bg-blue-600 text-white shadow-md shadow-blue-200' 
-          : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900'
+          ? 'bg-gradient-to-r from-primary to-primary-hover text-white shadow-[0_0_15px_rgba(37,99,235,0.25)]' 
+          : 'text-text-muted hover:bg-background-secondary hover:text-text-primary'
       }`}
     >
-      <Icon className={`w-5 h-5 ${isActive(path) ? 'text-white' : 'text-slate-400'}`} />
+      <Icon className={`w-5 h-5 ${isActive(path) ? 'text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]' : 'text-text-muted'}`} />
       <span>{label}</span>
     </button>
   );
 
   return (
-    <div className="w-64 h-screen bg-slate-50 border-r border-slate-200 flex flex-col fixed left-0 top-0 overflow-y-auto">
+    <div className="w-64 h-screen bg-background-secondary border-r border-border flex flex-col fixed left-0 top-0 overflow-y-auto">
       {/* Logo Area */}
       <div className="p-6 flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
         <img 
           src="/logo.png" 
           alt="U THINK Logo" 
-          className="h-12 w-auto object-contain drop-shadow-sm"
+          className="h-12 w-auto object-contain drop-shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none"
           onError={(e) => {
             const target = e.target as HTMLImageElement;
             target.onerror = null; // Prevent infinite loops
@@ -61,10 +61,10 @@ export default function Sidebar() {
           }}
         />
         <div className="flex flex-col">
-          <span className="text-lg font-black font-sans text-slate-900 tracking-tight whitespace-nowrap">
+          <span className="text-lg font-black font-sans text-text-primary tracking-tight whitespace-nowrap">
             U THINK
           </span>
-          <span className="text-[10px] text-blue-600 font-bold uppercase tracking-wider">
+          <span className="text-[10px] text-primary font-bold uppercase tracking-wider">
             Post-10th Guide
           </span>
         </div>
@@ -84,7 +84,7 @@ export default function Sidebar() {
         </div>
 
         {/* Secondary Navigation */}
-        <div className="pt-4 border-t border-slate-200 space-y-1">
+        <div className="pt-4 border-t border-border space-y-1">
           <NavItem icon={Target} label="Aptitude Test" path="/quiz" />
           <NavItem icon={Bookmark} label="Saved Jobs" path="/saved-jobs" />
           <NavItem icon={Bell} label="Reminders" path="/reminders" />
@@ -95,24 +95,24 @@ export default function Sidebar() {
 
       {/* Profile Completion Widget */}
       <div className="p-4 mt-auto">
-        <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+        <div className="bg-card border border-border rounded-2xl p-4 shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none">
           <div className="flex items-center justify-between mb-3">
-            <h4 className="text-xs font-bold text-slate-900">Complete Your Profile</h4>
+            <h4 className="text-xs font-bold text-text-primary">Complete Your Profile</h4>
             <UserCheck className="w-4 h-4 text-blue-500" />
           </div>
-          <div className="w-full bg-slate-100 h-2 rounded-full mb-2 overflow-hidden">
-            <div className="bg-blue-600 h-full rounded-full transition-all duration-1000 ease-out" style={{ width: `${Math.round((Object.keys(currentUser || {}).length / 10) * 100) > 100 ? 100 : Math.max(25, Math.round((Object.keys(currentUser || {}).length / 10) * 100))}%` }}></div>
+          <div className="w-full bg-background-secondary h-2 rounded-full mb-2 overflow-hidden">
+            <div className="bg-primary h-full rounded-full transition-all duration-1000 ease-out" style={{ width: `${Math.round((Object.keys(currentUser || {}).length / 10) * 100) > 100 ? 100 : Math.max(25, Math.round((Object.keys(currentUser || {}).length / 10) * 100))}%` }}></div>
           </div>
-          <div className="flex justify-between text-[10px] font-bold text-slate-500 mb-3">
-            <span className="text-blue-600">{Math.round((Object.keys(currentUser || {}).length / 10) * 100) > 100 ? 100 : Math.max(25, Math.round((Object.keys(currentUser || {}).length / 10) * 100))}%</span>
+          <div className="flex justify-between text-[10px] font-bold text-text-muted mb-3">
+            <span className="text-primary">{Math.round((Object.keys(currentUser || {}).length / 10) * 100) > 100 ? 100 : Math.max(25, Math.round((Object.keys(currentUser || {}).length / 10) * 100))}%</span>
             <span>Complete</span>
           </div>
-          <p className="text-[10px] text-slate-500 leading-tight mb-3">
+          <p className="text-[10px] text-text-muted leading-tight mb-3">
             Complete your profile to get better AI recommendations.
           </p>
           <button 
             onClick={() => navigate('/settings')}
-            className="w-full text-xs font-bold text-blue-600 flex items-center justify-center gap-1 hover:text-blue-700 transition-colors cursor-pointer"
+            className="w-full text-xs font-bold text-primary flex items-center justify-center gap-1 hover:text-primary-hover transition-colors cursor-pointer"
           >
             Continue Profile <ArrowRight className="w-3 h-3" />
           </button>
