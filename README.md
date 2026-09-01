@@ -37,24 +37,22 @@ U-THINK is a modern, AI-powered career guidance and academic stream explorer app
 
 ## 📁 Repository Structure
 
-```
+```text
 U-Think/
 ├── frontend/          ← React + Vite + TypeScript single-page application
-│   ├── src/           ← Components, Contexts, Hooks, Data, API client
+│   ├── src/           ← Components, Contexts, Hooks, API client, Pages
 │   ├── index.html
 │   └── package.json
 │
-├── backend/           ← Node.js + Express + TypeScript REST API server
-│   ├── src/
-│   │   ├── config/    ← MongoDB & Gemini AI configuration
-│   │   ├── middleware/← Firebase authentication & error handler
-│   │   └── routes/    ← User, AI, Quiz, Pathway, Exam, and Reminder routes
-│   └── package.json
-│
-└── database/          ← MongoDB + Mongoose Models, Seeds & Scripts
-    ├── models/        ← User, QuizResult, SavedPathway, TrackedExam, Reminder
-    ├── scripts/       ← Data patch & generator utility scripts
-    └── README.md      ← Database & script documentation
+└── backend/           ← Node.js + Express + TypeScript REST API server
+    ├── src/
+    │   ├── config/      ← MongoDB, Firebase, and Gemini AI configuration
+    │   ├── controllers/ ← Business logic and route handlers
+    │   ├── middleware/  ← Firebase authentication & global error handlers
+    │   ├── models/      ← Mongoose Models (College, Pathway, Stream, CareerPath, JobRole, etc.)
+    │   ├── routes/      ← Express Routes (Colleges, Pathways, Geography, User, AI)
+    │   └── scripts/     ← Database seeders and mass data ingestion scripts (UGC, AISHE, etc.)
+    └── package.json
 ```
 
 ---
