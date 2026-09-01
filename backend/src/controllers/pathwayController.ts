@@ -8,6 +8,7 @@ import Branch from '../models/Branch.js';
 import Career from '../models/Career.js';
 import SubjectCombination from '../models/SubjectCombination.js';
 import Subject from '../models/Subject.js';
+import Trade from '../models/Trade.js';
 
 export const getPathwayTree = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -57,7 +58,14 @@ export const getPathwayTree = async (req: Request, res: Response, next: NextFunc
            return res.json({ ...stream, subjectCombinations: combinationsWithDetails });
        }
 
-       // If no subject combinations, it's a direct course stream (e.g. B.Tech stream)
+       // If no subject combinations, it's a direct course stream (e.g. B.Tech stream or Diploma or Trades)
+       
+       const trades = await Trade.find({ streamId: stream._id, active: true }).sort({ order: 1 }).lean();
+       
+       if (trades && trades.length > 0) {
+           return res.json({ ...stream, trades });
+       }
+
        const courses = await Course.find({ streamId: stream._id, active: true }).sort({ order: 1 }).lean();
        
        const coursesWithDetails = await Promise.all(courses.map(async (course) => {
@@ -99,7 +107,8 @@ export const getPathwayTree = async (req: Request, res: Response, next: NextFunc
            // A stream might have courses directly, or it might have subject combinations that have courses
            const comboCount = await SubjectCombination.countDocuments({ streamId: stream._id, active: true });
            const courseCount = await Course.countDocuments({ streamId: stream._id, active: true });
-           return { ...stream, courseCount, comboCount };
+           const tradeCount = await Trade.countDocuments({ streamId: stream._id, active: true });
+           return { ...stream, courseCount, comboCount, tradeCount };
         }));
 
         return { ...pathway, streams: streamsWithCounts };
@@ -214,6 +223,10 @@ export const getPathwayStats = async (req: Request, res: Response, next: NextFun
             b.relatedCareers.forEach((car: any) => careerIds.add(car.toString()));
         }
     });
+
+    const collegesCount = await mongoose.model('College').countDocuments({ active: true });
+    const examsCount = await mongoose.model('Exam').countDocuments({ status: 'Active' });
+    const jobsCount = await mongoose.model('JobRole').countDocuments({ active: true });
     
     res.json({
       pathways: pathwayIds.length,
@@ -222,7 +235,10 @@ export const getPathwayStats = async (req: Request, res: Response, next: NextFun
       subjects: subjectIds.size,
       courses: courseIds.length,
       branches: branches.length,
-      careers: careerIds.size
+      careers: careerIds.size,
+      colleges: collegesCount,
+      exams: examsCount,
+      jobs: jobsCount
     });
   } catch (error) {
     next(error);

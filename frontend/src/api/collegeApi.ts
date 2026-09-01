@@ -75,8 +75,8 @@ export const fetchCollegeById = async (id: string): Promise<College> => {
   return response.data;
 };
 
-export const fetchCollegeStats = async () => {
-  const response = await api.get('/api/colleges/stats');
+export const fetchCollegeStats = async (params?: Record<string, string | number>) => {
+  const response = await api.get('/api/colleges/stats', { params });
   return response.data;
 };
 

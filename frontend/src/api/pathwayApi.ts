@@ -9,6 +9,17 @@ export interface SavedPathway {
   createdAt: string;
 }
 
+export interface TradeData {
+  _id: string;
+  name: string;
+  slug: string;
+  duration?: string;
+  eligibility?: string;
+  minimumQualification?: string;
+  admissionMethod?: string;
+  apprenticeshipOpportunities?: boolean;
+}
+
 export interface SubjectData {
   _id: string;
   name: string;
@@ -87,8 +98,10 @@ export interface StreamData {
   typicalStructure?: string[];
   courseCount?: number;
   comboCount?: number;
+  tradeCount?: number;
   subjectCombinations?: SubjectCombinationData[];
   courses?: CourseData[];
+  trades?: TradeData[];
 }
 
 export interface PathwayData {
@@ -117,6 +130,9 @@ export interface PathwayStats {
   courses: number;
   branches: number;
   careers: number;
+  colleges: number;
+  exams: number;
+  jobs: number;
 }
 
 export const getPathwayTree = (levelSlug?: string): Promise<EducationLevelData[]> =>

@@ -1,15 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  ArrowRight, Search, Bot, Award, Target, Building2, CalendarDays,
-  Briefcase, BookOpen, TrendingUp, FlaskConical, Scale, PenTool,
-  BriefcaseMedical, Wrench, Stethoscope, HeartPulse, Settings,
-  GraduationCap, Landmark, Leaf, Pill, Users, Cpu, Hotel, Globe,
-  Bell, CheckCircle, Clock, Bookmark, ChevronRight, Sparkles,
-  MapPin, Star, Zap, BarChart2, UserCheck, Code2, Database, Cloud,
-  Shield, Brain, Layers, LayoutGrid, RefreshCw
-} from 'lucide-react';
+import { BookOpen, GraduationCap, Building2, Briefcase, ChevronRight, Star, CheckCircle, Search, ArrowRight, Brain, Target, BarChart2, CalendarDays, Code2, Rocket, Globe, MapPin, RefreshCw, Bot, Award, FlaskConical, Scale, PenTool, BriefcaseMedical, Wrench, Stethoscope, HeartPulse, Settings, Landmark, Leaf, Pill, Users, Cpu, Hotel, Layers, Zap, TrendingUp, UserCheck } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { getPathwayStats, PathwayStats } from '../api/pathwayApi';
+import { getDistricts, DistrictData } from '../api/geographyApi';
 
 interface HomeProps {
   onNavigate: (tab: string) => void;
@@ -76,6 +70,8 @@ export default function Home({ onNavigate, onOpenCounselor }: HomeProps) {
 
   const [categoryCounts, setCategoryCounts] = useState<CategoryCounts>({});
   const [summary, setSummary] = useState<Summary>({ totalColleges: 0, totalExams: 0, totalJobs: 0, totalMentors: 0 });
+  const [globalStats, setGlobalStats] = useState<PathwayStats | null>(null);
+  const [districts, setDistricts] = useState<DistrictData[]>([]);
   const [upcomingExams, setUpcomingExams] = useState<any[]>([]);
   const [featuredJobs, setFeaturedJobs] = useState<any[]>([]);
   const [statsLoading, setStatsLoading] = useState(true);
@@ -89,31 +85,22 @@ export default function Home({ onNavigate, onOpenCounselor }: HomeProps) {
   const educationLevel = currentUser?.educationLevel || null;
   const stream = currentUser?.stream || null;
 
-  // Fetch stats, exams, jobs in parallel
   useEffect(() => {
-    const fetchAll = async () => {
-      setStatsLoading(true);
+    const fetchData = async () => {
       try {
-        const [statsRes, summaryRes, examsRes, jobsRes] = await Promise.all([
-          fetch('http://localhost:5000/api/stats/categories').catch(() => null),
-          fetch('http://localhost:5000/api/stats/summary').catch(() => null),
-          fetch('http://localhost:5000/api/exams?status=Active&limit=4').catch(() => null),
-          fetch('http://localhost:5000/api/jobs?limit=3').catch(() => null),
+        const [statsData, districtsData] = await Promise.all([
+          getPathwayStats(),
+          getDistricts()
         ]);
-
-        if (statsRes?.ok) setCategoryCounts(await statsRes.json());
-        if (summaryRes?.ok) setSummary(await summaryRes.json());
-        if (examsRes?.ok) setUpcomingExams(await examsRes.json());
-        if (jobsRes?.ok) {
-          const jobData = await jobsRes.json();
-          setFeaturedJobs(Array.isArray(jobData) ? jobData : jobData.jobs || []);
-        }
-      } catch (err) {
-        console.error('Home fetch error:', err);
+        setGlobalStats(statsData);
+        setDistricts(districtsData);
+      } catch (error) {
+        console.error('Error fetching global stats or districts:', error);
+      } finally {
+        setStatsLoading(false);
       }
-      setStatsLoading(false);
     };
-    fetchAll();
+    fetchData();
   }, []);
 
   // Live search
@@ -653,13 +640,16 @@ export default function Home({ onNavigate, onOpenCounselor }: HomeProps) {
           </button>
         </div>
         <div className="flex flex-wrap gap-2">
-          {['Bengaluru', 'Mysuru', 'Mangaluru', 'Belagavi', 'Hubballi', 'Dharwad', 'Tumakuru', 'Shivamogga', 'Kalaburagi', 'Vijayapura', 'Ballari', 'Hassan', 'Udupi'].map((dist, i) => (
-            <button key={i}
-              onClick={() => navigate(`/colleges?district=${encodeURIComponent(dist)}`)}
+          {districts.map((dist) => (
+            <button key={dist._id}
+              onClick={() => navigate(`/colleges?district=${dist._id}`)}
               className="px-4 py-2 bg-card border border-border hover:border-blue-300 hover:bg-blue-50 rounded-full text-sm font-semibold text-text-primary hover:text-primary-hover transition-colors shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none">
-              {dist}
+              {dist.name}
             </button>
           ))}
+          {districts.length === 0 && statsLoading && (
+            <div className="text-sm text-text-muted">Loading districts...</div>
+          )}
         </div>
       </div>
 

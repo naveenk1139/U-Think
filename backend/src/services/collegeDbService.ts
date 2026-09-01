@@ -30,6 +30,7 @@ const mapParams = (params: any) => {
   if (params.type && params.type !== 'All') apiParams.type = params.type;
   if (params.page) apiParams.page = params.page;
   if (params.limit) apiParams.limit = params.limit;
+  if (params.pageSize) apiParams.pageSize = params.pageSize;
 
   return apiParams;
 };

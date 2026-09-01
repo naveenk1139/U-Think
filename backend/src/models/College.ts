@@ -12,11 +12,16 @@ export interface ICollege extends Document {
   institutionType?: string; // University, Affiliated College, Autonomous
   ownership?: string; // Government, Government Aided, Private, Deemed, Autonomous
   state: string;
+  stateRef?: mongoose.Types.ObjectId;
   district?: string;
+  districtRef?: mongoose.Types.ObjectId;
   city?: string;
+  cityRef?: mongoose.Types.ObjectId;
   taluk?: string;
+  talukRef?: mongoose.Types.ObjectId;
   address?: string;
   pincode?: string;
+  status?: string; // ACTIVE, INACTIVE, CLOSED, MERGED, UNVERIFIED
   universityAffiliation?: string;
   approvalBody?: string; // AICTE, UGC, MCI, etc.
   establishedYear?: number;
@@ -73,11 +78,16 @@ const CollegeSchema: Schema = new Schema({
   institutionType: { type: String },
   ownership: { type: String },
   state: { type: String, default: 'Karnataka' },
+  stateRef: { type: Schema.Types.ObjectId, ref: 'State' },
   district: { type: String },
+  districtRef: { type: Schema.Types.ObjectId, ref: 'District' },
   city: { type: String },
+  cityRef: { type: Schema.Types.ObjectId, ref: 'City' },
   taluk: { type: String },
+  talukRef: { type: Schema.Types.ObjectId, ref: 'Taluk' },
   address: { type: String },
   pincode: { type: String },
+  status: { type: String, enum: ['ACTIVE', 'INACTIVE', 'CLOSED', 'MERGED', 'UNVERIFIED'], default: 'ACTIVE' },
   universityAffiliation: { type: String },
   approvalBody: { type: String },
   establishedYear: { type: Number },
@@ -126,9 +136,11 @@ CollegeSchema.index({ name: 'text', city: 'text', district: 'text', courses: 'te
 // Add unique compound index for source and sourceId
 CollegeSchema.index({ source: 1, sourceId: 1 }, { unique: true });
 
-// Add other helpful indexes
+// Add helpful indexes
 CollegeSchema.index({ state: 1, district: 1 });
+CollegeSchema.index({ stateRef: 1, districtRef: 1 });
 CollegeSchema.index({ categories: 1 });
 CollegeSchema.index({ type: 1 });
+CollegeSchema.index({ status: 1 });
 
 export default mongoose.model<ICollege>('College', CollegeSchema);

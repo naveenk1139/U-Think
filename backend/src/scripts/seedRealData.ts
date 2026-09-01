@@ -11,9 +11,20 @@ import Branch from '../models/Branch.js';
 import Specialization from '../models/Specialization.js';
 import College from '../models/College.js';
 import Career from '../models/Career.js';
+import { realColleges } from './realCollegesData.js';
+import { massiveRealColleges } from './realCollegesDataMassive.js';
+import { State, District, Taluk, City } from '../models/Geography.js';
 import Exam from '../models/Exam.js';
 import Subject from '../models/Subject.js';
 import SubjectCombination from '../models/SubjectCombination.js';
+import Trade from '../models/Trade.js';
+import JobRole from '../models/JobRole.js';
+import Industry from '../models/Industry.js';
+import State from '../models/State.js';
+import District from '../models/District.js';
+import Taluk from '../models/Taluk.js';
+import City from '../models/City.js';
+import CollegeCourse from '../models/CollegeCourse.js';
 import { connectDB } from '../config/db.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -34,34 +45,136 @@ const seedRealData = async () => {
     await Course.deleteMany({});
     await Branch.deleteMany({});
     await Specialization.deleteMany({});
-    await College.deleteMany({ source: 'seed' });
+    await College.deleteMany({});
     await Career.deleteMany({});
     await Exam.deleteMany({});
     await Subject.deleteMany({});
     await SubjectCombination.deleteMany({});
+    await Trade.deleteMany({});
+    await JobRole.deleteMany({});
+    await Industry.deleteMany({});
+    await State.deleteMany({});
+    await District.deleteMany({});
+    await Taluk.deleteMany({});
+    await City.deleteMany({});
+    await CollegeCourse.deleteMany({});
 
-    console.log('Old data wiped. Creating comprehensive taxonomy...');
+    console.log('Old data wiped. Creating comprehensive, fully connected taxonomy...');
 
     // ==========================================
-    // EXAMS & CAREERS (Basic setup)
+    // INDUSTRIES
     // ==========================================
-    const examsData = [
-      { examId: 'jee-main', name: 'JEE Main', level: 'National', category: 'Engineering', type: 'Entrance Exam' },
-      { examId: 'neet-ug', name: 'NEET UG', level: 'National', category: 'Medical', type: 'Entrance Exam' }
-    ];
-    await Exam.insertMany(examsData);
+    const itIndustry = await Industry.create({ name: 'IT & Technology', slug: 'it-tech' });
+    const healthcareIndustry = await Industry.create({ name: 'Healthcare & Medicine', slug: 'healthcare-medicine' });
+    const engineeringIndustry = await Industry.create({ name: 'Engineering & Construction', slug: 'engineering-construction' });
+    const financeIndustry = await Industry.create({ name: 'Finance & Banking', slug: 'finance-banking' });
 
-    const careersData = [
-      { name: 'Software Engineer', slug: 'software-engineer', industry: 'IT / Tech', salaryRange: '₹4L - ₹20L+', skills: ['Programming', 'Problem Solving'] },
-      { name: 'Data Scientist', slug: 'data-scientist', industry: 'IT / Tech', salaryRange: '₹6L - ₹25L+', skills: ['Python', 'Machine Learning', 'Math'] },
-      { name: 'Civil Engineer', slug: 'civil-engineer', industry: 'Construction', salaryRange: '₹3L - ₹12L+', skills: ['AutoCAD', 'Structural Design'] },
-      { name: 'Doctor (MBBS)', slug: 'doctor-mbbs', industry: 'Healthcare', salaryRange: '₹6L - ₹30L+', skills: ['Medical Knowledge', 'Patient Care'] }
+    // ==========================================
+    // CAREERS & JOB ROLES
+    // ==========================================
+    const swEngCareer = await Career.create({ name: 'Software Engineering', slug: 'software-engineering', industry: 'IT & Technology', salaryRange: '₹4L - ₹20L+', skills: ['Programming', 'Problem Solving', 'Algorithms'] });
+    const swEngJob = await JobRole.create({ careerId: swEngCareer._id, industryId: itIndustry._id, name: 'Software Engineer', slug: 'software-engineer', averageSalary: '₹8L' });
+
+    const doctorCareer = await Career.create({ name: 'Medicine', slug: 'medicine', industry: 'Healthcare & Medicine', salaryRange: '₹6L - ₹30L+', skills: ['Patient Care', 'Medical Knowledge'] });
+    const doctorJob = await JobRole.create({ careerId: doctorCareer._id, industryId: healthcareIndustry._id, name: 'Doctor', slug: 'doctor', averageSalary: '₹12L' });
+
+    const electricianCareer = await Career.create({ name: 'Electrical Technician', slug: 'electrical-technician', industry: 'Engineering & Construction', salaryRange: '₹2L - ₹6L', skills: ['Wiring', 'Safety Protocols'] });
+    const electricianJob = await JobRole.create({ careerId: electricianCareer._id, industryId: engineeringIndustry._id, name: 'Electrician', slug: 'electrician', averageSalary: '₹3L' });
+
+    // ==========================================
+    // EXAMS
+    // ==========================================
+    const jeeMain = await Exam.create({ examId: 'jee-main', name: 'JEE Main', level: 'National', category: 'Engineering', type: 'Entrance Exam', ugPg: 'UG', status: 'Active' });
+    const neetUg = await Exam.create({ examId: 'neet-ug', name: 'NEET UG', level: 'National', category: 'Medical', type: 'Entrance Exam', ugPg: 'UG', status: 'Active' });
+    const kcet = await Exam.create({ examId: 'kcet', name: 'KCET', level: 'State', category: 'Engineering', type: 'Entrance Exam', ugPg: 'UG', status: 'Active' });
+
+    // ==========================================
+    // GEOGRAPHY
+    // ==========================================
+    const karnataka = await State.create({ name: 'Karnataka', slug: 'karnataka', code: 'KA', country: 'India' });
+    
+    // Create Districts
+    const districtsData = [
+      { name: 'Bagalkot', division: 'Belagavi' },
+      { name: 'Ballari (Bellary)', division: 'Kalaburagi' },
+      { name: 'Belagavi (Belgaum)', division: 'Belagavi' },
+      { name: 'Bengaluru (Bangalore) Rural', division: 'Bengaluru' },
+      { name: 'Bengaluru (Bangalore) Urban', division: 'Bengaluru' },
+      { name: 'Bidar', division: 'Kalaburagi' },
+      { name: 'Chamarajanagar', division: 'Mysuru' },
+      { name: 'Chikballapur', division: 'Bengaluru' },
+      { name: 'Chikkamagaluru (Chikmagalur)', division: 'Mysuru' },
+      { name: 'Chitradurga', division: 'Bengaluru' },
+      { name: 'Dakshina Kannada', division: 'Mysuru' },
+      { name: 'Davanagere', division: 'Bengaluru' },
+      { name: 'Dharwad', division: 'Belagavi' },
+      { name: 'Gadag', division: 'Belagavi' },
+      { name: 'Hassan', division: 'Mysuru' },
+      { name: 'Haveri', division: 'Belagavi' },
+      { name: 'Kalaburagi (Gulbarga)', division: 'Kalaburagi' },
+      { name: 'Kodagu', division: 'Mysuru' },
+      { name: 'Kolar', division: 'Bengaluru' },
+      { name: 'Koppal', division: 'Kalaburagi' },
+      { name: 'Mandya', division: 'Mysuru' },
+      { name: 'Mysuru (Mysore)', division: 'Mysuru' },
+      { name: 'Raichur', division: 'Kalaburagi' },
+      { name: 'Ramanagara', division: 'Bengaluru' },
+      { name: 'Shivamogga (Shimoga)', division: 'Bengaluru' },
+      { name: 'Tumakuru (Tumkur)', division: 'Bengaluru' },
+      { name: 'Udupi', division: 'Mysuru' },
+      { name: 'Uttara Kannada (Karwar)', division: 'Belagavi' },
+      { name: 'Vijayapura (Bijapur)', division: 'Belagavi' },
+      { name: 'Yadgir', division: 'Kalaburagi' }
     ];
-    const createdCareers = await Career.insertMany(careersData);
-    const swEngId = createdCareers[0]._id;
-    const dataSciId = createdCareers[1]._id;
-    const civilEngId = createdCareers[2]._id;
-    const doctorId = createdCareers[3]._id;
+
+    const createdDistricts = await Promise.all(districtsData.map(d => 
+      District.create({ name: d.name, slug: slugify(d.name), division: d.division, stateId: karnataka._id })
+    ));
+    const districtMap: Record<string, mongoose.Types.ObjectId> = {};
+    createdDistricts.forEach(d => districtMap[d.slug] = d._id as mongoose.Types.ObjectId);
+
+    const bangaloreUrbanId = districtMap['bengaluru-bangalore-urban'];
+
+    // Create some Cities
+    const cityBangalore = await City.create({ name: 'Bangalore', slug: 'bangalore', districtId: bangaloreUrbanId, stateId: karnataka._id });
+
+    // ==========================================
+    // COLLEGES
+    // ==========================================
+    const createdCollegesMap: Record<string, any> = {};
+    for (const data of realColleges) {
+      const distSlug = slugify(data.district);
+      const districtId = districtMap[distSlug];
+      
+      const college = await College.create({
+        ...data,
+        slug: slugify(data.name),
+        state: 'Karnataka',
+        stateRef: karnataka._id,
+        districtRef: districtId,
+        status: 'ACTIVE',
+        source: 'seed'
+      });
+      createdCollegesMap[data.sourceId] = college;
+    }
+
+    // Seed the massive dataset
+    console.log(`Seeding ${massiveRealColleges.length} massive dataset colleges...`);
+    for (const data of massiveRealColleges) {
+      const distSlug = slugify(data.district);
+      const districtId = districtMap[distSlug];
+      
+      const college = await College.create({
+        ...data,
+        slug: slugify(data.name),
+        state: 'Karnataka',
+        stateRef: karnataka._id,
+        districtRef: districtId,
+        status: 'ACTIVE',
+        source: 'gemini-pro-knowledge'
+      });
+      createdCollegesMap[data.sourceId || slugify(data.name)] = college;
+    }
 
     // ==========================================
     // SUBJECTS
@@ -75,246 +188,149 @@ const seedRealData = async () => {
       { name: 'Electronics', slug: 'electronics' },
       { name: 'Statistics', slug: 'statistics' },
       { name: 'Home Science', slug: 'home-science' },
-      { name: 'Geology', slug: 'geology' }
+      { name: 'Geology', slug: 'geology' },
+      { name: 'History', slug: 'history' },
+      { name: 'Economics', slug: 'economics' },
+      { name: 'Political Science', slug: 'political-science' },
+      { name: 'Sociology', slug: 'sociology' },
+      { name: 'Business Studies', slug: 'business-studies' },
+      { name: 'Accountancy', slug: 'accountancy' }
     ];
     const createdSubjects = await Subject.insertMany(subjectsData);
     const subMap: Record<string, string> = {};
     createdSubjects.forEach(s => subMap[s.slug] = (s._id as any).toString());
 
     // ==========================================
-    // EDUCATION LEVELS & PATHWAYS & STREAMS
+    // EDUCATION LEVELS & PATHWAYS
     // ==========================================
     const after10 = await EducationLevel.create({ name: 'After 10th', slug: 'after-10th', order: 1 });
     const after12 = await EducationLevel.create({ name: 'After 12th', slug: 'after-12th', order: 2 });
+    const diplomaLevel = await EducationLevel.create({ name: 'Diploma', slug: 'diploma', order: 3 });
+    const itiLevel = await EducationLevel.create({ name: 'ITI', slug: 'iti', order: 4 });
+    const ugLevel = await EducationLevel.create({ name: 'Undergraduate / UG', slug: 'ug', order: 5 });
+    const pgLevel = await EducationLevel.create({ name: 'Postgraduate / PG', slug: 'pg', order: 6 });
 
     // 1. PUC / 11th-12th
-    const pathway12th = await Pathway.create({ educationLevelId: after10._id, name: '12th / PUC / Intermediate', slug: '12th-intermediate', duration: '2 Years', order: 1 });
-    const scienceStream = await Stream.create({ pathwayId: pathway12th._id, name: 'Science', slug: '12th-science', order: 1, duration: '2 Years', typicalStructure: ['I PUC', 'II PUC'] });
-    const commerceStream = await Stream.create({ pathwayId: pathway12th._id, name: 'Commerce', slug: '12th-commerce', order: 2, duration: '2 Years' });
-    const artsStream = await Stream.create({ pathwayId: pathway12th._id, name: 'Arts / Humanities', slug: '12th-arts', order: 3, duration: '2 Years' });
+    const pathwayPUC = await Pathway.create({ educationLevelId: after10._id, name: 'PUC / 11th–12th', slug: 'puc', duration: '2 Years', order: 1 });
+    
+    // Streams for PUC
+    const scienceStream = await Stream.create({ pathwayId: pathwayPUC._id, name: 'Science', slug: 'science', order: 1, duration: '2 Years' });
+    const commerceStream = await Stream.create({ pathwayId: pathwayPUC._id, name: 'Commerce', slug: 'commerce', order: 2, duration: '2 Years' });
+    const artsStream = await Stream.create({ pathwayId: pathwayPUC._id, name: 'Arts / Humanities', slug: 'arts', order: 3, duration: '2 Years' });
+    const vocPucStream = await Stream.create({ pathwayId: pathwayPUC._id, name: 'Vocational', slug: 'vocational-puc', order: 4, duration: '2 Years' });
 
     // 2. Diploma / Polytechnic
-    const pathwayDiploma = await Pathway.create({ educationLevelId: after10._id, name: 'Diploma / Polytechnic', slug: 'diploma-polytechnic', duration: '3 Years', order: 2 });
-    const engDiploma = await Stream.create({ pathwayId: pathwayDiploma._id, name: 'Engineering', slug: 'diploma-eng', order: 1 });
-    const nonEngDiploma = await Stream.create({ pathwayId: pathwayDiploma._id, name: 'Non-Engineering', slug: 'diploma-non-eng', order: 2 });
-    const specDiploma = await Stream.create({ pathwayId: pathwayDiploma._id, name: 'Specialised Diploma', slug: 'diploma-spec', order: 3 });
+    const pathwayDiploma = await Pathway.create({ educationLevelId: after10._id, name: 'Diploma / Polytechnic', slug: 'diploma', duration: '3 Years', order: 2 });
+    const dipEngStream = await Stream.create({ pathwayId: pathwayDiploma._id, name: 'Engineering', slug: 'engineering', order: 1 });
+    const dipNonEngStream = await Stream.create({ pathwayId: pathwayDiploma._id, name: 'Non-Engineering', slug: 'non-engineering', order: 2 });
 
     // 3. ITI
-    const pathwayITI = await Pathway.create({ educationLevelId: after10._id, name: 'ITI (Industrial Training Institute)', slug: 'iti', duration: '1-2 Years', order: 3 });
-    const itiStream = await Stream.create({ pathwayId: pathwayITI._id, name: 'ITI Trades', slug: 'iti-trades', order: 1 });
+    const pathwayITI = await Pathway.create({ educationLevelId: after10._id, name: 'ITI', slug: 'iti', duration: '1-2 Years', order: 3 });
+    const itiTradesStream = await Stream.create({ pathwayId: pathwayITI._id, name: 'ITI Trades', slug: 'trades', order: 1 });
 
     // 4. Paramedical / Allied Health
-    const pathwayParamedical = await Pathway.create({ educationLevelId: after10._id, name: 'Paramedical / Allied Health', slug: 'paramedical', duration: '2-3 Years', order: 4 });
-    const paraStream = await Stream.create({ pathwayId: pathwayParamedical._id, name: 'Paramedical Programs', slug: 'para-programs', order: 1 });
-
-    // 5. Vocational / Skill Education
-    const pathwayVocational = await Pathway.create({ educationLevelId: after10._id, name: 'Vocational / Skill Education', slug: 'vocational', duration: 'Varies', order: 5 });
-    const vocStream = await Stream.create({ pathwayId: pathwayVocational._id, name: 'Vocational Sectors', slug: 'voc-sectors', order: 1 });
-
-    // 6. Apprenticeship / Skill Training
-    const pathwayApprentice = await Pathway.create({ educationLevelId: after10._id, name: 'Apprenticeship / Skill Training', slug: 'apprenticeship', duration: 'Varies', order: 6 });
-    const appStream = await Stream.create({ pathwayId: pathwayApprentice._id, name: 'Apprenticeship Sectors', slug: 'app-sectors', order: 1 });
-
-    // 7. Other recognised pathways
-    const pathwayOther = await Pathway.create({ educationLevelId: after10._id, name: 'Other Recognised Pathways', slug: 'other-pathways', duration: 'Varies', order: 7 });
-    const otherStream = await Stream.create({ pathwayId: pathwayOther._id, name: 'Alternative Pathways', slug: 'other-streams', order: 1 });
+    const pathwayPara = await Pathway.create({ educationLevelId: after10._id, name: 'Paramedical / Allied Health', slug: 'paramedical', duration: '2-3 Years', order: 4 });
+    const paraStream = await Stream.create({ pathwayId: pathwayPara._id, name: 'Paramedical Programs', slug: 'programs', order: 1 });
 
     // ==========================================
-    // SUBJECT COMBINATIONS (And mapped Trades/Programs for dynamic drilldown UI)
+    // SUBJECT COMBINATIONS (for PUC)
     // ==========================================
-    const combinationsData = [
-      // SCIENCE
-      { streamId: scienceStream._id, name: 'PCMB', slug: 'pcmb', subjects: [subMap['physics'], subMap['chemistry'], subMap['mathematics'], subMap['biology']], eligibility: 'Passed 10th / SSLC or equivalent.' },
-      { streamId: scienceStream._id, name: 'PCMC / PCMCs', slug: 'pcmc', subjects: [subMap['physics'], subMap['chemistry'], subMap['mathematics'], subMap['computer-science']], eligibility: 'Passed 10th / SSLC or equivalent.' },
-      { streamId: scienceStream._id, name: 'PCME', slug: 'pcme', subjects: [subMap['physics'], subMap['chemistry'], subMap['mathematics'], subMap['electronics']], eligibility: 'Passed 10th / SSLC or equivalent.' },
-      { streamId: scienceStream._id, name: 'PCMS / SPCM', slug: 'pcms', subjects: [subMap['physics'], subMap['chemistry'], subMap['mathematics'], subMap['statistics']], eligibility: 'Passed 10th / SSLC or equivalent.' },
-      { streamId: scienceStream._id, name: 'PCB / Biology-oriented', slug: 'pcb', subjects: [subMap['physics'], subMap['chemistry'], subMap['biology']], eligibility: 'Passed 10th / SSLC or equivalent.' },
-      { streamId: scienceStream._id, name: 'PCBH', slug: 'pcbh', subjects: [subMap['physics'], subMap['chemistry'], subMap['biology'], subMap['home-science']], eligibility: 'Passed 10th / SSLC or equivalent.' },
-      { streamId: scienceStream._id, name: 'PCMG', slug: 'pcmg', subjects: [subMap['physics'], subMap['chemistry'], subMap['mathematics'], subMap['geology']], eligibility: 'Passed 10th / SSLC or equivalent.' },
+    const pcmb = await SubjectCombination.create({ streamId: scienceStream._id, name: 'PCMB', slug: 'pcmb', subjects: [subMap['physics'], subMap['chemistry'], subMap['mathematics'], subMap['biology']], eligibility: 'Passed 10th / SSLC' });
+    const pcmc = await SubjectCombination.create({ streamId: scienceStream._id, name: 'PCMC / PCMCs', slug: 'pcmc', subjects: [subMap['physics'], subMap['chemistry'], subMap['mathematics'], subMap['computer-science']], eligibility: 'Passed 10th / SSLC' });
+    const pcme = await SubjectCombination.create({ streamId: scienceStream._id, name: 'PCME', slug: 'pcme', subjects: [subMap['physics'], subMap['chemistry'], subMap['mathematics'], subMap['electronics']] });
+    
+    const ceba = await SubjectCombination.create({ streamId: commerceStream._id, name: 'CEBA', slug: 'ceba', subjects: [subMap['computer-science'], subMap['economics'], subMap['business-studies'], subMap['accountancy']] });
+    const seba = await SubjectCombination.create({ streamId: commerceStream._id, name: 'SEBA', slug: 'seba', subjects: [subMap['statistics'], subMap['economics'], subMap['business-studies'], subMap['accountancy']] });
 
-      // COMMERCE
-      { streamId: commerceStream._id, name: 'CEBA / Computer Science', slug: 'ceba', subjects: [] },
-      { streamId: commerceStream._id, name: 'SEBA', slug: 'seba', subjects: [] },
-      { streamId: commerceStream._id, name: 'MEBA', slug: 'meba', subjects: [] },
-      { streamId: commerceStream._id, name: 'MSBA', slug: 'msba', subjects: [] },
-      { streamId: commerceStream._id, name: 'Other approved combinations', slug: 'com-other', subjects: [] },
-
-      // ARTS
-      { streamId: artsStream._id, name: 'HEPS', slug: 'heps', subjects: [] },
-      { streamId: artsStream._id, name: 'HESP', slug: 'hesp', subjects: [] },
-      { streamId: artsStream._id, name: 'History', slug: 'arts-history', subjects: [] },
-      { streamId: artsStream._id, name: 'Economics', slug: 'arts-economics', subjects: [] },
-      { streamId: artsStream._id, name: 'Political Science', slug: 'arts-political', subjects: [] },
-      { streamId: artsStream._id, name: 'Sociology', slug: 'arts-sociology', subjects: [] },
-      { streamId: artsStream._id, name: 'Psychology', slug: 'arts-psychology', subjects: [] },
-      { streamId: artsStream._id, name: 'Languages', slug: 'arts-languages', subjects: [] },
-
-      // DIPLOMA - ENG
-      { streamId: engDiploma._id, name: 'Computer Science', slug: 'dip-cs', subjects: [] },
-      { streamId: engDiploma._id, name: 'Information Science', slug: 'dip-is', subjects: [] },
-      { streamId: engDiploma._id, name: 'Electronics & Communication', slug: 'dip-ec', subjects: [] },
-      { streamId: engDiploma._id, name: 'Electrical', slug: 'dip-ee', subjects: [] },
-      { streamId: engDiploma._id, name: 'Mechanical', slug: 'dip-mech', subjects: [] },
-      { streamId: engDiploma._id, name: 'Civil', slug: 'dip-civil', subjects: [] },
-      { streamId: engDiploma._id, name: 'Automobile', slug: 'dip-auto', subjects: [] },
-      { streamId: engDiploma._id, name: 'Mechatronics', slug: 'dip-mechatronics', subjects: [] },
-      { streamId: engDiploma._id, name: 'Instrumentation', slug: 'dip-inst', subjects: [] },
-      { streamId: engDiploma._id, name: 'Chemical', slug: 'dip-chem', subjects: [] },
-      { streamId: engDiploma._id, name: 'Other approved diploma branches', slug: 'dip-other-eng', subjects: [] },
-
-      // DIPLOMA - NON ENG
-      { streamId: nonEngDiploma._id, name: 'Commercial Practice', slug: 'dip-comm', subjects: [] },
-      { streamId: nonEngDiploma._id, name: 'Computer Applications', slug: 'dip-ca', subjects: [] },
-      { streamId: nonEngDiploma._id, name: 'Other programs', slug: 'dip-other-non', subjects: [] },
-
-      // DIPLOMA - SPEC
-      { streamId: specDiploma._id, name: 'Agriculture', slug: 'dip-agri', subjects: [] },
-      { streamId: specDiploma._id, name: 'Pharmacy', slug: 'dip-pharm', subjects: [] },
-      { streamId: specDiploma._id, name: 'Health-related', slug: 'dip-health', subjects: [] },
-      { streamId: specDiploma._id, name: 'Other recognised programs', slug: 'dip-spec-other', subjects: [] },
-
-      // ITI
-      { streamId: itiStream._id, name: 'Electrician', slug: 'iti-electrician', subjects: [] },
-      { streamId: itiStream._id, name: 'Fitter', slug: 'iti-fitter', subjects: [] },
-      { streamId: itiStream._id, name: 'Welder', slug: 'iti-welder', subjects: [] },
-      { streamId: itiStream._id, name: 'COPA', slug: 'iti-copa', subjects: [] },
-      { streamId: itiStream._id, name: 'Mechanic', slug: 'iti-mechanic', subjects: [] },
-      { streamId: itiStream._id, name: 'Electronics Mechanic', slug: 'iti-elec-mech', subjects: [] },
-      { streamId: itiStream._id, name: 'Turner', slug: 'iti-turner', subjects: [] },
-      { streamId: itiStream._id, name: 'Machinist', slug: 'iti-machinist', subjects: [] },
-      { streamId: itiStream._id, name: 'Plumber', slug: 'iti-plumber', subjects: [] },
-      { streamId: itiStream._id, name: 'Draughtsman', slug: 'iti-draughtsman', subjects: [] },
-      { streamId: itiStream._id, name: 'Refrigeration & Air Conditioning', slug: 'iti-rac', subjects: [] },
-      { streamId: itiStream._id, name: 'Other ITI trades', slug: 'iti-other', subjects: [] },
-
-      // PARAMEDICAL
-      { streamId: paraStream._id, name: 'Medical Laboratory Technology', slug: 'para-mlt', subjects: [] },
-      { streamId: paraStream._id, name: 'Medical Imaging / Radiology', slug: 'para-radiology', subjects: [] },
-      { streamId: paraStream._id, name: 'Dialysis Technology', slug: 'para-dialysis', subjects: [] },
-      { streamId: paraStream._id, name: 'Health Inspector', slug: 'para-inspector', subjects: [] },
-      { streamId: paraStream._id, name: 'Ophthalmic Technology', slug: 'para-ophthalmic', subjects: [] },
-      { streamId: paraStream._id, name: 'OT & Anaesthesia Technology', slug: 'para-ot', subjects: [] },
-      { streamId: paraStream._id, name: 'Medical Record Technology', slug: 'para-record', subjects: [] },
-      { streamId: paraStream._id, name: 'Dental Mechanic', slug: 'para-dental-mech', subjects: [] },
-      { streamId: paraStream._id, name: 'Dental Hygiene', slug: 'para-dental-hyg', subjects: [] },
-      { streamId: paraStream._id, name: 'Other recognised programs', slug: 'para-other', subjects: [] },
-
-      // VOCATIONAL
-      { streamId: vocStream._id, name: 'IT / Computer Applications', slug: 'voc-it', subjects: [] },
-      { streamId: vocStream._id, name: 'Retail', slug: 'voc-retail', subjects: [] },
-      { streamId: vocStream._id, name: 'Tourism', slug: 'voc-tourism', subjects: [] },
-      { streamId: vocStream._id, name: 'Hospitality', slug: 'voc-hospitality', subjects: [] },
-      { streamId: vocStream._id, name: 'Fashion', slug: 'voc-fashion', subjects: [] },
-      { streamId: vocStream._id, name: 'Beauty & Wellness', slug: 'voc-beauty', subjects: [] },
-      { streamId: vocStream._id, name: 'Media', slug: 'voc-media', subjects: [] },
-      { streamId: vocStream._id, name: 'Healthcare', slug: 'voc-health', subjects: [] },
-      { streamId: vocStream._id, name: 'Agriculture', slug: 'voc-agri', subjects: [] },
-      { streamId: vocStream._id, name: 'Other vocational programs', slug: 'voc-other', subjects: [] },
-
-      // APPRENTICESHIP
-      { streamId: appStream._id, name: 'Technical trades', slug: 'app-tech', subjects: [] },
-      { streamId: appStream._id, name: 'Manufacturing', slug: 'app-mfg', subjects: [] },
-      { streamId: appStream._id, name: 'Electrical', slug: 'app-ee', subjects: [] },
-      { streamId: appStream._id, name: 'Automotive', slug: 'app-auto', subjects: [] },
-      { streamId: appStream._id, name: 'IT', slug: 'app-it', subjects: [] },
-      { streamId: appStream._id, name: 'Service-sector skills', slug: 'app-service', subjects: [] },
-
-      // OTHER
-      { streamId: otherStream._id, name: 'Open schooling', slug: 'oth-open', subjects: [] },
-      { streamId: otherStream._id, name: 'Skill-development programs', slug: 'oth-skill', subjects: [] },
-      { streamId: otherStream._id, name: 'Job-oriented certificate programs', slug: 'oth-job', subjects: [] },
-      { streamId: otherStream._id, name: 'Other approved alternatives', slug: 'oth-other', subjects: [] },
-    ];
-    const createdCombinations = await SubjectCombination.insertMany(combinationsData);
-    const comboMap: Record<string, string> = {};
-    createdCombinations.forEach(c => comboMap[c.slug] = (c._id as any).toString());
+    const heps = await SubjectCombination.create({ streamId: artsStream._id, name: 'HEPS', slug: 'heps', subjects: [subMap['history'], subMap['economics'], subMap['political-science'], subMap['sociology']] });
 
     // ==========================================
-    // DATA MAPPING FOR COURSES & BRANCHES
+    // COURSES (UG)
     // ==========================================
-    const comboMappings: Record<string, Record<string, string[]>> = {
-      pcmb: {
-        'Engineering & Technology': ['Computer Science Engineering', 'Artificial Intelligence & Machine Learning', 'Data Science', 'Information Science', 'Electronics & Communication', 'Electrical & Electronics', 'Mechanical', 'Civil', 'Chemical', 'Aerospace', 'Biotechnology', 'Biomedical Engineering'],
-        'Medical': ['MBBS', 'BDS', 'BAMS', 'BHMS', 'BSMS', 'BUMS', 'Veterinary'],
-        'Allied Health Sciences': ['B.Sc Nursing', 'BPT', 'B.Sc Medical Laboratory Technology', 'B.Sc Radiology', 'B.Sc Imaging Technology', 'B.Sc Operation Theatre Technology', 'B.Sc Emergency Care', 'Optometry', 'Cardiac Care'],
-        'Pharmacy': ['B.Pharm', 'Pharm.D'],
-        'Agriculture': ['B.Sc Agriculture', 'Horticulture', 'Forestry', 'Sericulture', 'Fisheries'],
-        'Pure Science': ['B.Sc Physics', 'B.Sc Chemistry', 'B.Sc Mathematics', 'B.Sc Biology', 'B.Sc Statistics', 'B.Sc Geology'],
-        'Computer / IT': ['BCA', 'B.Sc Computer Science', 'B.Sc Data Science', 'B.Sc AI', 'B.Sc Cyber Security']
-      },
-      pcmc: {
-        'Engineering & Technology': ['Computer Science', 'AI & Machine Learning', 'Data Science', 'Cyber Security', 'Information Science', 'Software Engineering', 'Cloud Computing', 'Information Technology', 'Computer Applications', 'Electronics & Communication', 'Electrical Engineering', 'Robotics', 'Automation', 'Mechanical', 'Civil', 'Architecture']
-      },
-      pcme: {
-        'Engineering & Technology': ['Electronics & Communication', 'Electrical & Electronics', 'Electronics Engineering', 'Embedded Systems', 'VLSI', 'Robotics', 'Automation', 'Mechatronics', 'Instrumentation', 'Computer Engineering', 'Telecommunications']
-      },
-      pcms: {
-        'Data & Mathematical Sciences': ['Statistics', 'Data Science', 'Data Analytics', 'Mathematics', 'Actuarial Science', 'Economics', 'Computer Science', 'Artificial Intelligence', 'Financial Analytics']
-      },
-      pcb: {
-        'Medical & Life Sciences': ['Medicine', 'Dentistry', 'Pharmacy', 'Nursing', 'Physiotherapy', 'Allied Health', 'Biotechnology', 'Microbiology', 'Biochemistry', 'Zoology', 'Botany']
-      },
-      pcbh: {
-        'Home Science & Nutrition': ['Nutrition & Dietetics', 'Food Science', 'Home Science', 'Human Development', 'Family Resource Management', 'Nursing', 'Allied Health', 'Life Sciences']
-      },
-      pcmg: {
-        'Earth Sciences & Environment': ['Geology', 'Earth Science', 'Geophysics', 'Environmental Science', 'Mining Engineering', 'Civil Engineering', 'Petroleum / Energy-related fields', 'Geography', 'Earth & Environmental Research']
-      }
-    };
-
-    const areaNamesMap: Record<string, string> = {
-      'Engineering & Technology': 'B.E. / B.Tech Degrees',
-      'Medical': 'Medical Degrees',
-      'Allied Health Sciences': 'Allied Health Degrees',
-      'Pharmacy': 'Pharmacy Degrees',
-      'Agriculture': 'Agriculture Degrees',
-      'Pure Science': 'Pure Science Degrees',
-      'Computer / IT': 'Computer / IT Degrees',
-      'Data & Mathematical Sciences': 'Data & Mathematical Degrees',
-      'Medical & Life Sciences': 'Medical & Life Sciences Degrees',
-      'Home Science & Nutrition': 'Home Science & Nutrition Degrees',
-      'Earth Sciences & Environment': 'Earth Sciences & Environment Degrees'
-    };
-
-    const areaBranches: Record<string, Set<string>> = {};
-    const areaCombos: Record<string, Set<string>> = {};
-
-    Object.entries(comboMappings).forEach(([comboSlug, areaMap]) => {
-      Object.entries(areaMap).forEach(([area, branches]) => {
-        if (!areaBranches[area]) areaBranches[area] = new Set();
-        if (!areaCombos[area]) areaCombos[area] = new Set();
-        branches.forEach(b => areaBranches[area].add(b));
-        areaCombos[area].add(comboMap[comboSlug]);
-      });
+    const btech = await Course.create({
+      name: 'B.E / B.Tech', slug: 'btech', courseLevel: 'Undergraduate', duration: '4 Years',
+      higherStudyArea: 'Engineering & Technology',
+      eligibleCombinations: [pcmb._id, pcmc._id, pcme._id],
+    });
+    
+    const mbbs = await Course.create({
+      name: 'MBBS', slug: 'mbbs', courseLevel: 'Undergraduate', duration: '5.5 Years',
+      higherStudyArea: 'Medical',
+      eligibleCombinations: [pcmb._id],
     });
 
-    const coursesToInsert = Object.keys(areaBranches).map(area => ({
-      name: areaNamesMap[area] || `Degrees in ${area}`,
-      slug: slugify(`course-${area}`),
-      courseLevel: 'Undergraduate',
-      higherStudyArea: area,
-      eligibleCombinations: Array.from(areaCombos[area])
-    }));
-
-    const createdCourses = await Course.insertMany(coursesToInsert);
-    const courseObjMap: Record<string, string> = {};
-    createdCourses.forEach(c => courseObjMap[c.higherStudyArea!] = (c._id as any).toString());
-
-    const branchesToInsert: any[] = [];
-    Object.keys(areaBranches).forEach(area => {
-      const courseId = courseObjMap[area];
-      Array.from(areaBranches[area]).forEach(branchName => {
-        branchesToInsert.push({
-          courseId,
-          name: branchName,
-          slug: slugify(`branch-${area}-${branchName}`)
-        });
-      });
+    const bcom = await Course.create({
+      name: 'B.Com', slug: 'bcom', courseLevel: 'Undergraduate', duration: '3 Years',
+      higherStudyArea: 'Commerce & Business',
+      eligibleCombinations: [ceba._id, seba._id],
     });
 
-    await Branch.insertMany(branchesToInsert);
+    // ==========================================
+    // BRANCHES (Under Courses)
+    // ==========================================
+    const btechCS = await Branch.create({
+      courseId: btech._id, name: 'Computer Science', slug: 'computer-science', duration: '4 Years',
+      relatedExams: [jeeMain._id, kcet._id],
+      relatedCareers: [swEngCareer._id]
+    });
+    
+    const btechMech = await Branch.create({
+      courseId: btech._id, name: 'Mechanical Engineering', slug: 'mechanical-engineering', duration: '4 Years',
+      relatedExams: [jeeMain._id, kcet._id]
+    });
 
-    console.log('Successfully seeded fully normalized taxonomy with requested hierarchical branches!');
+    const mbbsBranch = await Branch.create({
+      courseId: mbbs._id, name: 'Medicine and Surgery', slug: 'medicine-and-surgery', duration: '5.5 Years',
+      relatedExams: [neetUg._id],
+      relatedCareers: [doctorCareer._id]
+    });
+
+    // Add branches to Colleges for backward compatibility with pathway feature
+    const rvce = createdCollegesMap['rvce-01'];
+    const bmsce = createdCollegesMap['bmsce-01'];
+    const bmc = createdCollegesMap['bmcri-02'];
+    
+    if (rvce) {
+      await College.updateOne({ _id: rvce._id }, { $push: { offeredBranchesRef: btechCS._id } });
+      await College.updateOne({ _id: rvce._id }, { $push: { offeredBranchesRef: btechMech._id } });
+      await CollegeCourse.create({ collegeId: rvce._id, courseId: btech._id, branchId: btechCS._id, duration: '4 Years', fees: '₹10L', academicYear: '2024-25', intake: 120, eligibility: '10+2 with 45% in PCM', programType: 'UG', entranceExamId: kcet._id });
+      await CollegeCourse.create({ collegeId: rvce._id, courseId: btech._id, branchId: btechMech._id, duration: '4 Years', fees: '₹10L', academicYear: '2024-25', intake: 60, eligibility: '10+2 with 45% in PCM', programType: 'UG', entranceExamId: kcet._id });
+    }
+    if (bmsce) {
+      await College.updateOne({ _id: bmsce._id }, { $push: { offeredBranchesRef: btechCS._id } });
+      await CollegeCourse.create({ collegeId: bmsce._id, courseId: btech._id, branchId: btechCS._id, duration: '4 Years', fees: '₹8L', academicYear: '2024-25', intake: 180, eligibility: '10+2 with 45% in PCM', programType: 'UG', entranceExamId: kcet._id });
+    }
+    if (bmc) {
+      await College.updateOne({ _id: bmc._id }, { $push: { offeredBranchesRef: mbbsBranch._id } });
+      await CollegeCourse.create({ collegeId: bmc._id, courseId: mbbs._id, branchId: mbbsBranch._id, duration: '5.5 Years', fees: '₹1L', academicYear: '2024-25', intake: 250, eligibility: '10+2 with PCB, NEET UG', programType: 'UG', entranceExamId: neetUg._id });
+    }
+
+    // ==========================================
+    // DIPLOMA COURSES & BRANCHES (Connected directly to Stream)
+    // ==========================================
+    const dipEngCourse = await Course.create({
+      name: 'Diploma in Engineering', slug: 'diploma-engineering', courseLevel: 'Diploma', duration: '3 Years',
+      streamId: dipEngStream._id
+    });
+    const dipCS = await Branch.create({
+      courseId: dipEngCourse._id, name: 'Computer Science Engineering', slug: 'computer-science-engineering', duration: '3 Years',
+      relatedCareers: [swEngCareer._id]
+    });
+
+    // ==========================================
+    // ITI TRADES (Connected to ITI Stream)
+    // ==========================================
+    await Trade.create({
+      streamId: itiTradesStream._id, name: 'Electrician', slug: 'electrician', duration: '2 Years',
+      eligibility: '10th Pass', minimumQualification: '10th',
+      apprenticeshipOpportunities: true
+    });
+    await Trade.create({
+      streamId: itiTradesStream._id, name: 'Fitter', slug: 'fitter', duration: '2 Years',
+      eligibility: '10th Pass', minimumQualification: '10th',
+    });
+
+    console.log('Database seeding completed successfully. The complete graph is now connected!');
     process.exit(0);
   } catch (error) {
     console.error('Error seeding data:', error);

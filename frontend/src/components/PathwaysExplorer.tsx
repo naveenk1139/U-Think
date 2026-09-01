@@ -70,8 +70,8 @@ const PathwaysExplorer: React.FC = () => {
           getPathwayTree(),
           getPathwayStats()
         ]);
-        setEducationLevels(treeData);
-        setGlobalStats(globalStatsData);
+        setEducationLevels(treeData || []);
+        setGlobalStats(globalStatsData || null);
       } catch (error) {
         console.error("Failed to fetch global pathways data", error);
       }
@@ -143,8 +143,8 @@ const PathwaysExplorer: React.FC = () => {
     });
   };
 
-  const activeLevel = educationLevels.find(l => l.slug === activeLevelSlug);
-  const activePathway = activeLevel?.pathways.find(p => p.slug === pathwaySlug);
+  const activeLevel = educationLevels?.find(l => l.slug === activeLevelSlug);
+  const activePathway = activeLevel?.pathways?.find(p => p.slug === pathwaySlug);
   
   const selectedCombination = comboSlug && streamDetails?.subjectCombinations 
     ? streamDetails.subjectCombinations.find(c => c.slug === comboSlug) 
@@ -193,6 +193,19 @@ const PathwaysExplorer: React.FC = () => {
       });
       streamStats.subjects = subSet.size;
       streamStats.courses = courseSet.size;
+      streamStats.branches = branchSet.size;
+      streamStats.careers = careerSet.size;
+  } else if (streamDetails?.courses) {
+      streamStats.courses = streamDetails.courses.length;
+      const branchSet = new Set();
+      const careerSet = new Set();
+      streamDetails.courses.forEach(c => {
+          c.branches?.forEach(b => {
+              if (!b) return;
+              branchSet.add(b._id);
+              b.relatedCareers?.forEach((rc: any) => { if (rc) careerSet.add(rc._id || rc) });
+          });
+      });
       streamStats.branches = branchSet.size;
       streamStats.careers = careerSet.size;
   }
@@ -468,6 +481,14 @@ const PathwaysExplorer: React.FC = () => {
                                 </div>
                             </div>
                         )}
+                        {(streamDetails.trades && streamDetails.trades.length > 0) && (
+                            <div className="flex flex-wrap gap-4 items-center bg-gray-50 p-4 rounded-xl border border-gray-100">
+                                <div className="text-center px-4 border-r border-gray-200">
+                                    <div className="text-2xl font-black text-emerald-600">{streamDetails.trades.length}</div>
+                                    <div className="text-[10px] uppercase font-bold text-gray-500">Trades</div>
+                                </div>
+                            </div>
+                        )}
                     </div>
                     
                     {/* COMBINATIONS CARDS GRID */}
@@ -537,6 +558,27 @@ const PathwaysExplorer: React.FC = () => {
                                                 </ul>
                                             </div>
                                         )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    ) : streamDetails.trades && streamDetails.trades.length > 0 ? (
+                        <div className="bg-white border border-gray-200 rounded-[24px] p-8 shadow-sm">
+                            <h3 className="font-bold text-gray-900 mb-6 text-xl">{streamDetails.name} Trades</h3>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {streamDetails.trades.map((trade: any) => (
+                                    <div key={trade._id} className="border border-gray-100 rounded-xl p-6 shadow-sm hover:border-blue-300 transition-colors">
+                                        <div className="flex items-center gap-3 mb-4">
+                                            <div className="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                                                <Wrench className="w-5 h-5" />
+                                            </div>
+                                            <h4 className="font-bold text-lg text-gray-900">{trade.name}</h4>
+                                        </div>
+                                        <div className="space-y-2 mt-4 text-sm text-gray-600">
+                                            {trade.duration && <p><strong>Duration:</strong> {trade.duration}</p>}
+                                            {trade.eligibility && <p><strong>Eligibility:</strong> {trade.eligibility}</p>}
+                                            {trade.apprenticeshipOpportunities && <p><strong>Apprenticeship:</strong> Yes</p>}
+                                        </div>
                                     </div>
                                 ))}
                             </div>
@@ -830,23 +872,23 @@ const PathwaysExplorer: React.FC = () => {
             <div className="bg-white border border-gray-100 rounded-xl p-5 hover:shadow-md transition-shadow flex items-center justify-between group cursor-pointer" onClick={() => navigate('/colleges')}>
               <div>
                 <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">All Colleges</p>
-                <p className="text-2xl font-black text-teal-600">8,521</p> {/* Example fallback for existing DB data absent from stats */}
+                <p className="text-2xl font-black text-teal-600">{globalStats.colleges.toLocaleString()}</p>
               </div>
               <div className="w-10 h-10 rounded-full bg-teal-50 flex items-center justify-center text-teal-500 group-hover:bg-teal-500 group-hover:text-white transition-colors"><Building2 className="w-5 h-5" /></div>
             </div>
             <div className="bg-white border border-gray-100 rounded-xl p-5 hover:shadow-md transition-shadow flex items-center justify-between group cursor-pointer" onClick={() => navigate('/exams')}>
               <div>
                 <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">All Exams</p>
-                <p className="text-2xl font-black text-amber-500">2,158</p> {/* Example fallback for existing DB data absent from stats */}
+                <p className="text-2xl font-black text-amber-500">{globalStats.exams.toLocaleString()}</p>
               </div>
               <div className="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center text-amber-500 group-hover:bg-amber-500 group-hover:text-white transition-colors"><ClipboardList className="w-5 h-5" /></div>
             </div>
             <div className="bg-white border border-gray-100 rounded-xl p-5 hover:shadow-md transition-shadow flex items-center justify-between group cursor-pointer" onClick={() => navigate('/jobs')}>
               <div>
                 <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">All Jobs</p>
-                <p className="text-2xl font-black text-indigo-500">18,963</p> {/* Example fallback for existing DB data absent from stats */}
+                <p className="text-2xl font-black text-indigo-500">{globalStats.jobs.toLocaleString()}</p>
               </div>
-              <div className="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-500 group-hover:bg-indigo-500 group-hover:text-white transition-colors"><Briefcase className="w-5 h-5" /></div>
+              <div className="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-500 group-hover:bg-indigo-500 group-hover:text-white transition-colors"><Users className="w-5 h-5" /></div>
             </div>
           </div>
         </div>

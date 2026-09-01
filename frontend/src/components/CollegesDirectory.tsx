@@ -51,8 +51,13 @@ export default function CollegesDirectory() {
   };
 
   useEffect(() => {
-    fetchCollegeStats().then(setStats).catch(console.error);
-  }, []);
+    const params: any = {};
+    if (searchQuery) params.q = searchQuery;
+    if (selectedType !== 'All') params.type = selectedType;
+    if (selectedDistrict !== 'Any District') params.district = selectedDistrict;
+    
+    fetchCollegeStats(params).then(setStats).catch(console.error);
+  }, [searchQuery, selectedType, selectedDistrict]);
 
   // Reset page when filters change
   useEffect(() => {
@@ -75,15 +80,12 @@ export default function CollegesDirectory() {
           branch: selectedBranch === 'All' ? undefined : selectedBranch,
           type: selectedType === 'All' ? undefined : selectedType,
           district: selectedDistrict === 'Any District' ? undefined : selectedDistrict,
+          sortBy: sortBy,
           page: page,
           limit: 20
         };
         const response = await fetchColleges(params);
-        if (page === 1) {
-          setColleges(response.data);
-        } else {
-          setColleges(prev => [...prev, ...response.data]);
-        }
+        setColleges(response.data);
         setTotalPages(response.pagination?.totalPages || 1);
         setTotalCollegesCount(response.pagination?.total || 0);
       } catch (error) {
@@ -99,7 +101,7 @@ export default function CollegesDirectory() {
     }, 300);
     
     return () => clearTimeout(timeoutId);
-  }, [searchQuery, selectedCategory, selectedBranch, selectedType, selectedDistrict, page]);
+  }, [searchQuery, selectedCategory, selectedBranch, selectedType, selectedDistrict, sortBy, page]);
 
   // Generate a match score: use real AI score if available, otherwise calculate from user preferences
   const getMatchScore = (college: College) => {
@@ -408,7 +410,7 @@ export default function CollegesDirectory() {
             <h2 className="text-xl font-black text-text-primary">
               {selectedCategory === 'All' ? 'All Colleges' : `${selectedCategory} Colleges`}
               <span className="text-text-muted text-base font-semibold ml-2">
-                — Showing {colleges.length > 0 ? 1 : 0}-{colleges.length} of {totalCollegesCount} in Karnataka
+                — Showing {totalCollegesCount > 0 ? (page - 1) * 20 + 1 : 0}-{Math.min(page * 20, totalCollegesCount)} of {totalCollegesCount} in Karnataka
               </span>
             </h2>
             <div className="flex items-center gap-2 text-sm font-bold text-text-muted">
@@ -531,14 +533,51 @@ export default function CollegesDirectory() {
               ))
             )}
             
-            {page < totalPages && (
-              <div className="flex justify-center mt-6">
+            {totalPages > 1 && (
+              <div className="flex justify-center items-center gap-2 mt-8">
                 <button 
-                  onClick={() => setPage(p => p + 1)}
-                  disabled={isLoading}
-                  className="px-6 py-3 bg-card border border-border hover:border-blue-300 hover:text-primary text-text-secondary rounded-xl font-bold transition-all disabled:opacity-50"
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  disabled={page === 1 || isLoading}
+                  className="px-4 py-2 bg-card border border-border hover:border-blue-300 hover:text-primary text-text-secondary rounded-xl font-bold transition-all disabled:opacity-50"
                 >
-                  {isLoading ? 'Loading...' : 'Load More Colleges'}
+                  Previous
+                </button>
+                
+                <div className="hidden sm:flex gap-1">
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    // Show a sliding window of 5 pages
+                    let pageNum = page;
+                    if (totalPages <= 5) pageNum = i + 1;
+                    else if (page <= 3) pageNum = i + 1;
+                    else if (page >= totalPages - 2) pageNum = totalPages - 4 + i;
+                    else pageNum = page - 2 + i;
+                    
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => setPage(pageNum)}
+                        className={`w-10 h-10 flex items-center justify-center rounded-xl font-bold transition-all ${
+                          page === pageNum 
+                            ? 'bg-primary text-white shadow-md' 
+                            : 'bg-card border border-border text-text-secondary hover:border-primary hover:text-primary'
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  })}
+                </div>
+                
+                <span className="sm:hidden text-sm font-bold text-text-muted">
+                  Page {page} of {totalPages}
+                </span>
+
+                <button 
+                  onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                  disabled={page === totalPages || isLoading}
+                  className="px-4 py-2 bg-card border border-border hover:border-blue-300 hover:text-primary text-text-secondary rounded-xl font-bold transition-all disabled:opacity-50"
+                >
+                  Next
                 </button>
               </div>
             )}

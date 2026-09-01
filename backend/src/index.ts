@@ -17,6 +17,19 @@ import './models/Specialization.js';
 import './models/College.js';
 import './models/Career.js';
 import './models/Exam.js';
+import './models/Trade.js';
+import './models/JobRole.js';
+import './models/Industry.js';
+import './models/Skill.js';
+import './models/Certification.js';
+import './models/CollegeCourse.js';
+import './models/Scholarship.js';
+import './models/GovernmentScheme.js';
+import './models/CareerPath.js';
+import './models/State.js';
+import './models/District.js';
+import './models/Taluk.js';
+import './models/City.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -40,6 +53,10 @@ import mentorRoutes from './routes/mentorRoutes.js';
 import degreeRoutes from './routes/degreeRoutes.js';
 import statsRoutes from './routes/statsRoutes.js';
 import branchRoutes from './routes/branchRoutes.js';
+import geographyRoutes from './routes/geographyRoutes.js';
+import streamRoutes from './routes/streamRoutes.js';
+import subjectCombinationRoutes from './routes/subjectCombinationRoutes.js';
+import courseRoutes from './routes/courseRoutes.js';
 import { getPathwayTree, getPathwayStats, getFilteredPathways } from './controllers/pathwayController.js';
 
 // Middleware
@@ -94,6 +111,10 @@ app.use('/api/mentors', mentorRoutes);
 app.use('/api/degrees', degreeRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/branches', branchRoutes);
+app.use('/api/geography', geographyRoutes);
+app.use('/api/streams', streamRoutes);
+app.use('/api/subject-combinations', subjectCombinationRoutes);
+app.use('/api/courses', courseRoutes);
 
 // Public Catalog API
 app.get('/api/education-catalog', getPathwayTree);

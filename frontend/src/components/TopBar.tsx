@@ -1,7 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Search, Bell, ChevronDown, LogOut } from 'lucide-react';
+import { Search, Bell, ChevronDown, LogOut, Loader2, ArrowRight } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+
+interface SearchResult {
+  type: string;
+  name: string;
+  slug: string;
+}
 
 export default function TopBar() {
   const { currentUser, logout } = useAuth();
@@ -9,31 +16,119 @@ export default function TopBar() {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setDropdownOpen(false);
       }
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+        setShowSearchResults(false);
+      }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-  
+
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(async () => {
+      if (searchQuery.trim().length > 1) {
+        setIsSearching(true);
+        try {
+          const res = await axios.get(`http://localhost:5000/api/pathways/search?q=${searchQuery}`);
+          setSearchResults(res.data);
+          setShowSearchResults(true);
+        } catch (error) {
+          console.error(error);
+        } finally {
+          setIsSearching(false);
+        }
+      } else {
+        setSearchResults([]);
+        setShowSearchResults(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchQuery]);
+
+  const handleSearchResultClick = (result: SearchResult) => {
+    setShowSearchResults(false);
+    setSearchQuery('');
+    
+    switch(result.type) {
+      case 'Pathway':
+      case 'Stream':
+        navigate(`/pathways`);
+        break;
+      case 'Course':
+        navigate(`/courses/${result.slug}`);
+        break;
+      case 'Branch':
+        navigate(`/branches/${result.slug}`);
+        break;
+      case 'Career':
+        navigate(`/jobs`);
+        break;
+      default:
+        break;
+    }
+  };
+
   return (
     <div className="h-20 bg-background-secondary border-b border-border px-8 flex items-center justify-between sticky top-0 z-40">
       
       {/* Search Bar */}
-      <div className="flex-1 max-w-2xl">
+      <div className="flex-1 max-w-2xl" ref={searchContainerRef}>
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
             <Search className="h-5 w-5 text-text-muted" />
           </div>
           <input
             type="text"
-            className="block w-full pl-11 pr-4 py-3 bg-input border border-input-border rounded-2xl text-sm placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-            placeholder="Search careers, colleges, exams..."
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setShowSearchResults(true);
+            }}
+            onFocus={() => {
+              if (searchResults.length > 0) setShowSearchResults(true);
+            }}
+            className="block w-full pl-11 pr-10 py-3 bg-input border border-input-border rounded-2xl text-sm placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+            placeholder="Search careers, courses, branches..."
           />
+          {isSearching && (
+             <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                <Loader2 className="w-4 h-4 text-primary animate-spin" />
+             </div>
+          )}
         </div>
+        
+        {/* Search Results Dropdown */}
+        {showSearchResults && searchResults.length > 0 && (
+          <div className="absolute top-16 w-full max-w-2xl bg-card border border-border rounded-2xl shadow-xl z-50 overflow-hidden">
+            <div className="p-2">
+              {searchResults.map((result, idx) => (
+                <button
+                   key={idx}
+                   onClick={() => handleSearchResultClick(result)}
+                   className="w-full text-left px-4 py-3 hover:bg-background-secondary rounded-xl flex items-center justify-between group transition-colors"
+                >
+                   <div className="flex flex-col">
+                      <span className="text-sm font-bold text-text-primary group-hover:text-primary transition-colors">{result.name}</span>
+                      <span className="text-[10px] uppercase font-bold text-text-muted tracking-wider mt-0.5">{result.type}</span>
+                   </div>
+                   <ArrowRight className="w-4 h-4 text-text-muted opacity-0 group-hover:opacity-100 group-hover:text-primary transition-all -translate-x-2 group-hover:translate-x-0" />
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Right Actions */}
