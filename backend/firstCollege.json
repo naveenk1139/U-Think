@@ -1,0 +1,56 @@
+[
+  {
+    "_id": "6a9845960e8cbcd6c9e561db",
+    "slug": "rv-college-of-engineering-bengaluru",
+    "__v": 0,
+    "acceptedExamsRef": [],
+    "admissionLink": "https://rvce.edu.in/admission",
+    "aisheCode": "C-1296",
+    "aliases": [
+      "RVCE"
+    ],
+    "categories": [
+      "Engineering"
+    ],
+    "city": "Bangalore",
+    "cityRef": "6a9845968028fd6a1b3c4f67",
+    "courses": [
+      "Computer Science and Engineering",
+      "Electronics & Communication Engineering"
+    ],
+    "createdAt": "2026-09-02T15:49:42.538Z",
+    "district": "Bangalore Urban",
+    "districtRef": "6a9845968028fd6a1b3c4f64",
+    "entranceExams": [],
+    "establishedYear": 1963,
+    "facilities": [],
+    "fees": {
+      "tuition": "₹1,00,000 (KCET) / ₹2,64,000 (COMEDK)"
+    },
+    "hostelAvailable": null,
+    "institutionType": "Affiliated College",
+    "isVerified": true,
+    "lastVerifiedAt": "2026-09-02T15:49:42.538Z",
+    "name": "R.V. College of Engineering",
+    "nirfRank": 89,
+    "offeredBranchesRef": [],
+    "officialWebsiteUrl": "https://rvce.edu.in/",
+    "ownership": "Private Aided",
+    "placement": {
+      "topRecruiters": []
+    },
+    "programs": [],
+    "scholarshipsAvailable": null,
+    "source": "collegedb",
+    "sourceId": "C-1296",
+    "specializations": [],
+    "state": "Karnataka",
+    "stateRef": "6a98457efa45382bfba2bd06",
+    "status": "ACTIVE",
+    "type": "Private",
+    "universityAffiliation": "Visvesvaraya Technological University",
+    "updatedAt": "2026-09-02T15:49:42.538Z",
+    "verificationStatus": "verified",
+    "websiteVerified": false
+  }
+]

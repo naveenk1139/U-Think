@@ -1,0 +1,100 @@
+{
+  "state": {
+    "name": "Karnataka"
+  },
+  "districts": [
+    {
+      "name": "Bagalkot"
+    },
+    {
+      "name": "Ballari"
+    },
+    {
+      "name": "Belagavi"
+    },
+    {
+      "name": "Bengaluru Rural"
+    },
+    {
+      "name": "Bengaluru Urban"
+    },
+    {
+      "name": "Bidar"
+    },
+    {
+      "name": "Chamarajanagar"
+    },
+    {
+      "name": "Chikkaballapur"
+    },
+    {
+      "name": "Chikkamagaluru"
+    },
+    {
+      "name": "Chitradurga"
+    },
+    {
+      "name": "Dakshina Kannada"
+    },
+    {
+      "name": "Davanagere"
+    },
+    {
+      "name": "Dharwad"
+    },
+    {
+      "name": "Gadag"
+    },
+    {
+      "name": "Hassan"
+    },
+    {
+      "name": "Haveri"
+    },
+    {
+      "name": "Kalaburagi"
+    },
+    {
+      "name": "Kodagu"
+    },
+    {
+      "name": "Kolar"
+    },
+    {
+      "name": "Koppal"
+    },
+    {
+      "name": "Mandya"
+    },
+    {
+      "name": "Mysuru"
+    },
+    {
+      "name": "Raichur"
+    },
+    {
+      "name": "Ramanagara"
+    },
+    {
+      "name": "Shivamogga"
+    },
+    {
+      "name": "Tumakuru"
+    },
+    {
+      "name": "Udupi"
+    },
+    {
+      "name": "Uttara Kannada"
+    },
+    {
+      "name": "Vijayapura"
+    },
+    {
+      "name": "Yadgir"
+    },
+    {
+      "name": "Vijayanagara"
+    }
+  ]
+}

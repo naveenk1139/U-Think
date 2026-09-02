@@ -25,6 +25,7 @@ export interface IFeeRecord extends Document {
   seat_type?: string; // Government Seat in Private College, Private Seat, etc.
 
   source_url?: string;
+  source_name?: string;
   source_document?: string;
   last_verified_at?: Date;
 
@@ -63,6 +64,7 @@ const FeeRecordSchema = new Schema(
     seat_type: { type: String },
 
     source_url: { type: String },
+    source_name: { type: String },
     source_document: { type: String },
     last_verified_at: { type: Date }
   },

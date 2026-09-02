@@ -17,6 +17,7 @@ import BranchDetail from './components/BranchDetail';
 import CourseDetail from './components/CourseDetail';
 
 import CollegesDirectory from './components/CollegesDirectory';
+import CollegeDetail from './components/CollegeDetail';
 import StudentDashboard from './components/StudentDashboard';
 import SpecializationDetailView from './components/SpecializationDetailView';
 import { Login } from './components/Login';
@@ -139,6 +140,7 @@ function AppShell() {
             <Route path="/" element={<Home onNavigate={(tab) => navigate(`/${tab === 'home' ? '' : tab}`)} onOpenCounselor={() => setIsCounselorOpen(true)} />} />
             <Route path="/streams" element={<PathwaysExplorer />} />
             <Route path="/colleges" element={<CollegesDirectory />} />
+            <Route path="/colleges/:slug" element={<CollegeDetail />} />
             <Route path="/branches/:slug" element={<BranchDetail />} />
             <Route path="/exams" element={<ExamsDirectory key="exams-tab" initialTab="exams" />} />
             <Route path="/exams/:examId" element={<ExamDetail />} />

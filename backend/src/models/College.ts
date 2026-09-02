@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface ICollege extends Document {
+  slug: string;
   collegeId?: string; // Optional alias for sourceId
   source: string; // 'collegedb', 'manual', etc.
   sourceId: string;
@@ -63,17 +64,23 @@ export interface ICollege extends Document {
   email?: string;
   latitude?: number;
   longitude?: number;
-  image?: string;
-  logo?: string;
+  logoUrl?: string;
+  imageUrl?: string;
+  imageSourceUrl?: string;
+  imageLicense?: string;
+  imageLastVerifiedAt?: Date;
+  aisheUrl?: string;
   sourceName?: string;
   sourceUrl?: string;
   lastVerifiedAt?: Date;
+  verificationStatus?: 'verified' | 'unverified' | 'stale' | 'needs_review';
   isVerified?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
 }
 
 const CollegeSchema: Schema = new Schema({
+  slug: { type: String, required: true, unique: true },
   collegeId: { type: String },
   source: { type: String, required: true, default: 'collegedb' },
   sourceId: { type: String, required: true },
@@ -136,11 +143,16 @@ const CollegeSchema: Schema = new Schema({
   email: { type: String },
   latitude: { type: Number },
   longitude: { type: Number },
-  image: { type: String },
-  logo: { type: String },
+  logoUrl: { type: String },
+  imageUrl: { type: String },
+  imageSourceUrl: { type: String },
+  imageLicense: { type: String },
+  imageLastVerifiedAt: { type: Date },
+  aisheUrl: { type: String },
   sourceName: { type: String },
   sourceUrl: { type: String },
   lastVerifiedAt: { type: Date },
+  verificationStatus: { type: String, enum: ['verified', 'unverified', 'stale', 'needs_review'], default: 'unverified' },
   isVerified: { type: Boolean, default: false },
 }, { timestamps: true });
 
