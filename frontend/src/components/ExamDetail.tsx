@@ -4,22 +4,29 @@ import { ArrowLeft, Bookmark, Calendar, Building, Info, FileText, CheckCircle2, 
 import { StructuredExam } from '../types';
 
 export default function ExamDetail() {
-  const { examId } = useParams();
+  const { examId: slug } = useParams();
   const navigate = useNavigate();
   const [exam, setExam] = useState<StructuredExam | null>(null);
+  const [mappedDegrees, setMappedDegrees] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     fetchExam();
-  }, [examId]);
+  }, [slug]);
 
   const fetchExam = async () => {
     try {
-      const res = await fetch(`http://localhost:5000/api/exams/info/${examId}`);
+      const res = await fetch(`http://localhost:5000/api/exams/${slug}`);
       if (res.ok) {
         const data = await res.json();
         setExam(data);
+      }
+      
+      const mapRes = await fetch(`http://localhost:5000/api/exams/${slug}/degrees`);
+      if (mapRes.ok) {
+        const maps = await mapRes.json();
+        setMappedDegrees(maps);
       }
     } catch (err) {
       console.error(err);
@@ -61,7 +68,7 @@ export default function ExamDetail() {
                      <span className="px-3 py-1 bg-emerald-500/30 border border-emerald-400/30 rounded-lg text-emerald-100 text-xs font-black uppercase tracking-widest">{exam.category}</span>
                   </div>
                   <h1 className="text-4xl md:text-5xl font-black mb-4 leading-tight">{exam.name}</h1>
-                  <p className="text-xl text-blue-100/90 max-w-2xl font-medium">{exam.type} conducted by {exam.conductingBody}</p>
+                  <p className="text-xl text-blue-100/90 max-w-2xl font-medium">{exam.description || `${exam.type} conducted by ${exam.conducting_body}`}</p>
                </div>
                <div className="flex gap-3 shrink-0">
                   <button onClick={() => setSaved(!saved)} className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold transition-all ${saved ? 'bg-emerald-500 text-white border border-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.3)]' : 'bg-white/10 text-white border border-white/20 hover:bg-white/20'}`}>
@@ -89,7 +96,7 @@ export default function ExamDetail() {
                   </div>
                   <div>
                      <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Mode</div>
-                     <div className="font-bold text-gray-900">{exam.examMode || 'N/A'}</div>
+                     <div className="font-bold text-gray-900">{exam.exam_mode?.join(', ') || 'N/A'}</div>
                   </div>
                   <div>
                      <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Status</div>
@@ -97,7 +104,7 @@ export default function ExamDetail() {
                   </div>
                   <div>
                      <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Website</div>
-                     <a href={`https://${exam.officialWebsite}`} target="_blank" rel="noreferrer" className="font-bold text-blue-600 hover:underline line-clamp-1">{exam.officialWebsite}</a>
+                     <a href={exam.official_website_url} target="_blank" rel="noreferrer" className="font-bold text-blue-600 hover:underline line-clamp-1">{exam.official_website_url}</a>
                   </div>
                </div>
 
@@ -108,19 +115,25 @@ export default function ExamDetail() {
                   </h3>
                   <div className="space-y-6">
                      <div>
-                        <h4 className="font-bold text-gray-900 mb-2">Qualification Required</h4>
-                        <p className="text-gray-600 leading-relaxed">{exam.eligibility?.qualification || 'Not specified'}</p>
+                        <h4 className="font-bold text-gray-900 mb-2">Minimum Qualification</h4>
+                        <p className="text-gray-600 leading-relaxed">{(exam as any).eligibility?.minimum_qualification || 'Not specified'}</p>
                      </div>
-                     {exam.eligibility?.ageCriteria && (
+                     {((exam as any).eligibility?.minimum_marks) && (
                         <div>
-                           <h4 className="font-bold text-gray-900 mb-2">Age Criteria</h4>
-                           <p className="text-gray-600 leading-relaxed">{exam.eligibility.ageCriteria}</p>
+                           <h4 className="font-bold text-gray-900 mb-2">Minimum Marks</h4>
+                           <p className="text-gray-600 leading-relaxed">{(exam as any).eligibility?.minimum_marks}</p>
                         </div>
                      )}
-                     {exam.eligibility?.details && (
+                     {((exam as any).eligibility?.age_requirement) && (
                         <div>
-                           <h4 className="font-bold text-gray-900 mb-2">Additional Details</h4>
-                           <p className="text-gray-600 leading-relaxed bg-gray-50 p-4 rounded-xl border border-gray-100">{exam.eligibility.details}</p>
+                           <h4 className="font-bold text-gray-900 mb-2">Age Criteria</h4>
+                           <p className="text-gray-600 leading-relaxed">{(exam as any).eligibility.age_requirement}</p>
+                        </div>
+                     )}
+                     {((exam as any).eligibility?.attempt_rules) && (
+                        <div>
+                           <h4 className="font-bold text-gray-900 mb-2">Attempt Rules</h4>
+                           <p className="text-gray-600 leading-relaxed bg-gray-50 p-4 rounded-xl border border-gray-100">{(exam as any).eligibility.attempt_rules}</p>
                         </div>
                      )}
                   </div>
@@ -140,9 +153,20 @@ export default function ExamDetail() {
                   </div>
                   <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 p-8">
                      <h3 className="text-xl font-black text-gray-900 mb-6 flex items-center gap-3">
-                        <div className="bg-orange-50 text-orange-600 p-2 rounded-lg"><Building className="w-5 h-5" /></div> Accepted For
+                        <div className="bg-orange-50 text-orange-600 p-2 rounded-lg"><Building className="w-5 h-5" /></div> Gateways to Degrees
                      </h3>
-                     <p className="text-gray-700 font-medium leading-relaxed">{exam.acceptedFor || 'Not specified'}</p>
+                     {mappedDegrees.length > 0 ? (
+                        <ul className="space-y-3">
+                           {mappedDegrees.map(map => (
+                              <li key={map._id} className="flex flex-col p-3 bg-gray-50 rounded-xl border border-gray-100">
+                                 <span className="font-bold text-[#2B3B94]">{map.degree_id?.name}</span>
+                                 {map.admission_role && <span className="text-xs text-gray-500 uppercase tracking-wider">{map.admission_role}</span>}
+                              </li>
+                           ))}
+                        </ul>
+                     ) : (
+                        <p className="text-gray-700 font-medium leading-relaxed">No specific degrees mapped yet.</p>
+                     )}
                   </div>
                </div>
             </div>
@@ -160,21 +184,14 @@ export default function ExamDetail() {
                         <div className="w-5 h-5 rounded-full bg-[#2B3B94] border-4 border-white shrink-0 mt-0.5 shadow-sm z-10"></div>
                         <div>
                            <div className="font-bold text-gray-900">Application Window</div>
-                           <div className="text-sm text-gray-500 mt-1">{exam.importantDates?.applicationStart || 'TBA'} - {exam.importantDates?.applicationEnd || 'TBA'}</div>
+                           <div className="text-sm text-gray-500 mt-1">{new Date((exam as any).importantDates?.application_start).toLocaleDateString()} - {new Date((exam as any).importantDates?.application_end).toLocaleDateString()}</div>
                         </div>
                      </div>
                      <div className="relative flex items-start gap-4">
                         <div className="w-5 h-5 rounded-full bg-orange-500 border-4 border-white shrink-0 mt-0.5 shadow-sm z-10"></div>
                         <div>
                            <div className="font-bold text-gray-900">Exam Date</div>
-                           <div className="text-sm text-[#2B3B94] font-bold mt-1 bg-blue-50 px-3 py-1.5 rounded-lg inline-block">{exam.importantDates?.examDate || 'TBA'}</div>
-                        </div>
-                     </div>
-                     <div className="relative flex items-start gap-4">
-                        <div className="w-5 h-5 rounded-full bg-emerald-500 border-4 border-white shrink-0 mt-0.5 shadow-sm z-10"></div>
-                        <div>
-                           <div className="font-bold text-gray-900">Result Date</div>
-                           <div className="text-sm text-gray-500 mt-1">{exam.importantDates?.resultDate || 'TBA'}</div>
+                           <div className="text-sm text-[#2B3B94] font-bold mt-1 bg-blue-50 px-3 py-1.5 rounded-lg inline-block">{new Date((exam as any).importantDates?.exam_date).toLocaleDateString()}</div>
                         </div>
                      </div>
                   </div>
@@ -186,7 +203,7 @@ export default function ExamDetail() {
                   <button onClick={() => navigate(`/colleges?category=${exam.category}`)} className="w-full bg-[#2B3B94] hover:bg-blue-800 text-white py-3 rounded-xl font-bold transition-colors mb-3">
                      View Participating Colleges
                   </button>
-                  <button onClick={() => window.open(`https://${exam.officialWebsite}`, '_blank')} className="w-full bg-white hover:bg-gray-50 text-gray-800 border border-gray-200 py-3 rounded-xl font-bold transition-colors">
+                  <button onClick={() => window.open(exam.official_website_url, '_blank')} className="w-full bg-white hover:bg-gray-50 text-gray-800 border border-gray-200 py-3 rounded-xl font-bold transition-colors">
                      Visit Official Website
                   </button>
                </div>

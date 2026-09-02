@@ -1,7 +1,8 @@
 import { Router, Request, Response } from 'express';
 import mongoose from 'mongoose';
-import College from '../models/College';
-import { searchCollegesFromAPI } from '../services/collegeDbService';
+import College from '../models/College.js';
+import { searchCollegesFromAPI } from '../services/collegeDbService.js';
+import { ai, generateWithRetry } from '../config/gemini.js';
 
 const router = Router();
 
@@ -166,6 +167,107 @@ router.get('/', async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Error fetching colleges:', error);
     res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// POST /api/colleges/recommend
+router.post('/recommend', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { preferences } = req.body;
+    
+    if (!preferences) {
+      res.status(400).json({ message: 'Preferences are required' });
+      return;
+    }
+
+    // 1. Fetch a broad set of colleges (e.g., active ones in Karnataka)
+    // We limit to 50 to avoid token limits for the LLM
+    const colleges = await College.find({ status: 'ACTIVE', state: 'Karnataka' })
+      .select('name city district categories specializations fees placement nirfRank type')
+      .limit(50)
+      .lean();
+
+    if (!colleges || colleges.length === 0) {
+       res.status(404).json({ message: 'No colleges available for recommendation.' });
+       return;
+    }
+
+    // 2. Prepare a concise summary of colleges for the LLM
+    const collegeDataForAI = colleges.map(c => ({
+      id: c._id,
+      name: c.name,
+      location: `${c.city || ''}, ${c.district || ''}`.trim(),
+      type: c.type,
+      categories: c.categories,
+      specializations: c.specializations,
+      fees: c.fees?.tuition || 'Unknown',
+      placementPct: c.placement?.percentage || 'Unknown'
+    }));
+
+    const prompt = `
+You are an expert college counselor.
+Based on the following user preferences:
+${JSON.stringify(preferences, null, 2)}
+
+And the following list of available colleges:
+${JSON.stringify(collegeDataForAI)}
+
+Recommend the top 3-5 colleges that best match the user's preferences.
+Return ONLY a valid JSON array of objects, with each object containing:
+- "collegeId": The ID of the recommended college (must match exactly one of the IDs from the list).
+- "rationale": A short, 1-2 sentence explanation of why this college is a good fit for the user based on their preferences.
+`;
+
+    // 3. Call Gemini
+    let recommendations: Array<{ collegeId: string, rationale: string }> = [];
+
+    if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === 'your_gemini_api_key_here') {
+      // Mock response if API key is missing
+      recommendations = colleges.slice(0, 3).map((c: any) => ({
+        collegeId: String(c._id),
+        rationale: "This is a simulated AI recommendation because the GEMINI_API_KEY is not configured in the backend."
+      }));
+    } else {
+      const model = ai.models;
+      const response = await generateWithRetry(model, {
+        model: 'gemini-2.5-pro',
+        contents: prompt,
+        config: {
+          responseMimeType: 'application/json',
+        }
+      });
+
+      const aiResponseText = response.text();
+      
+      try {
+        recommendations = JSON.parse(aiResponseText);
+      } catch (e) {
+        console.error('Failed to parse AI response:', aiResponseText);
+        res.status(500).json({ message: 'Failed to process AI recommendations.' });
+        return;
+      }
+    }
+
+    // 4. Fetch the full college objects for the recommendations
+    const recommendedColleges = [];
+    for (const rec of recommendations) {
+      const fullCollege = await College.findById(rec.collegeId)
+        .populate('districtRef', 'name slug')
+        .populate('talukRef', 'name slug')
+        .populate('cityRef', 'name slug');
+        
+      if (fullCollege) {
+        recommendedColleges.push({
+          college: fullCollege,
+          rationale: rec.rationale
+        });
+      }
+    }
+
+    res.json({ recommendations: recommendedColleges });
+  } catch (error) {
+    console.error('Error generating college recommendations:', error);
+    res.status(500).json({ message: 'Server error while generating recommendations', error: String(error) });
   }
 });
 

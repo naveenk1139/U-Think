@@ -3,22 +3,39 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, GraduationCap, Briefcase, ChevronRight, BookOpen, Clock, AlertCircle } from 'lucide-react';
 import { StructuredDegree } from '../types';
 
+import RoadmapVisualizer from './RoadmapVisualizer';
+
 export default function DegreeDetail() {
-  const { degreeId } = useParams();
+  const { degreeId: slug } = useParams();
   const navigate = useNavigate();
   const [degree, setDegree] = useState<StructuredDegree | null>(null);
+  const [mappedExams, setMappedExams] = useState<any[]>([]);
+  const [roadmapSteps, setRoadmapSteps] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchDegree();
-  }, [degreeId]);
+  }, [slug]);
 
   const fetchDegree = async () => {
     try {
-      const res = await fetch(`http://localhost:5000/api/degrees/${degreeId}`);
+      const res = await fetch(`http://localhost:5000/api/degrees/${slug}`);
       if (res.ok) {
         const data = await res.json();
         setDegree(data);
+        
+        // Fetch exams
+        const examRes = await fetch(`http://localhost:5000/api/degrees/${slug}/exams`);
+        if (examRes.ok) {
+           setMappedExams(await examRes.json());
+        }
+
+        // Fetch roadmap
+        const roadmapRes = await fetch(`http://localhost:5000/api/roadmaps/${data._id}`);
+        if (roadmapRes.ok) {
+           const roadmapData = await roadmapRes.json();
+           setRoadmapSteps(roadmapData.roadmap || []);
+        }
       }
     } catch (err) {
       console.error(err);
@@ -79,11 +96,11 @@ export default function DegreeDetail() {
                
                {/* Quick Info */}
                <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 p-8 flex flex-col md:flex-row gap-8">
-                  <div className="flex-1">
+                   <div className="flex-1">
                      <div className="flex items-center gap-3 mb-2 text-gray-500">
                         <Clock className="w-5 h-5" /> <span className="font-bold uppercase tracking-wider text-xs">Duration</span>
                      </div>
-                     <div className="text-xl font-black text-gray-900">{degree.duration}</div>
+                     <div className="text-xl font-black text-gray-900">{degree.duration} {degree.duration_unit}</div>
                   </div>
                   <div className="w-px bg-gray-100 hidden md:block"></div>
                   <div className="flex-1">
@@ -91,60 +108,39 @@ export default function DegreeDetail() {
                         <BookOpen className="w-5 h-5" /> <span className="font-bold uppercase tracking-wider text-xs">Admission</span>
                      </div>
                      <div className="flex flex-wrap gap-2 mt-2">
-                        {degree.admissionRoutes && degree.admissionRoutes.length > 0 ? degree.admissionRoutes.map(route => (
-                           <span key={route} className="px-2 py-1 bg-gray-50 border border-gray-200 text-gray-700 text-xs font-bold rounded-md">{route}</span>
-                        )) : <span className="font-bold text-gray-900">Merit-based</span>}
+                        {degree.entrance_required ? (
+                           <span className="px-2 py-1 bg-orange-50 border border-orange-200 text-orange-700 text-xs font-bold rounded-md">Entrance Exam Required</span>
+                        ) : (
+                           <span className="px-2 py-1 bg-gray-50 border border-gray-200 text-gray-700 text-xs font-bold rounded-md">Merit-based</span>
+                        )}
+                        {degree.mode && degree.mode.map((m: string) => (
+                           <span key={m} className="px-2 py-1 bg-purple-50 border border-purple-200 text-purple-700 text-xs font-bold rounded-md">{m}</span>
+                        ))}
                      </div>
                   </div>
                </div>
 
-               {/* Eligibility */}
+                {/* Entrance Exams */}
                <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 p-8">
-                  <h3 className="text-xl font-black text-gray-900 mb-6">Eligibility Criteria</h3>
-                  <div className="space-y-4">
-                     <div className="flex gap-4">
-                        <div className="w-8 h-8 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center shrink-0 font-bold">1</div>
-                        <div>
-                           <h4 className="font-bold text-gray-900 mb-1">Qualification Required</h4>
-                           <p className="text-gray-600">{degree.eligibility?.qualification || 'Not specified'}</p>
-                        </div>
-                     </div>
-                     {degree.eligibility?.details && (
-                        <div className="flex gap-4">
-                           <div className="w-8 h-8 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center shrink-0 font-bold">2</div>
-                           <div>
-                              <h4 className="font-bold text-gray-900 mb-1">Additional Requirements</h4>
-                              <p className="text-gray-600">{degree.eligibility.details}</p>
-                           </div>
-                        </div>
-                     )}
-                  </div>
+                  <h3 className="text-xl font-black text-gray-900 mb-6 flex items-center gap-3">
+                     <div className="bg-orange-50 text-orange-600 p-2 rounded-lg"><BookOpen className="w-5 h-5" /></div> Mapped Entrance Exams
+                  </h3>
+                  {mappedExams.length > 0 ? (
+                     <ul className="space-y-3">
+                        {mappedExams.map(map => (
+                           <li key={map._id} className="flex flex-col p-3 bg-gray-50 rounded-xl border border-gray-100">
+                              <span className="font-bold text-[#2B3B94]">{map.exam_id?.name}</span>
+                              {map.eligibility_condition && <span className="text-xs text-gray-500 mt-1">{map.eligibility_condition}</span>}
+                           </li>
+                        ))}
+                     </ul>
+                  ) : (
+                     <p className="text-gray-700 font-medium leading-relaxed">No entrance exams mapped. May be direct admission based on merit.</p>
+                  )}
                </div>
 
-               {/* Subjects */}
-               <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 p-8">
-                  <h3 className="text-xl font-black text-gray-900 mb-6">Core Subjects & Specializations</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                     <div>
-                        <h4 className="font-bold text-gray-700 mb-4 border-b border-gray-100 pb-2">Major Subjects</h4>
-                        <ul className="space-y-3">
-                           {degree.subjects && degree.subjects.length > 0 ? degree.subjects.map((sub, idx) => (
-                              <li key={idx} className="flex items-center gap-3 text-sm font-semibold text-gray-800">
-                                 <div className="w-1.5 h-1.5 rounded-full bg-indigo-500"></div> {sub}
-                              </li>
-                           )) : <li className="text-gray-500">Not specified</li>}
-                        </ul>
-                     </div>
-                     <div>
-                        <h4 className="font-bold text-gray-700 mb-4 border-b border-gray-100 pb-2">Available Specializations</h4>
-                        <div className="flex flex-wrap gap-2">
-                           {degree.specializations && degree.specializations.length > 0 ? degree.specializations.map((spec, idx) => (
-                              <span key={idx} className="px-3 py-1.5 bg-gray-50 text-gray-700 border border-gray-200 text-xs font-bold rounded-lg">{spec}</span>
-                           )) : <span className="text-gray-500">General degree (No specific specializations)</span>}
-                        </div>
-                     </div>
-                  </div>
-               </div>
+               {/* Roadmap */}
+               {roadmapSteps.length > 0 && <RoadmapVisualizer steps={roadmapSteps} />}
 
             </div>
 
@@ -156,13 +152,9 @@ export default function DegreeDetail() {
                   <h3 className="text-xl font-black text-gray-900 mb-6 flex items-center gap-3">
                      <div className="bg-emerald-50 text-emerald-600 p-2 rounded-lg"><Briefcase className="w-5 h-5" /></div> Career Options
                   </h3>
-                  <div className="flex flex-col gap-3">
-                     {degree.careers && degree.careers.length > 0 ? degree.careers.map((career, idx) => (
-                        <button key={idx} onClick={() => navigate(`/jobs?role=${encodeURIComponent(career)}`)} className="text-left w-full p-4 rounded-xl border border-gray-100 hover:border-emerald-200 hover:bg-emerald-50/50 transition-colors flex justify-between items-center group">
-                           <span className="font-bold text-gray-800 group-hover:text-emerald-700 transition-colors">{career}</span>
-                           <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-emerald-600" />
-                        </button>
-                     )) : <p className="text-gray-500">Not specified</p>}
+                   <div className="flex flex-col gap-3">
+                     {/* Temporarily hardcoded for now, or use degree.careers from old schema if we migrate it */}
+                     <p className="text-gray-500 text-sm">Please check branch specializations for specific career paths.</p>
                   </div>
                </div>
 
@@ -176,12 +168,8 @@ export default function DegreeDetail() {
                      <div className="flex justify-center text-gray-300">
                         <ArrowLeft className="w-6 h-6 -rotate-90" />
                      </div>
-                     <div className="grid grid-cols-2 gap-3">
-                        {degree.higherStudies && degree.higherStudies.length > 0 ? degree.higherStudies.map((study, idx) => (
-                           <div key={idx} className="bg-white border border-gray-200 p-3 rounded-lg flex items-center justify-center font-bold text-sm text-gray-800 text-center shadow-sm">
-                              {study}
-                           </div>
-                        )) : <div className="col-span-2 text-center text-gray-500 text-sm">Not specified</div>}
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="col-span-2 text-center text-gray-500 text-sm">See Roadmap for higher studies sequence.</div>
                      </div>
                   </div>
                </div>

@@ -54,7 +54,7 @@ export default function DegreeComparisonModal({ isOpen, onClose, degrees }: Degr
 
                   {/* Duration & Level */}
                   <div className="p-4 bg-white rounded-xl shadow-sm border border-gray-100 h-24 flex flex-col justify-center gap-1">
-                     <span className="font-bold text-gray-900">{degree.duration}</span>
+                     <span className="font-bold text-gray-900">{degree.duration} {degree.duration_unit}</span>
                      <span className="text-sm text-gray-500">{degree.level}</span>
                   </div>
 

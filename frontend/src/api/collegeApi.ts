@@ -18,7 +18,11 @@ export interface College {
   subCategory?: string;
   type: string;
   institutionType?: string;
+  institutionCategory?: string;
   ownership?: string;
+  ownershipType?: string;
+  managementType?: string;
+  aisheCode?: string;
   state: string;
   district: string;
   city: string;
@@ -51,8 +55,11 @@ export interface College {
     topRecruiters: string[];
   };
   accreditation: string;
-  nirfRank?: number;
   website: string;
+  officialWebsiteUrl?: string;
+  websiteVerified?: boolean;
+  websiteSource?: string;
+  websiteVerifiedAt?: string;
   phone: string;
   email: string;
   latitude: number;
@@ -63,6 +70,8 @@ export interface College {
   sourceUrl?: string;
   verifiedAt?: string;
   isVerified?: boolean;
+  nirfRank?: number;
+  sourceId?: string;
 }
 
 export const fetchColleges = async (params?: Record<string, string | number>) => {

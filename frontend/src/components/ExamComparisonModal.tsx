@@ -61,20 +61,20 @@ export default function ExamComparisonModal({ isOpen, onClose, exams }: ExamComp
 
                   {/* Conducting Body */}
                   <div className="p-4 bg-white rounded-xl shadow-sm border border-gray-100 h-24 flex items-center text-sm font-semibold text-gray-800">
-                     {exam.conductingBody || 'N/A'}
+                     {exam.conducting_body || 'N/A'}
                   </div>
 
                   {/* Eligibility */}
                   <div className="p-4 bg-white rounded-xl shadow-sm border border-gray-100 min-h-[120px] flex flex-col justify-center">
-                     <p className="text-sm text-gray-800 font-medium mb-2">{exam.eligibility?.qualification || 'N/A'}</p>
-                     {exam.eligibility?.ageCriteria && (
-                        <p className="text-xs text-gray-500 bg-gray-50 p-2 rounded-lg">{exam.eligibility.ageCriteria}</p>
+                     <p className="text-sm text-gray-800 font-medium mb-2">{exam.eligibility?.minimum_qualification || 'N/A'}</p>
+                     {exam.eligibility?.age_requirement && (
+                        <p className="text-xs text-gray-500 bg-gray-50 p-2 rounded-lg">{exam.eligibility.age_requirement}</p>
                      )}
                   </div>
 
                   {/* Exam Mode */}
                   <div className="p-4 bg-white rounded-xl shadow-sm border border-gray-100 h-24 flex items-center text-sm font-semibold text-gray-800">
-                     {exam.examMode || 'N/A'}
+                     {exam.exam_mode?.join(', ') || 'N/A'}
                   </div>
 
                   {/* Subjects */}
@@ -89,17 +89,15 @@ export default function ExamComparisonModal({ isOpen, onClose, exams }: ExamComp
                   {/* Dates */}
                   <div className="p-4 bg-white rounded-xl shadow-sm border border-gray-100 min-h-[100px] flex flex-col justify-center gap-2">
                      <div className="text-xs">
-                        <span className="font-bold text-gray-500 uppercase">App Start:</span> <span className="font-semibold text-gray-900">{exam.importantDates?.applicationStart || 'TBA'}</span>
+                        <span className="font-bold text-gray-500 uppercase">App Start:</span> <span className="font-semibold text-gray-900">{exam.importantDates?.application_start ? new Date(exam.importantDates.application_start).toLocaleDateString() : 'TBA'}</span>
                      </div>
                      <div className="text-xs">
-                        <span className="font-bold text-gray-500 uppercase">Exam:</span> <span className="font-semibold text-[#2B3B94]">{exam.importantDates?.examDate || 'TBA'}</span>
+                        <span className="font-bold text-gray-500 uppercase">Exam:</span> <span className="font-semibold text-[#2B3B94]">{exam.importantDates?.exam_date ? new Date(exam.importantDates.exam_date).toLocaleDateString() : 'TBA'}</span>
                      </div>
                   </div>
 
                   {/* Accepted For */}
-                  <div className="p-4 bg-white rounded-xl shadow-sm border border-gray-100 min-h-[100px] flex items-center text-sm font-medium text-gray-800">
-                     {exam.acceptedFor || 'N/A'}
-                  </div>
+                     {exam.description || 'N/A'}
 
                </div>
             ))}

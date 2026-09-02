@@ -9,7 +9,9 @@
     "start": "node dist/index.js",
     "lint": "tsc --noEmit",
     "test:email": "tsx test_smtp.ts",
-    "import:real-data": "tsx src/scripts/seedRealData.ts"
+    "import:real-data": "tsx src/scripts/seedRealData.ts",
+    "seed:exams": "tsx src/scripts/seedRealExamsDegrees.ts",
+    "inspect:db": "tsx src/scripts/inspectDb.ts"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",

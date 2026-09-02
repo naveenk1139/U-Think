@@ -33,6 +33,13 @@ export default function CollegesDirectory() {
   const [savedColleges, setSavedColleges] = useState<string[]>([]);
   const [compareList, setCompareList] = useState<string[]>([]);
 
+  const openOfficialWebsite = (url: string | undefined, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (url) {
+        window.open(url, '_blank', 'noopener,noreferrer');
+    }
+  };
+
   const categories = ['All', 'Engineering', 'Medical', 'Management', 'Law', 'Design', 'Science', 'Commerce', 'Diploma', 'Polytechnic', 'ITI', 'Paramedical', 'Vocational'];
 
   const CATEGORY_BRANCHES: Record<string, string[]> = {
@@ -519,6 +526,14 @@ export default function CollegesDirectory() {
                           <div className="text-sm font-black text-emerald-600">{college.placement?.avgPackage || 'N/A'}</div>
                         </div>
                         <div className="col-span-2 flex items-center justify-end gap-2">
+                          {college.officialWebsiteUrl ? (
+                            <button 
+                              onClick={(e) => openOfficialWebsite(college.officialWebsiteUrl, e)}
+                              className="px-3 py-1.5 rounded-lg text-xs font-bold transition-colors bg-blue-50 text-blue-600 hover:bg-blue-100 flex items-center gap-1"
+                            >
+                              Official Website ↗
+                            </button>
+                          ) : null}
                           <button 
                             onClick={(e) => toggleCompare(college._id, e)}
                             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${compareList.includes(college._id) ? 'bg-primary text-white' : 'bg-background-secondary text-text-secondary hover:border-border'}`}
@@ -605,13 +620,30 @@ export default function CollegesDirectory() {
                   <div className="text-white">
                     <h1 className="text-2xl font-black">{selectedCollege.name}</h1>
                     <div className="flex items-center gap-3 mt-2 text-xs font-semibold text-slate-200">
-                      <span className="flex items-center gap-1"><MapPin className="w-4 h-4" /> {selectedCollege.city}, {selectedCollege.district}</span>
+                      <span className="flex items-center gap-1">
+                        <MapPin className="w-4 h-4" /> 
+                        {[selectedCollege.city, selectedCollege.district].filter(Boolean).join(', ') || 'Location Unknown'}
+                      </span>
                       <span className="flex items-center gap-1"><Star className="w-4 h-4 text-amber-400" /> 4.5/5 Reviews</span>
                     </div>
                   </div>
-                  <button className="hidden sm:block px-6 py-2 bg-primary hover:bg-primary-hover text-white font-bold rounded-xl shadow-lg transition-colors">
-                    Apply Now
-                  </button>
+                  <div className="hidden sm:flex gap-2">
+                    {selectedCollege.officialWebsiteUrl ? (
+                      <button 
+                        onClick={(e) => openOfficialWebsite(selectedCollege.officialWebsiteUrl, e)}
+                        className="px-6 py-2 bg-white text-blue-600 font-bold rounded-xl shadow-lg transition-colors hover:bg-blue-50 flex items-center gap-2"
+                      >
+                         Visit Official Website ↗
+                      </button>
+                    ) : (
+                      <button disabled className="px-6 py-2 bg-white/20 text-white/50 font-bold rounded-xl cursor-not-allowed">
+                        Official website unavailable
+                      </button>
+                    )}
+                    <button className="px-6 py-2 bg-primary hover:bg-primary-hover text-white font-bold rounded-xl shadow-lg transition-colors">
+                      Apply Now
+                    </button>
+                  </div>
                 </div>
               </div>
               
@@ -637,26 +669,56 @@ export default function CollegesDirectory() {
                     <div className="bg-card p-6 rounded-2xl border border-border shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none">
                       <h3 className="text-base font-black text-text-primary mb-4">About College</h3>
                       <p className="text-sm text-text-secondary leading-relaxed">
-                        {selectedCollege.name} is one of the premier institutions in India, offering cutting-edge infrastructure and world-class faculty. Established in {selectedCollege.establishedYear}, it has consistently ranked among the top colleges.
+                        {selectedCollege.name} is one of the premier institutions in India, offering cutting-edge infrastructure and world-class faculty.
+                        {selectedCollege.establishedYear ? ` Established in ${selectedCollege.establishedYear}, it has consistently ranked among the top colleges.` : ''}
                       </p>
                     </div>
                     
+                    {/* AISHE / Government Source Info Row */}
+                    {(selectedCollege.aisheCode || selectedCollege.ownershipType || selectedCollege.institutionType) && (
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-100 flex items-center gap-3">
+                          <Building2 className="w-8 h-8 text-blue-500 opacity-20" />
+                          <div>
+                            <div className="text-[10px] font-bold text-blue-600 uppercase">AISHE Code</div>
+                            <div className="font-black text-blue-900 text-sm">{selectedCollege.aisheCode || selectedCollege.sourceId || 'N/A'}</div>
+                          </div>
+                        </div>
+                        <div className="bg-indigo-50/50 p-4 rounded-xl border border-indigo-100 flex items-center gap-3">
+                          <Building2 className="w-8 h-8 text-indigo-500 opacity-20" />
+                          <div>
+                            <div className="text-[10px] font-bold text-indigo-600 uppercase">Ownership</div>
+                            <div className="font-black text-indigo-900 text-sm">{selectedCollege.ownershipType || selectedCollege.ownership || 'N/A'}</div>
+                          </div>
+                        </div>
+                        <div className="bg-purple-50/50 p-4 rounded-xl border border-purple-100 flex items-center gap-3">
+                          <GraduationCap className="w-8 h-8 text-purple-500 opacity-20" />
+                          <div>
+                            <div className="text-[10px] font-bold text-purple-600 uppercase">Institution Type</div>
+                            <div className="font-black text-purple-900 text-sm">{selectedCollege.institutionType || 'N/A'}</div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
                     <div className="grid grid-cols-2 gap-4">
                       <div className="bg-card p-4 rounded-xl border border-border shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none">
                         <div className="text-[10px] font-bold text-text-muted uppercase">Established</div>
-                        <div className="font-black text-text-primary">{selectedCollege.establishedYear}</div>
+                        <div className="font-black text-text-primary">{selectedCollege.establishedYear || 'N/A'}</div>
                       </div>
                       <div className="bg-card p-4 rounded-xl border border-border shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none">
                         <div className="text-[10px] font-bold text-text-muted uppercase">Type</div>
-                        <div className="font-black text-text-primary">{selectedCollege.type}</div>
+                        <div className="font-black text-text-primary">{selectedCollege.type || 'N/A'}</div>
                       </div>
                       <div className="bg-card p-4 rounded-xl border border-border shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none">
                         <div className="text-[10px] font-bold text-text-muted uppercase">Accreditation</div>
-                        <div className="font-black text-emerald-600 flex items-center gap-1"><ShieldCheck className="w-3 h-3"/> {selectedCollege.accreditation}</div>
+                        <div className="font-black text-emerald-600 flex items-center gap-1">
+                          <ShieldCheck className="w-3 h-3"/> {selectedCollege.accreditation || 'N/A'}
+                        </div>
                       </div>
                       <div className="bg-card p-4 rounded-xl border border-border shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none">
                         <div className="text-[10px] font-bold text-text-muted uppercase">NIRF Ranking</div>
-                        <div className="font-black text-primary">#{selectedCollege.nirfRank}</div>
+                        <div className="font-black text-primary">{selectedCollege.nirfRank ? `#${selectedCollege.nirfRank}` : 'Not Ranked'}</div>
                       </div>
                     </div>
                   </div>

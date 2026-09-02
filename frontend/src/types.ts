@@ -47,6 +47,8 @@ export interface College {
   approxFeesPerYear: string;
   rating: number;
   description: string;
+  nirfRank?: number;
+  sourceId?: string;
 }
 
 export interface JobProfile {
@@ -179,50 +181,69 @@ export interface StructuredMentor {
 export interface StructuredExam {
   _id: string;
   examId: string;
+  slug: string;
   name: string;
+  short_name?: string;
   level: string;
-  educationLevel: string[];
   category: string;
+  sub_category?: string;
+  education_stage: string[];
   type: string;
-  ugPg: string;
-  streams: string[];
-  courses: string[];
-  subjects: string[];
-  eligibility: {
-    qualification: string;
-    ageCriteria: string;
-    details: string;
+  ugPg?: string;
+  status: string;
+  conducting_body?: string;
+  official_website_url?: string;
+  description?: string;
+  application_fee?: string;
+  academic_year?: string;
+  source_name?: string;
+  exam_mode?: string[];
+  subjects?: string[];
+  eligibility?: {
+    minimum_qualification?: string;
+    minimum_marks?: string;
+    age_requirement?: string;
+    attempt_rules?: string;
+    nationality_rules?: string;
+    required_subjects?: string[];
+    qualification?: string;
+    details?: string;
+    ageCriteria?: string;
   };
-  importantDates: {
-    applicationStart: string;
-    applicationEnd: string;
-    examDate: string;
-    resultDate: string;
+  importantDates?: {
+    application_start?: string;
+    application_end?: string;
+    exam_date?: string;
+    result_date?: string;
+    applicationStart?: string;
+    applicationEnd?: string;
+    examDate?: string;
+    resultDate?: string;
   };
-  officialWebsite: string;
-  lastUpdated: string;
-  conductingBody: string;
-  examMode: string;
-  applicationProcess: string;
-  acceptedFor: string;
-  status: 'Active' | 'Discontinued' | 'TBA';
+  acceptedFor?: string;
 }
 
 export interface StructuredDegree {
   _id: string;
   degreeId: string;
+  slug: string;
   name: string;
+  short_name?: string;
   level: string;
   category: string;
-  duration: string;
-  eligibility: {
-    qualification: string;
-    details: string;
-  };
-  admissionRoutes: string[];
-  subjects: string[];
-  specializations: string[];
-  careers: string[];
-  higherStudies: string[];
+  duration: number;
+  duration_unit: string;
   overview: string;
+  stream?: string;
+  discipline?: string;
+  mode?: string[];
+  entrance_required?: boolean;
+  admissionRoutes?: string[];
+  subjects?: string[];
+  careers?: string[];
+  higherStudies?: string[];
+  eligibility?: {
+    qualification?: string;
+    details?: string;
+  };
 }

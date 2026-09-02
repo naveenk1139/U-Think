@@ -10,7 +10,10 @@ export interface ICollege extends Document {
   subCategory?: string;
   type?: string; // Government, Private, etc.
   institutionType?: string; // University, Affiliated College, Autonomous
+  institutionCategory?: string; // Govt, Private, etc.
   ownership?: string; // Government, Government Aided, Private, Deemed, Autonomous
+  managementType?: string;
+  aisheCode?: string;
   state: string;
   stateRef?: mongoose.Types.ObjectId;
   district?: string;
@@ -52,6 +55,10 @@ export interface ICollege extends Document {
   accreditation?: string;
   nirfRank?: number;
   website?: string;
+  officialWebsiteUrl?: string;
+  websiteVerified?: boolean;
+  websiteSource?: string;
+  websiteVerifiedAt?: Date;
   phone?: string;
   email?: string;
   latitude?: number;
@@ -76,7 +83,10 @@ const CollegeSchema: Schema = new Schema({
   subCategory: { type: String },
   type: { type: String },
   institutionType: { type: String },
+  institutionCategory: { type: String },
   ownership: { type: String },
+  managementType: { type: String },
+  aisheCode: { type: String },
   state: { type: String, default: 'Karnataka' },
   stateRef: { type: Schema.Types.ObjectId, ref: 'State' },
   district: { type: String },
@@ -118,6 +128,10 @@ const CollegeSchema: Schema = new Schema({
   accreditation: { type: String },
   nirfRank: { type: Number },
   website: { type: String },
+  officialWebsiteUrl: { type: String },
+  websiteVerified: { type: Boolean, default: false },
+  websiteSource: { type: String },
+  websiteVerifiedAt: { type: Date },
   phone: { type: String },
   email: { type: String },
   latitude: { type: Number },

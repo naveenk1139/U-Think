@@ -8,25 +8,15 @@ const router = Router();
 // Get all exams with optional filtering
 router.get('/', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { search, educationLevel, category, level, type } = req.query;
+    const { search, education_stage, category, level, status, academic_year } = req.query;
     
     let query: any = {};
 
-    if (educationLevel && educationLevel !== 'All') {
-      query.educationLevel = educationLevel;
-    }
-    
-    if (category && category !== 'All') {
-      query.category = category;
-    }
-
-    if (level && level !== 'All') {
-      query.level = level;
-    }
-
-    if (type && type !== 'All') {
-      query.type = type;
-    }
+    if (education_stage && education_stage !== 'All') query.education_stage = education_stage;
+    if (category && category !== 'All') query.category = category;
+    if (level && level !== 'All') query.level = level;
+    if (status && status !== 'All') query.status = status;
+    if (academic_year && academic_year !== 'All') query.academic_year = academic_year;
 
     if (search) {
       query.$text = { $search: search as string };
@@ -39,10 +29,10 @@ router.get('/', async (req: Request, res: Response, next: NextFunction) => {
   }
 });
 
-// Get single exam
-router.get('/info/:id', async (req: Request, res: Response, next: NextFunction) => {
+// Get single exam by slug
+router.get('/:slug', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const exam = await Exam.findOne({ examId: req.params.id });
+    const exam = await Exam.findOne({ slug: req.params.slug });
     if (!exam) {
       res.status(404).json({ error: 'Exam not found' });
       return;
@@ -52,6 +42,25 @@ router.get('/info/:id', async (req: Request, res: Response, next: NextFunction) 
     next(err);
   }
 });
+
+// Get degrees mapped to this exam
+router.get('/:slug/degrees', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const exam = await Exam.findOne({ slug: req.params.slug });
+    if (!exam) {
+      res.status(404).json({ error: 'Exam not found' });
+      return;
+    }
+
+    // Dynamic import to avoid circular dependencies if any, though ExamDegreeMap is fine
+    const ExamDegreeMap = mongoose.model('ExamDegreeMap');
+    const mappings = await ExamDegreeMap.find({ exam_id: exam._id }).populate('degree_id');
+    res.json(mappings);
+  } catch (err) {
+    next(err);
+  }
+});
+
 const getTrackedExamModel = (): mongoose.Model<any> => {
   const existing = mongoose.models.TrackedExam as mongoose.Model<any> | undefined;
   if (existing) {

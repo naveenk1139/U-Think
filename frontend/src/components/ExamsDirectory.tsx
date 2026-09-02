@@ -146,7 +146,7 @@ export default function ExamsDirectory({ initialTab = 'exams' }: ExamsDirectoryP
            </div>
            <div>
              <span className="text-xs font-semibold text-gray-500 uppercase">Conducting Body</span>
-             <p className="text-sm font-medium text-gray-800 line-clamp-1">{exam.conductingBody}</p>
+             <p className="text-sm font-medium text-gray-800 line-clamp-1">{exam.conducting_body}</p>
            </div>
            <div>
              <span className="text-xs font-semibold text-gray-500 uppercase">Status</span>
@@ -155,10 +155,10 @@ export default function ExamsDirectory({ initialTab = 'exams' }: ExamsDirectoryP
         </div>
 
         <div className="mt-auto pt-4 border-t border-gray-100 flex gap-2">
-           <button onClick={() => navigate(`/exams/${exam.examId}`)} className="flex-1 bg-[#2B3B94] hover:bg-blue-800 text-white py-2.5 rounded-xl text-sm font-bold transition-colors">
+           <button onClick={() => navigate(`/exams/${exam.slug}`)} className="flex-1 bg-[#2B3B94] hover:bg-blue-800 text-white py-2.5 rounded-xl text-sm font-bold transition-colors">
              View Details
            </button>
-           <button onClick={() => window.open(`https://${exam.officialWebsite}`, '_blank')} className="flex-1 bg-gray-50 hover:bg-gray-100 text-gray-700 py-2.5 rounded-xl text-sm font-bold border border-gray-200 transition-colors">
+           <button onClick={() => window.open(exam.official_website_url, '_blank')} className="flex-1 bg-gray-50 hover:bg-gray-100 text-gray-700 py-2.5 rounded-xl text-sm font-bold border border-gray-200 transition-colors">
              Official Site
            </button>
         </div>
@@ -193,7 +193,7 @@ export default function ExamsDirectory({ initialTab = 'exams' }: ExamsDirectoryP
             <h3 className="text-lg font-bold text-gray-900 leading-tight">{degree.name}</h3>
             <div className="flex flex-wrap gap-2 mt-2.5">
               <span className="px-2.5 py-1 bg-purple-50 text-purple-700 text-[10px] font-bold uppercase tracking-wider rounded-md border border-purple-100">{degree.level}</span>
-              <span className="px-2.5 py-1 bg-orange-50 text-orange-700 text-[10px] font-bold uppercase tracking-wider rounded-md border border-orange-100">{degree.duration}</span>
+              <span className="px-2.5 py-1 bg-orange-50 text-orange-700 text-[10px] font-bold uppercase tracking-wider rounded-md border border-orange-100">{degree.duration} {degree.duration_unit}</span>
             </div>
           </div>
         </div>
@@ -201,7 +201,7 @@ export default function ExamsDirectory({ initialTab = 'exams' }: ExamsDirectoryP
         <p className="text-sm text-gray-600 mb-6 line-clamp-2 flex-grow">{degree.overview}</p>
 
         <div className="mt-auto pt-4 border-t border-gray-100 flex gap-2">
-           <button onClick={() => navigate(`/degrees/${degree.degreeId}`)} className="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-2.5 rounded-xl text-sm font-bold transition-colors">
+           <button onClick={() => navigate(`/degrees/${degree.slug}`)} className="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-2.5 rounded-xl text-sm font-bold transition-colors">
              View Details
            </button>
            <button onClick={() => navigate(`/colleges?category=${degree.category}`)} className="flex-1 bg-gray-50 hover:bg-gray-100 text-gray-700 py-2.5 rounded-xl text-sm font-bold border border-gray-200 transition-colors">
