@@ -6,7 +6,7 @@ U-THINK is a modern, AI-powered career guidance and academic stream explorer app
 
 ## ✨ Key Features
 
-- **🎓 College Discovery Engine:** Real-time database of thousands of colleges across India, powered by the CollegeDB API with pagination and advanced filtering (state, city, courses).
+- **🎓 College Discovery Engine:** Verified, database-driven directory of thousands of colleges across India, seamlessly ingesting data from official AISHE datasets and rendering interactive `@react-google-maps/api` maps. Features comprehensive, dynamically calculated geographical and course-based filtering.
 - **💼 Job Explorer:** Live job board powered by the Adzuna API, showing real-time job openings with advanced filtering (role, location, experience) and pagination.
 - **🤖 AI-Powered Career Assistant:** Integrated Gemini AI chatbot for personalized career counseling, pathway recommendations, and answering student queries.
 - **📝 Aptitude Assessments:** Built-in quizzes to assess student interests and match them with suitable academic streams (Science, Commerce, Arts, Vocational).
@@ -30,7 +30,8 @@ U-THINK is a modern, AI-powered career guidance and academic stream explorer app
 
 **External APIs:**
 - Google Gemini AI (Counseling)
-- CollegeDB API (College Directory)
+- Google Maps Platform (Campus geolocations & interactive maps)
+- CollegeDB API & AISHE Datasets (College Directory)
 - Adzuna API (Real-time Jobs)
 
 ---
@@ -72,6 +73,7 @@ cd ../backend && npm install
 ### 2. Configure Environment Variables
 - Copy `backend/.env.example` to `backend/.env` and add your `MONGODB_URI`, `GEMINI_API_KEY`, `COLLEGEDB_API_KEY`, and `ADZUNA_APP_ID`/`ADZUNA_APP_KEY`.
 - Copy `frontend/.env.example` to `frontend/.env` and update your Firebase credentials.
+- Note: The frontend requires a `VITE_GOOGLE_MAPS_API_KEY` for map functionalities.
 
 ### 3. Run Development Servers
 From the workspace root directory:
