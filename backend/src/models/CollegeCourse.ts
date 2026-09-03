@@ -4,6 +4,7 @@ export interface ICollegeCourse extends Document {
   collegeId: mongoose.Types.ObjectId;
   courseId?: mongoose.Types.ObjectId;
   branchId?: mongoose.Types.ObjectId;
+  educationLevel?: string;
   courseName?: string;
   degreeName?: string;
   branchName?: string;
@@ -25,6 +26,7 @@ export interface ICollegeCourse extends Document {
   sourceUrl?: string;
   sourceName?: string;
   lastVerifiedAt?: Date;
+  currentAvailability?: boolean;
   active: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -34,6 +36,7 @@ const CollegeCourseSchema: Schema = new Schema({
   collegeId: { type: Schema.Types.ObjectId, ref: 'College', required: true },
   courseId: { type: Schema.Types.ObjectId, ref: 'Course' },
   branchId: { type: Schema.Types.ObjectId, ref: 'Branch' },
+  educationLevel: { type: String },
   courseName: { type: String },
   degreeName: { type: String },
   branchName: { type: String },
@@ -55,6 +58,7 @@ const CollegeCourseSchema: Schema = new Schema({
   sourceUrl: { type: String },
   sourceName: { type: String },
   lastVerifiedAt: { type: Date },
+  currentAvailability: { type: Boolean, default: true },
   active: { type: Boolean, default: true },
 }, { timestamps: true });
 

@@ -163,6 +163,7 @@ export const fetchCoursesList = async () => {
 };
 
 export const fetchAiRecommendations = async (userProfile: any, colleges: College[]) => {
-  const response = await api.post('/api/colleges/recommend', { userProfile, colleges });
+  const collegeIds = colleges.map(c => c._id);
+  const response = await api.post('/api/colleges/recommend', { userProfile, collegeIds });
   return response.data.scores;
 };

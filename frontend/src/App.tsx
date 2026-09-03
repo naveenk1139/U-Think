@@ -25,6 +25,7 @@ import { ForgotPassword } from './components/ForgotPassword';
 import { EmployerDashboard, AdminDashboard, CollegeDashboard } from './components/Dashboards';
 import ApplicationTracker from './components/ApplicationTracker';
 import AdminJobPanel from './components/AdminJobPanel';
+import AdminDataHealth from './components/AdminDataHealth';
 import { AuthReminderModal } from './components/AuthReminderModal';
 import Settings from './components/Settings';
 import { useAuth } from './contexts/AuthContext';
@@ -178,6 +179,7 @@ function AppShell() {
             <Route path="/dashboard" element={<StudentDashboard />} />
             <Route path="/employer-dashboard" element={<EmployerDashboard />} />
             <Route path="/admin-dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/data-health" element={<AdminDataHealth />} />
             <Route path="/college-dashboard" element={<CollegeDashboard />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

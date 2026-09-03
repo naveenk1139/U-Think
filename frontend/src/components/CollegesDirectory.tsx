@@ -7,14 +7,15 @@ import {
 import { fetchColleges, fetchAiRecommendations, fetchCollegeStats, fetchDistrictStats, fetchFilterOptions, fetchDistricts, College } from '../api/collegeApi';
 import { useJsApiLoader, GoogleMap, Marker, InfoWindow } from '@react-google-maps/api';
 import { useAuth } from '../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 export default function CollegesDirectory() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   
   // Filters State
-  const [selectedDistrict, setSelectedDistrict] = useState('All Districts (31)');
+  const [selectedDistrict, setSelectedDistrict] = useState('All Districts');
+  const [selectedTaluk, setSelectedTaluk] = useState('All Taluks');
   const [selectedCity, setSelectedCity] = useState('All Cities');
   const [selectedEducationLevels, setSelectedEducationLevels] = useState<string[]>([]);
   const [selectedInstitutionTypes, setSelectedInstitutionTypes] = useState<string[]>([]);
@@ -45,6 +46,8 @@ export default function CollegesDirectory() {
   const [districtStatsList, setDistrictStatsList] = useState<any[]>([]);
   const [filterOptionsData, setFilterOptionsData] = useState<any>(null);
   const [districtsList, setDistrictsList] = useState<any[]>([]);
+  const [taluksList, setTaluksList] = useState<any[]>([]);
+  const [searchCourse, setSearchCourse] = useState('');
 
   // Maps configuration
   const { isLoaded: isMapLoaded } = useJsApiLoader({
@@ -76,10 +79,24 @@ export default function CollegesDirectory() {
     fetchDistricts().then(setDistrictsList).catch(console.error);
   }, [searchQuery]);
 
+  useEffect(() => {
+    if (selectedDistrict !== 'All Districts') {
+      const dist = districtsList.find(d => d.name === selectedDistrict);
+      if (dist) {
+        import('../api/collegeApi').then(({ fetchTaluks }) => {
+          fetchTaluks(dist._id).then(setTaluksList).catch(console.error);
+        });
+      }
+    } else {
+      setTaluksList([]);
+      setSelectedTaluk('All Taluks');
+    }
+  }, [selectedDistrict, districtsList]);
+
   // Reset page when filters change
   useEffect(() => {
     setPage(1);
-  }, [searchQuery, selectedDistrict, selectedCity, selectedEducationLevels, selectedInstitutionTypes, selectedCourseCategories, selectedEntranceExam, feeRange]);
+  }, [searchQuery, selectedDistrict, selectedTaluk, selectedCity, selectedEducationLevels, selectedInstitutionTypes, selectedCourseCategories, selectedEntranceExam, feeRange, searchCourse]);
 
   useEffect(() => {
     const loadColleges = async () => {
@@ -87,16 +104,18 @@ export default function CollegesDirectory() {
       try {
         const params: any = {
           q: searchQuery,
-          district: selectedDistrict !== 'All Districts (31)' ? selectedDistrict : undefined,
+          district: selectedDistrict !== 'All Districts' ? selectedDistrict : undefined,
+          taluk: selectedTaluk !== 'All Taluks' ? selectedTaluk : undefined,
           city: selectedCity !== 'All Cities' ? selectedCity : undefined,
-          // Simplify mapping of UI checkboxes to backend filters
+          course: searchCourse || undefined,
+          education_level: selectedEducationLevels.length > 0 ? selectedEducationLevels.join(',') : undefined,
           type: selectedInstitutionTypes.length > 0 ? selectedInstitutionTypes.join(',') : undefined,
           category: selectedCourseCategories.length > 0 ? selectedCourseCategories.join(',') : undefined,
           sortBy: sortBy,
           page: page,
           limit: 20
         };
-        const response = await fetchColleges(params);
+        const response = await import('../api/collegeApi').then(m => m.fetchColleges(params));
         setColleges(response.data || []);
         setTotalPages(response.pagination?.totalPages || 1);
         setTotalCollegesCount(response.pagination?.total || 0);
@@ -112,7 +131,7 @@ export default function CollegesDirectory() {
     }, 300);
     
     return () => clearTimeout(timeoutId);
-  }, [searchQuery, selectedDistrict, selectedCity, selectedInstitutionTypes, selectedCourseCategories, sortBy, page]);
+  }, [searchQuery, selectedDistrict, selectedTaluk, selectedCity, selectedEducationLevels, selectedInstitutionTypes, selectedCourseCategories, sortBy, page, searchCourse]);
 
   const toggleFilter = (setFilter: React.Dispatch<React.SetStateAction<string[]>>, filterList: string[], value: string) => {
     if (filterList.includes(value)) {
@@ -342,14 +361,17 @@ export default function CollegesDirectory() {
             </div>
 
             <div className="space-y-6">
-              {/* District & City */}
+              {/* District, Taluk, City & Course */}
               <div className="space-y-4">
                 <div>
                   <label className="text-xs font-bold text-slate-500 block mb-1.5 uppercase tracking-wider">District</label>
                   <select 
                     className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 shadow-sm"
                     value={selectedDistrict}
-                    onChange={(e) => setSelectedDistrict(e.target.value)}
+                    onChange={(e) => {
+                      setSelectedDistrict(e.target.value);
+                      setSelectedTaluk('All Taluks'); // Reset Taluk
+                    }}
                   >
                     <option>All Districts (31)</option>
                     {districtsList.map(d => (
@@ -357,8 +379,27 @@ export default function CollegesDirectory() {
                     ))}
                   </select>
                 </div>
+
                 <div>
-                  <label className="text-xs font-bold text-slate-500 block mb-1.5 uppercase tracking-wider">City / Taluk</label>
+                  <label className="text-xs font-bold text-slate-500 block mb-1.5 uppercase tracking-wider">Taluk</label>
+                  <select 
+                    className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 shadow-sm disabled:bg-slate-100 disabled:text-slate-400"
+                    value={selectedTaluk}
+                    onChange={(e) => setSelectedTaluk(e.target.value)}
+                    disabled={selectedDistrict === 'All Districts'}
+                  >
+                    <option>All Taluks</option>
+                    {taluksList.map(t => (
+                      <option key={t._id} value={t._id}>{t.name}</option>
+                    ))}
+                  </select>
+                  {selectedDistrict === 'All Districts' && (
+                    <p className="text-[10px] text-slate-500 mt-1">Select a district to view taluks</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-slate-500 block mb-1.5 uppercase tracking-wider">City</label>
                   <select 
                     className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 shadow-sm"
                     value={selectedCity}
@@ -367,7 +408,23 @@ export default function CollegesDirectory() {
                     <option>All Cities</option>
                     <option>Bengaluru</option>
                     <option>Hubballi</option>
+                    <option>Mangaluru</option>
+                    <option>Mysuru</option>
                   </select>
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-slate-500 block mb-1.5 uppercase tracking-wider">Search Course</label>
+                  <div className="relative">
+                    <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
+                    <input 
+                      type="text" 
+                      placeholder="e.g. Computer Science, MBBS" 
+                      className="w-full bg-white border border-slate-200 rounded-lg pl-9 pr-3 py-2.5 text-sm font-semibold text-slate-700 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 shadow-sm"
+                      value={searchCourse}
+                      onChange={(e) => setSearchCourse(e.target.value)}
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -544,9 +601,9 @@ export default function CollegesDirectory() {
                     className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md hover:border-slate-300 transition-all flex flex-col sm:flex-row group"
                   >
                     {/* Left: Image */}
-                    <div className="w-full sm:w-[220px] h-[200px] sm:h-auto relative shrink-0 cursor-pointer" onClick={() => navigate(`/colleges/${college.slug || college.sourceId}`)}>
+                    <Link to={`/colleges/${college.slug || college.sourceId}`} className="w-full sm:w-[220px] h-[200px] sm:h-auto relative shrink-0 block">
                       <img 
-                        src={college.imageUrl || college.image || "https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=1000&auto=format&fit=crop"} 
+                        src={college.image || "https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=1000&auto=format&fit=crop"} 
                         alt={college.name} 
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
                       />
@@ -554,17 +611,16 @@ export default function CollegesDirectory() {
                       <div className="absolute bottom-2 left-2 bg-black/60 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-1 rounded flex items-center gap-1">
                         <MapPin className="w-3 h-3" /> {college.district || college.city || 'Karnataka'}
                       </div>
-                    </div>
+                    </Link>
                     
                     {/* Middle: Details */}
                     <div className="flex-1 p-5 flex flex-col justify-between border-b sm:border-b-0 sm:border-r border-slate-100">
                       <div>
-                        <h3 
-                          onClick={() => navigate(`/colleges/${college.slug || college.sourceId}`)}
-                          className="text-lg font-black text-slate-900 group-hover:text-blue-600 transition-colors cursor-pointer leading-tight mb-2"
-                        >
-                          {college.name}
-                        </h3>
+                        <Link to={`/colleges/${college.slug || college.sourceId}`}>
+                          <h3 className="text-lg font-black text-slate-900 group-hover:text-blue-600 transition-colors leading-tight mb-2">
+                            {college.name}
+                          </h3>
+                        </Link>
                         
                         <div className="flex flex-wrap items-center gap-2 mb-3">
                           {college.isVerified !== false && (

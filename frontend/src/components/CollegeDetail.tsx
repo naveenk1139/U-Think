@@ -133,11 +133,12 @@ export default function CollegeDetail() {
                   </div>
                   <h1 className="text-3xl md:text-4xl lg:text-5xl font-black mb-3 leading-tight text-white">{college.name}</h1>
                   <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-slate-200 font-semibold">
-                    <span className="flex items-center gap-1.5"><MapPin className="w-4 h-4 text-blue-400" /> {college.city ? `${college.city}, ` : ''}{college.district}, {college.state}</span>
-                    <span className="flex items-center gap-1.5"><Building2 className="w-4 h-4 text-blue-400" /> Est. {college.establishedYear || 'N/A'}</span>
-                    {college.universityAffiliation && (
-                      <span className="flex items-center gap-1.5"><Award className="w-4 h-4 text-blue-400" /> Affiliated: {college.universityAffiliation.split('(')[0].trim()}</span>
+                    <span className="flex items-center gap-1.5">📍 {college.city ? `${college.city}, ` : ''}{college.district}, {college.state}</span>
+                    <span className="flex items-center gap-1.5">🏛️ {college.ownership || college.type || 'Private'}</span>
+                    {college.isVerified && (
+                      <span className="flex items-center gap-1.5 text-emerald-300">🛡️ Verified by {college.sourceName || 'AISHE/Govt'}</span>
                     )}
+                    <span className="flex items-center gap-1.5">📅 Est. {college.establishedYear || 'N/A'}</span>
                   </div>
                 </div>
               </div>
@@ -283,8 +284,8 @@ export default function CollegeDetail() {
                             
                             <div className="w-full lg:w-64 shrink-0 bg-blue-50/50 dark:bg-blue-900/10 p-5 rounded-xl border border-blue-100 dark:border-blue-900/30 flex flex-col justify-center">
                               <div className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase mb-1 text-center">First Year Fee</div>
-                              <div className="text-2xl font-black text-blue-700 dark:text-blue-300 text-center mb-4">
-                                {fee ? `₹${fee.total_fee.toLocaleString('en-IN')}` : 'TBA'}
+                              <div className="text-xl font-black text-blue-700 dark:text-blue-300 text-center mb-4">
+                                {fee ? `₹${fee.total_fee.toLocaleString('en-IN')}` : 'Fee not verified'}
                               </div>
                               {fee?.fee_type && <div className="text-xs text-center text-blue-600/70 dark:text-blue-400/70 mb-4 font-semibold">{fee.fee_type}</div>}
                               <button className="w-full py-2.5 bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-slate-700 rounded-xl font-bold hover:bg-blue-50 dark:hover:bg-slate-700 transition-colors shadow-sm text-sm">

@@ -23,6 +23,7 @@ export interface IFeeRecord extends Document {
   category?: string; // General, SC/ST, OBC (if fees differ by caste/category)
   quota?: string; // State Quota, All India Quota
   seat_type?: string; // Government Seat in Private College, Private Seat, etc.
+  residency?: string; // Karnataka, Non-Karnataka, NRI
 
   source_url?: string;
   source_name?: string;
@@ -62,6 +63,7 @@ const FeeRecordSchema = new Schema(
     category: { type: String },
     quota: { type: String },
     seat_type: { type: String },
+    residency: { type: String },
 
     source_url: { type: String },
     source_name: { type: String },

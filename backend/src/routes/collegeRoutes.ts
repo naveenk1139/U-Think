@@ -147,14 +147,15 @@ router.get('/filter-options', async (req: Request, res: Response) => {
     const categories = categoryAgg.map(c => ({ name: c._id, count: c.count }));
     const types = typeAgg.map(t => ({ name: t._id, count: t.count }));
 
-    // Mocking Education Levels for now as they might map to different logic
-    // But ideally derived from courses/programs
     const educationLevels = [
-      { name: 'After 10th (PUC, Diploma, ITI)', count: await College.countDocuments({ state: 'Karnataka', programs: { $in: ['PUC', 'Diploma', 'ITI'] } }) },
-      { name: 'After 12th (UG)', count: await College.countDocuments({ state: 'Karnataka', programs: { $in: ['B.Tech', 'B.E.', 'B.Sc', 'BA', 'B.Com', 'BCA', 'MBBS', 'BDS', 'BBA'] } }) },
-      { name: 'Postgraduate (PG)', count: await College.countDocuments({ state: 'Karnataka', programs: { $in: ['M.Tech', 'MBA', 'MCA', 'M.Sc', 'MA', 'M.Com', 'MD', 'MS'] } }) },
-      { name: 'Professional (Medical, Law etc.)', count: await College.countDocuments({ state: 'Karnataka', categories: { $in: ['Medical', 'Law', 'Dental', 'Architecture'] } }) },
-      { name: 'Research (Phd)', count: await College.countDocuments({ state: 'Karnataka', programs: { $in: ['Ph.D'] } }) }
+      { name: 'AFTER_10TH', count: await College.countDocuments({ state: 'Karnataka', educationLevels: 'AFTER_10TH' }) },
+      { name: 'PUC', count: await College.countDocuments({ state: 'Karnataka', educationLevels: 'PUC' }) },
+      { name: 'DIPLOMA', count: await College.countDocuments({ state: 'Karnataka', educationLevels: 'DIPLOMA' }) },
+      { name: 'ITI', count: await College.countDocuments({ state: 'Karnataka', educationLevels: 'ITI' }) },
+      { name: 'UNDERGRADUATE', count: await College.countDocuments({ state: 'Karnataka', educationLevels: 'UNDERGRADUATE' }) },
+      { name: 'POSTGRADUATE', count: await College.countDocuments({ state: 'Karnataka', educationLevels: 'POSTGRADUATE' }) },
+      { name: 'PROFESSIONAL', count: await College.countDocuments({ state: 'Karnataka', educationLevels: 'PROFESSIONAL' }) },
+      { name: 'RESEARCH', count: await College.countDocuments({ state: 'Karnataka', educationLevels: 'RESEARCH' }) }
     ];
 
     res.json({
@@ -302,6 +303,7 @@ router.get('/', async (req: Request, res: Response) => {
     
     if (category && category !== 'All') filter.categories = { $in: [String(category)] };
     if (type && type !== 'All') filter.type = { $regex: String(type), $options: 'i' };
+    if (req.query.education_level) filter.educationLevels = { $in: [String(req.query.education_level)] };
     if (ownership) filter.ownership = String(ownership);
     
     // Support string matching for legacy/unmigrated data OR strict ObjectId refs if passed
@@ -312,9 +314,17 @@ router.get('/', async (req: Request, res: Response) => {
          filter.district = { $regex: String(district), $options: 'i' };
       }
     }
-    if (req.query.talukId) filter.talukRef = req.query.talukId;
     
-    if (city) filter.city = String(city);
+    const taluk = req.query.taluk;
+    if (taluk && taluk !== 'All') {
+      if (mongoose.Types.ObjectId.isValid(String(taluk))) {
+         filter.talukRef = taluk;
+      } else {
+         filter.taluk = { $regex: String(taluk), $options: 'i' };
+      }
+    }
+    
+    if (city && city !== 'All') filter.city = { $regex: String(city), $options: 'i' };
     if (course) filter.courses = { $regex: String(course), $options: 'i' };
     if (branch) filter.specializations = { $regex: String(branch), $options: 'i' };
     if (entranceExam) filter.entranceExams = { $in: [String(entranceExam)] };
@@ -361,27 +371,32 @@ router.get('/', async (req: Request, res: Response) => {
 // POST /api/colleges/recommend
 router.post('/recommend', async (req: Request, res: Response): Promise<void> => {
   try {
-    const { preferences } = req.body;
+    const { userProfile, collegeIds } = req.body;
     
-    if (!preferences) {
-      res.status(400).json({ message: 'Preferences are required' });
+    if (!userProfile) {
+      res.status(400).json({ message: 'User profile is required' });
       return;
     }
 
-    // 1. Fetch a broad set of colleges (e.g., active ones in Karnataka)
-    // We limit to 50 to avoid token limits for the LLM
-    const colleges = await College.find({ status: 'ACTIVE', state: 'Karnataka' })
-      .select('name city district categories specializations fees placement nirfRank type')
-      .limit(50)
-      .lean();
+    let collegesToScore = [];
+    if (collegeIds && collegeIds.length > 0) {
+      collegesToScore = await College.find({ _id: { $in: collegeIds }, status: 'ACTIVE' })
+        .select('_id name city district categories specializations fees placement nirfRank type establishedYear courses universityAffiliation description')
+        .lean();
+    } else {
+      collegesToScore = await College.find({ status: 'ACTIVE', state: 'Karnataka' })
+        .select('_id name city district categories specializations fees placement nirfRank type establishedYear courses universityAffiliation description')
+        .limit(50)
+        .lean();
+    }
 
-    if (!colleges || colleges.length === 0) {
+    if (!collegesToScore || collegesToScore.length === 0) {
        res.status(404).json({ message: 'No colleges available for recommendation.' });
        return;
     }
 
-    // 2. Prepare a concise summary of colleges for the LLM
-    const collegeDataForAI = colleges.map(c => ({
+    // 2. Prepare an extensive summary of colleges for the LLM
+    const collegeDataForAI = collegesToScore.map(c => ({
       id: c._id,
       name: c.name,
       location: `${c.city || ''}, ${c.district || ''}`.trim(),
@@ -389,21 +404,25 @@ router.post('/recommend', async (req: Request, res: Response): Promise<void> => 
       categories: c.categories,
       specializations: c.specializations,
       fees: c.fees?.tuition || 'Unknown',
-      placementPct: c.placement?.percentage || 'Unknown'
+      placementPct: c.placement?.percentage || 'Unknown',
+      establishedYear: c.establishedYear || 'Unknown',
+      coursesOffered: c.courses?.slice(0, 8).join(', ') || 'Unknown',
+      affiliation: c.universityAffiliation || 'Unknown',
+      descriptionSummary: c.description ? c.description.substring(0, 150) : ''
     }));
 
-    const prompt = `
-You are an expert college counselor.
-Based on the following user preferences:
-${JSON.stringify(preferences, null, 2)}
+const prompt = `
+You are an expert, highly knowledgeable career and college counselor.
+Based on the following user profile and preferences:
+${JSON.stringify(userProfile, null, 2)}
 
-And the following list of available colleges:
+And the following list of available, highly verified colleges in Karnataka:
 ${JSON.stringify(collegeDataForAI)}
 
-Recommend the top 3-5 colleges that best match the user's preferences.
+Recommend the top 3-5 colleges that best match the user's specific aptitude scores, interests, and preferences. Consider factors like established history, placement percentages, and courses offered.
 Return ONLY a valid JSON array of objects, with each object containing:
-- "collegeId": The ID of the recommended college (must match exactly one of the IDs from the list).
-- "rationale": A short, 1-2 sentence explanation of why this college is a good fit for the user based on their preferences.
+- "collegeId": The precise ID of the recommended college (must match exactly one of the IDs from the list).
+- "rationale": A deeply personalized, 2-3 sentence explanation connecting the user's aptitude/interests with the college's specific strengths (e.g. placements, established year, specific courses).
 `;
 
     // 3. Call Gemini
@@ -411,7 +430,7 @@ Return ONLY a valid JSON array of objects, with each object containing:
 
     if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === 'your_gemini_api_key_here') {
       // Mock response if API key is missing
-      recommendations = colleges.slice(0, 3).map((c: any) => ({
+      recommendations = collegesToScore.slice(0, 3).map((c: any) => ({
         collegeId: String(c._id),
         rationale: "This is a simulated AI recommendation because the GEMINI_API_KEY is not configured in the backend."
       }));
@@ -436,23 +455,18 @@ Return ONLY a valid JSON array of objects, with each object containing:
       }
     }
 
-    // 4. Fetch the full college objects for the recommendations
-    const recommendedColleges = [];
+    // 4. Return as a dictionary of scores mapped to IDs as expected by frontend
+    const scores: Record<string, { score: number, rationale: string }> = {};
     for (const rec of recommendations) {
-      const fullCollege = await College.findById(rec.collegeId)
-        .populate('districtRef', 'name slug')
-        .populate('talukRef', 'name slug')
-        .populate('cityRef', 'name slug');
-        
-      if (fullCollege) {
-        recommendedColleges.push({
-          college: fullCollege,
-          rationale: rec.rationale
-        });
-      }
+      // Create a pseudo-score based on index (top result = highest)
+      const pseudoScore = 95 - (Object.keys(scores).length * 5);
+      scores[rec.collegeId] = {
+        score: pseudoScore > 0 ? pseudoScore : 10,
+        rationale: rec.rationale
+      };
     }
 
-    res.json({ recommendations: recommendedColleges });
+    res.json({ scores });
   } catch (error) {
     console.error('Error generating college recommendations:', error);
     res.status(500).json({ message: 'Server error while generating recommendations', error: String(error) });

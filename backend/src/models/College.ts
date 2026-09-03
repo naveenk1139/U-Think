@@ -2,6 +2,8 @@ import mongoose, { Schema, Document } from 'mongoose';
 
 export interface ICollege extends Document {
   slug: string;
+  canonicalSlug?: string;
+  normalizedName?: string;
   collegeId?: string; // Optional alias for sourceId
   source: string; // 'collegedb', 'manual', etc.
   sourceId: string;
@@ -15,6 +17,16 @@ export interface ICollege extends Document {
   ownership?: string; // Government, Government Aided, Private, Deemed, Autonomous
   managementType?: string;
   aisheCode?: string;
+  ugcCode?: string;
+  aicteCode?: string;
+  dteCode?: string;
+  itiNcvtCode?: string;
+  otherRegulatorIds?: string;
+  googlePlaceId?: string;
+  googleMapsUrl?: string;
+  googleDirectionsUrl?: string;
+  statusVerifiedAt?: Date;
+  sourceRecordId?: string;
   state: string;
   stateRef?: mongoose.Types.ObjectId;
   district?: string;
@@ -31,6 +43,7 @@ export interface ICollege extends Document {
   establishedYear?: number;
   courses: string[];
   programs?: string[]; // B.Tech, M.Tech, MBA, etc.
+  educationLevels?: string[]; // AFTER_10TH, PUC, DIPLOMA, ITI, UNDERGRADUATE, POSTGRADUATE, PROFESSIONAL, RESEARCH
   specializations: string[];
   description?: string;
   facilities?: string[];
@@ -73,7 +86,7 @@ export interface ICollege extends Document {
   sourceName?: string;
   sourceUrl?: string;
   lastVerifiedAt?: Date;
-  verificationStatus?: 'verified' | 'unverified' | 'stale' | 'needs_review';
+  verificationStatus?: 'verified' | 'unverified' | 'stale' | 'needs_review' | 'partially_verified' | 'conflicting';
   isVerified?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
@@ -81,6 +94,8 @@ export interface ICollege extends Document {
 
 const CollegeSchema: Schema = new Schema({
   slug: { type: String, required: true, unique: true },
+  canonicalSlug: { type: String },
+  normalizedName: { type: String },
   collegeId: { type: String },
   source: { type: String, required: true, default: 'collegedb' },
   sourceId: { type: String, required: true },
@@ -94,6 +109,16 @@ const CollegeSchema: Schema = new Schema({
   ownership: { type: String },
   managementType: { type: String },
   aisheCode: { type: String },
+  ugcCode: { type: String },
+  aicteCode: { type: String },
+  dteCode: { type: String },
+  itiNcvtCode: { type: String },
+  otherRegulatorIds: { type: String },
+  googlePlaceId: { type: String },
+  googleMapsUrl: { type: String },
+  googleDirectionsUrl: { type: String },
+  statusVerifiedAt: { type: Date },
+  sourceRecordId: { type: String },
   state: { type: String, default: 'Karnataka' },
   stateRef: { type: Schema.Types.ObjectId, ref: 'State' },
   district: { type: String },
@@ -110,6 +135,7 @@ const CollegeSchema: Schema = new Schema({
   establishedYear: { type: Number },
   courses: [{ type: String }],
   programs: [{ type: String }],
+  educationLevels: [{ type: String }],
   specializations: [{ type: String }],
   description: { type: String },
   facilities: [{ type: String }],
@@ -152,7 +178,7 @@ const CollegeSchema: Schema = new Schema({
   sourceName: { type: String },
   sourceUrl: { type: String },
   lastVerifiedAt: { type: Date },
-  verificationStatus: { type: String, enum: ['verified', 'unverified', 'stale', 'needs_review'], default: 'unverified' },
+  verificationStatus: { type: String, enum: ['verified', 'unverified', 'stale', 'needs_review', 'partially_verified', 'conflicting'], default: 'unverified' },
   isVerified: { type: Boolean, default: false },
 }, { timestamps: true });
 
