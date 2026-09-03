@@ -1,90 +1,111 @@
-# 🎓 U-THINK — MERN Stack Platform
+# U-THINK: Karnataka's Ultimate Educational Navigation System 🚀
 
-U-THINK is a modern, AI-powered career guidance and academic stream explorer application tailored for post-10th grade students across India. It helps students discover the right colleges, explore real job opportunities, take aptitude assessments, and chart their future pathways.
+U-THINK is an exhaustive, comprehensive, and highly detailed educational navigation ecosystem built specifically for Karnataka students. It guides students from post-10th grade all the way to Research level (PhD), covering every single educational pathway, stream, course combination, branch, specialization, exam, career path, and institution available in the state.
 
----
+## 🌟 Key Features
 
-## ✨ Key Features
+*   **Comprehensive Pathway Discovery:** Interactive mapping of ALL possible educational pathways after 10th (PUC, Diploma, ITI, Paramedical, etc.).
+*   **In-Depth Stream Exploration:** Detailed insights into every stream and course combination (e.g., PCMB, PCMSc, HEPS, CEBA).
+*   **Verified Institution Ecosystem:** A robust directory of 3,500+ verified colleges, institutes, and universities across all 31 districts of Karnataka.
+*   **Live Exam & Degree Directory:** A real-time engine tracking major entrance exams (JEE, NEET, KCET, CA, UPSC, etc.) with dynamic countdowns, eligibility checkers, and automated status calculations.
+*   **AI-Powered Recommendations:** Built-in AI integration (Gemini 2.5 Pro) that scores and recommends personalized pathways and colleges based on the user's aptitude, budget, and career goals.
+*   **Data Provenance:** Strict verification markers for all data sources (AISHE, NTA, KEA, official portals) ensuring zero fake data.
 
-- **🎓 College Discovery Engine:** Verified, database-driven directory of thousands of colleges across India, seamlessly ingesting data from official AISHE datasets and rendering interactive `@react-google-maps/api` maps. Features comprehensive, dynamically calculated geographical and course-based filtering.
-- **💼 Job Explorer:** Live job board powered by the Adzuna API, showing real-time job openings with advanced filtering (role, location, experience) and pagination.
-- **🤖 AI-Powered Career Assistant:** Integrated Gemini AI chatbot for personalized career counseling, pathway recommendations, and answering student queries.
-- **📝 Aptitude Assessments:** Built-in quizzes to assess student interests and match them with suitable academic streams (Science, Commerce, Arts, Vocational).
-- **🔒 Secure Authentication:** Firebase-powered authentication for secure student profiles, saved jobs, and tracked exams.
+## 🛠️ Technology Stack
 
----
+This is a modern **MERN** stack application built with a focus on performance, scalability, and type safety.
 
-## 🛠️ Tech Stack
-
-**Frontend:**
-- React 18 & Vite
-- TypeScript
-- Tailwind CSS
-- Context API (State Management)
-
-**Backend:**
-- Node.js & Express.js
-- TypeScript
-- MongoDB & Mongoose (Database)
-- Firebase Admin SDK
-
-**External APIs:**
-- Google Gemini AI (Counseling)
-- Google Maps Platform (Campus geolocations & interactive maps)
-- CollegeDB API & AISHE Datasets (College Directory)
-- Adzuna API (Real-time Jobs)
-
----
+*   **Frontend:** React 18, Vite, TypeScript, Tailwind CSS, Lucide Icons, React Router DOM.
+*   **Backend:** Node.js, Express.js, TypeScript, Mongoose.
+*   **Database:** MongoDB.
+*   **AI Integration:** Google Gemini SDK (`@google/genai`).
 
 ## 📁 Repository Structure
 
 ```text
 U-Think/
-├── frontend/          ← React + Vite + TypeScript single-page application
-│   ├── src/           ← Components, Contexts, Hooks, API client, Pages
-│   ├── index.html
-│   └── package.json
-│
-└── backend/           ← Node.js + Express + TypeScript REST API server
-    ├── src/
-    │   ├── config/      ← MongoDB, Firebase, and Gemini AI configuration
-    │   ├── controllers/ ← Business logic and route handlers
-    │   ├── middleware/  ← Firebase authentication & global error handlers
-    │   ├── models/      ← Mongoose Models (College, Pathway, Stream, CareerPath, JobRole, etc.)
-    │   ├── routes/      ← Express Routes (Colleges, Pathways, Geography, User, AI)
-    │   └── scripts/     ← Database seeders and mass data ingestion scripts (UGC, AISHE, etc.)
-    └── package.json
+├── backend/                  # Express API Server
+│   ├── src/
+│   │   ├── config/           # Database and API configurations (MongoDB, Gemini)
+│   │   ├── controllers/      # Route handlers and business logic
+│   │   ├── middleware/       # Express middlewares (Auth, Error Handling)
+│   │   ├── models/           # Mongoose schemas (Exam, College, Pathway, etc.)
+│   │   ├── routes/           # API route definitions
+│   │   ├── scripts/          # Seeder scripts for data ingestion (seedMegaExams, etc.)
+│   │   ├── services/         # External service integrations (SMS, Email)
+│   │   └── index.ts          # Application entry point
+│   ├── package.json
+│   └── tsconfig.json
+├── frontend/                 # React Vite Application
+│   ├── src/
+│   │   ├── api/              # Axios API clients for backend communication
+│   │   ├── assets/           # Static assets, images, and global CSS
+│   │   ├── components/       # Reusable UI components (ExamDetail, CollegesDirectory)
+│   │   ├── contexts/         # React Context providers (AuthContext)
+│   │   ├── App.tsx           # Main application routing
+│   │   └── main.tsx          # React DOM entry point
+│   ├── package.json
+│   ├── tailwind.config.js
+│   └── vite.config.ts
+├── .gitignore
+├── package.json              # Workspace root package manager
+└── README.md                 # Project documentation
 ```
 
----
+## 🚀 Getting Started
 
-## 🚀 Quick Start
+### Prerequisites
+*   Node.js (v18+)
+*   MongoDB (Local or Atlas)
+*   Google Gemini API Key (for AI recommendations)
 
-### 1. Install Dependencies
+### Installation
+
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/naveenk1139/U-Think.git
+    cd U-Think
+    ```
+
+2.  **Install dependencies (Workspace):**
+    ```bash
+    npm install
+    ```
+
+3.  **Environment Variables:**
+    *   Create `backend/.env` and add:
+        ```env
+        PORT=5000
+        MONGO_URI=mongodb://127.0.0.1:27017/u-think
+        CORS_ORIGIN=http://localhost:3000
+        GEMINI_API_KEY=your_gemini_api_key_here
+        ```
+    *   Create `frontend/.env` and add:
+        ```env
+        VITE_API_URL=http://localhost:5000
+        ```
+
+4.  **Run Development Servers:**
+    Open two terminals to run both frontend and backend concurrently, or use the workspace script:
+    ```bash
+    # Terminal 1 (Backend)
+    npm run dev:backend
+
+    # Terminal 2 (Frontend)
+    npm run dev:frontend
+    ```
+    The frontend will run on `http://localhost:3000` (or `3001` if 3000 is occupied) and the backend will run on `http://localhost:5000`.
+
+## 🌱 Data Seeding
+
+To populate the database with the verified Karnataka educational dataset and major entrance exams, run the following scripts from the `backend/` directory:
+
 ```bash
-# Install root dependencies
-npm install
-
-# Install frontend & backend dependencies
-cd frontend && npm install
-cd ../backend && npm install
+cd backend
+npx tsx src/scripts/seedMegaPathways.ts
+npx tsx src/scripts/seedMegaExams.ts
+# Additional seeders available in src/scripts/
 ```
 
-### 2. Configure Environment Variables
-- Copy `backend/.env.example` to `backend/.env` and add your `MONGODB_URI`, `GEMINI_API_KEY`, `COLLEGEDB_API_KEY`, and `ADZUNA_APP_ID`/`ADZUNA_APP_KEY`.
-- Copy `frontend/.env.example` to `frontend/.env` and update your Firebase credentials.
-- Note: The frontend requires a `VITE_GOOGLE_MAPS_API_KEY` for map functionalities.
-
-### 3. Run Development Servers
-From the workspace root directory:
-```bash
-# Run both frontend and backend concurrently
-npm run dev
-```
-
-- **Frontend**: [http://localhost:3000](http://localhost:3000)
-- **Backend**: [http://localhost:5000](http://localhost:5000)
-- **Health Check**: [http://localhost:5000/api/health](http://localhost:5000/api/health)
-
----
-*Built with ❤️ by Naveen.*
+## 🤝 Contribution Guidelines
+This project enforces a strict "Real Data Only" mandate. No placeholder data, fake dates, or unverified fees should be committed to the database layer. Always cite your data source (e.g., `source_url`, `last_verified_at`) when updating institutional or exam information.
