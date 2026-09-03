@@ -8,6 +8,9 @@ export interface IStream extends Document {
   description?: string;
   duration?: string;
   typicalStructure?: string[];
+  coreSubjects?: string[];
+  electives?: string[];
+  examDates?: Map<string, string>;
   icon?: string;
   order: number;
   active: boolean;
@@ -23,6 +26,9 @@ const StreamSchema: Schema = new Schema({
   description: { type: String },
   duration: { type: String },
   typicalStructure: [{ type: String }],
+  coreSubjects: [{ type: String }],
+  electives: [{ type: String }],
+  examDates: { type: Map, of: String },
   icon: { type: String },
   order: { type: Number, default: 0 },
   active: { type: Boolean, default: true },

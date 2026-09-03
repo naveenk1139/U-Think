@@ -1,84 +1,71 @@
-import { Router, Response, NextFunction } from 'express';
+import { Router, Request, Response } from 'express';
 import mongoose from 'mongoose';
-import { protect, AuthRequest } from '../middleware/authMiddleware';
-
-import { getPathwayTree, getFilteredPathways, getPathwayStats, searchPathways } from '../controllers/pathwayController';
+import Pathway from '../models/Pathway.js';
+import Stream from '../models/Stream.js';
+import Branch from '../models/Branch.js';
+import CourseCategory from '../models/CourseCategory.js';
+import CourseDetail from '../models/CourseDetail.js';
+import College from '../models/College.js';
 
 const router = Router();
 
-// Public routes for Pathway Explorer
-router.get('/tree', getPathwayTree);
-router.get('/filter', getFilteredPathways);
-router.get('/stats', getPathwayStats);
-router.get('/search', searchPathways);
-
-const getSavedPathwayModel = (): mongoose.Model<any> => {
-
-  const existing = mongoose.models.SavedPathway as mongoose.Model<any> | undefined;
-  if (existing) {
-    return existing;
-  }
-  const SavedPathwaySchema = new mongoose.Schema(
-    {
-      userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
-      specId: { type: String, required: true },
-      specName: { type: String, required: true },
-      notes: { type: String, default: '' },
-    },
-    { timestamps: true }
-  );
-  return mongoose.model('SavedPathway', SavedPathwaySchema) as mongoose.Model<any>;
-};
-
-router.use(protect);
-
-// Save a pathway
-router.post('/', async (req: AuthRequest, res: Response, next: NextFunction) => {
+// GET /api/pathways
+router.get('/', async (req: Request, res: Response) => {
   try {
-    const userId = req.user?.id;
-    const { specId, specName, notes } = req.body;
-    if (!specId || !specName) {
-      res.status(400).json({ error: 'specId and specName are required.' });
-      return;
-    }
-
-    const SavedPathway = getSavedPathwayModel();
-    const pathway = await SavedPathway.create({ userId, specId, specName, notes });
-    res.status(201).json(pathway);
-  } catch (err) {
-    next(err);
-  }
-});
-
-// Fetch saved pathways for a user
-router.get('/', async (req: AuthRequest, res: Response, next: NextFunction) => {
-  try {
-    const userId = req.user?.id;
-
-    const SavedPathway = getSavedPathwayModel();
-    const pathways = await SavedPathway.find({ userId }).sort({ createdAt: -1 });
+    const pathways = await Pathway.find({ active: true }).sort({ order: 1 });
     res.json(pathways);
-  } catch (err) {
-    next(err);
+  } catch (error) {
+    console.error('Error fetching pathways:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
-// Delete a saved pathway
-router.delete('/:id', async (req: AuthRequest, res: Response, next: NextFunction) => {
+// GET /api/pathways/:id/streams
+router.get('/:id/streams', async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
-    const userId = req.user?.id;
-    const SavedPathway = getSavedPathwayModel();
-    const deleted = await SavedPathway.findOneAndDelete({ _id: id, userId });
+    const streams = await Stream.find({ pathwayId: req.params.id, active: true }).sort({ order: 1 });
+    res.json(streams);
+  } catch (error) {
+    console.error('Error fetching streams:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// GET /api/streams/:id/branches
+router.get('/streams/:id/branches', async (req: Request, res: Response) => {
+  try {
+    const branches = await Branch.find({ streamId: req.params.id, active: true }).sort({ order: 1 });
+    res.json(branches);
+  } catch (error) {
+    console.error('Error fetching branches:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// GET /api/streams/:id/colleges
+router.get('/streams/:id/colleges', async (req: Request, res: Response) => {
+  try {
+    // Basic mapping heuristic: if stream is science, find colleges with specific educationLevels
+    // For a fully comprehensive system, there would be a stream_colleges map.
+    // For now, let's just return a placeholder or do a fuzzy search on college categories
+    const stream = await Stream.findById(req.params.id);
+    if (!stream) return res.status(404).json({ message: 'Stream not found' });
     
-    if (!deleted) {
-      res.status(404).json({ error: 'Saved pathway not found or unauthorized.' });
-      return;
-    }
+    let filter: any = { state: 'Karnataka' };
     
-    res.json({ message: 'Saved pathway deleted successfully.' });
-  } catch (err) {
-    next(err);
+    // Map stream to college education level
+    const slug = stream.slug.toLowerCase();
+    if (slug.includes('ug') || slug.includes('undergrad')) filter.educationLevels = 'UNDERGRADUATE';
+    else if (slug.includes('pg') || slug.includes('postgrad')) filter.educationLevels = 'POSTGRADUATE';
+    else if (slug.includes('iti')) filter.educationLevels = 'ITI';
+    else if (slug.includes('diploma')) filter.educationLevels = 'DIPLOMA';
+    else if (slug.includes('science') || slug.includes('commerce') || slug.includes('arts')) filter.educationLevels = 'PUC';
+
+    const colleges = await College.find(filter).limit(10).populate('districtRef', 'name');
+    res.json(colleges);
+  } catch (error) {
+    console.error('Error fetching stream colleges:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 

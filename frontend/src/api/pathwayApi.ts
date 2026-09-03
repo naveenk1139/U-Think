@@ -84,6 +84,8 @@ export interface CourseData {
   description?: string;
   branches?: BranchData[];
   duration?: string;
+  eligibility?: string;
+  higherStudyArea?: string;
   subjects?: string[];
   ugCourses?: UGCourseData[];
 }

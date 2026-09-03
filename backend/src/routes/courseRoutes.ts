@@ -1,7 +1,31 @@
 import { Router, Request, Response } from 'express';
 import Course from '../models/Course.js';
+import CourseCategory from '../models/CourseCategory.js';
+import CourseDetail from '../models/CourseDetail.js';
 
 const router = Router();
+
+// GET /api/courses/categories
+router.get('/categories', async (req: Request, res: Response) => {
+  try {
+    const categories = await CourseCategory.find({ active: true }).sort({ createdAt: 1 });
+    res.json(categories);
+  } catch (error) {
+    console.error('Error fetching course categories:', error);
+    res.status(500).json({ error: 'Server error fetching categories' });
+  }
+});
+
+// GET /api/courses/categories/:id
+router.get('/categories/:id', async (req: Request, res: Response) => {
+  try {
+    const courses = await CourseDetail.find({ categoryId: req.params.id, active: true }).sort({ createdAt: 1 });
+    res.json(courses);
+  } catch (error) {
+    console.error('Error fetching course details:', error);
+    res.status(500).json({ error: 'Server error fetching courses' });
+  }
+});
 
 router.get('/', async (req: Request, res: Response) => {
   try {

@@ -15,6 +15,7 @@ import ExamDetail from './components/ExamDetail';
 import DegreeDetail from './components/DegreeDetail';
 import BranchDetail from './components/BranchDetail';
 import CourseDetail from './components/CourseDetail';
+import ProfessionalCourses from './components/ProfessionalCourses';
 
 import CollegesDirectory from './components/CollegesDirectory';
 import CollegeDetail from './components/CollegeDetail';
@@ -172,6 +173,7 @@ function AppShell() {
             <Route path="/pathways/:levelSlug/:pathwaySlug/:streamSlug" element={<PathwaysExplorer />} />
             <Route path="/pathways/:levelSlug/:pathwaySlug/:streamSlug/:comboSlug" element={<PathwaysExplorer />} />
             <Route path="/courses/:courseSlug" element={<CourseDetail />} />
+            <Route path="/professional-courses" element={<ProfessionalCourses />} />
             <Route path="/applications" element={<ApplicationTracker />} />
             <Route path="/admin/jobs" element={<AdminJobPanel />} />
             <Route path="/mentorship" element={<MentorshipProgram />} />

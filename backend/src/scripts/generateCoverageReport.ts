@@ -11,7 +11,7 @@ dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 async function generateReport() {
   try {
-    await mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/u-think');
+    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/uthink');
     console.log('DISTRICT | TOTAL VERIFIED | ACTIVE | UNVERIFIED | DUPLICATES | MISSING WEBSITE | MISSING LOCATION | MISSING PROGRAMMES | MISSING FEES | LAST SYNC');
     console.log('-'.repeat(150));
 

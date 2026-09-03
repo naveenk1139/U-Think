@@ -1,7 +1,9 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IBranch extends Document {
-  courseId: mongoose.Types.ObjectId;
+  streamId?: mongoose.Types.ObjectId;
+  pathwayId?: mongoose.Types.ObjectId;
+  courseId?: mongoose.Types.ObjectId;
   name: string; // e.g., 'Computer Science Engineering', 'MBBS'
   slug: string;
   description?: string;
@@ -10,6 +12,7 @@ export interface IBranch extends Document {
   requiredSubjects?: string[];
   averageFees?: string;
   relatedCareers?: mongoose.Types.ObjectId[];
+  careerOpportunities?: string[];
   relatedExams?: mongoose.Types.ObjectId[];
   higherStudies?: mongoose.Types.ObjectId[];
   furtherStudies?: mongoose.Types.ObjectId[]; // PG courses
@@ -21,7 +24,9 @@ export interface IBranch extends Document {
 }
 
 const BranchSchema: Schema = new Schema({
-  courseId: { type: Schema.Types.ObjectId, ref: 'Course', required: true },
+  streamId: { type: Schema.Types.ObjectId, ref: 'Stream' },
+  pathwayId: { type: Schema.Types.ObjectId, ref: 'Pathway' },
+  courseId: { type: Schema.Types.ObjectId, ref: 'Course' },
   name: { type: String, required: true },
   slug: { type: String, required: true },
   description: { type: String },
@@ -30,6 +35,7 @@ const BranchSchema: Schema = new Schema({
   requiredSubjects: [{ type: String }],
   averageFees: { type: String },
   relatedCareers: [{ type: Schema.Types.ObjectId, ref: 'Career' }],
+  careerOpportunities: [{ type: String }],
   relatedExams: [{ type: Schema.Types.ObjectId, ref: 'Exam' }],
   higherStudies: [{ type: Schema.Types.ObjectId, ref: 'Course' }],
   furtherStudies: [{ type: Schema.Types.ObjectId, ref: 'Course' }],

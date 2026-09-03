@@ -7,6 +7,7 @@ export interface IPathway extends Document {
   description?: string;
   duration?: string;
   eligibility?: string;
+  entryRequirement?: string;
   order: number;
   icon?: string;
   sourceName?: string;
@@ -24,6 +25,7 @@ const PathwaySchema: Schema = new Schema({
   description: { type: String },
   duration: { type: String },
   eligibility: { type: String },
+  entryRequirement: { type: String },
   order: { type: Number, default: 0 },
   icon: { type: String },
   sourceName: { type: String },

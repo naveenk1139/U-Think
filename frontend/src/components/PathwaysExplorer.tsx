@@ -543,6 +543,18 @@ const PathwaysExplorer: React.FC = () => {
                                         {course.description && (
                                             <p className="text-sm text-gray-600 mb-4 line-clamp-2">{course.description}</p>
                                         )}
+                                        <div className="flex flex-wrap gap-2 mb-4">
+                                          {course.duration && (
+                                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-blue-50 text-blue-700 border border-blue-100">
+                                              <Activity className="w-3.5 h-3.5" /> Duration: {course.duration}
+                                            </span>
+                                          )}
+                                          {course.eligibility && (
+                                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-purple-50 text-purple-700 border border-purple-100">
+                                              <CheckCircle className="w-3.5 h-3.5" /> {course.eligibility}
+                                            </span>
+                                          )}
+                                        </div>
                                         {course.branches && course.branches.length > 0 && (
                                             <div className="mt-4 pt-4 border-t border-gray-100">
                                                 <h5 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Available Branches / Options</h5>

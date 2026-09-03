@@ -81,6 +81,7 @@ export default function Sidebar() {
           <NavItem icon={Award} label="Aptitude Assessment" path="/quiz" />
           <NavItem icon={Briefcase} label="Job Explorer" path="/jobs" />
           <NavItem icon={Users} label="Industry Mentors" path="/mentorship" />
+          <NavItem icon={Award} label="Professional Courses" path="/professional-courses" />
         </div>
 
         {/* Secondary Navigation */}
