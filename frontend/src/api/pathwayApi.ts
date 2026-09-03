@@ -13,11 +13,14 @@ export interface TradeData {
   _id: string;
   name: string;
   slug: string;
+  description?: string;
   duration?: string;
   eligibility?: string;
   minimumQualification?: string;
   admissionMethod?: string;
   apprenticeshipOpportunities?: boolean;
+  careerOpportunities?: string[];
+  averageStartingSalary?: string;
 }
 
 export interface SubjectData {
@@ -25,6 +28,8 @@ export interface SubjectData {
   name: string;
   slug: string;
   description?: string;
+  syllabusWeightage?: string;
+  practicalComponent?: string;
 }
 
 export interface SubjectCombinationData {
@@ -48,7 +53,9 @@ export interface CollegeData {
   _id: string;
   name: string;
   slug: string;
-  type?: string;
+  city?: string;
+  district?: string;
+  ownership?: string;
 }
 
 export interface BranchData {
@@ -57,6 +64,13 @@ export interface BranchData {
   name: string;
   slug: string;
   description?: string;
+  duration?: string;
+  eligibility?: string;
+  averageFees?: string;
+  careerOpportunities?: string[];
+  specializations?: string[];
+  exampleInstitutions?: string[];
+  requiredSkills?: string[];
   relatedCareers: { _id: string; name: string; slug: string }[];
   relatedExams: { _id: string; name: string; slug: string }[];
   higherStudies: { _id: string; name: string; slug: string }[];
@@ -104,6 +118,7 @@ export interface StreamData {
   subjectCombinations?: SubjectCombinationData[];
   courses?: CourseData[];
   trades?: TradeData[];
+  branches?: BranchData[];
 }
 
 export interface PathwayData {
@@ -141,7 +156,7 @@ export const getPathwayTree = (levelSlug?: string): Promise<EducationLevelData[]
   api.get<EducationLevelData[]>('/api/education-catalog', { params: { levelSlug } }).then((r) => r.data);
 
 export const getStreamDetails = async (streamId: string): Promise<StreamData> => {
-  const response = await api.get(`/api/pathways/tree?streamSlug=${streamId}`);
+  const response = await api.get(`/api/education-catalog?streamSlug=${streamId}`);
   return response.data;
 };
 
@@ -165,3 +180,19 @@ export const savePathway = (pathway: Omit<SavedPathway, '_id' | 'userId' | 'crea
 
 export const deletePathway = (id: string): Promise<void> =>
   api.delete(`/api/pathways/${id}`).then(() => undefined);
+
+export interface ExamScheduleData {
+  _id: string;
+  streamId?: string;
+  examType: string;
+  subjectName: string;
+  date: string;
+  time: string;
+}
+
+export const getExamSchedule = async (streamId?: string): Promise<ExamScheduleData[]> => {
+  let url = '/api/exams/schedule';
+  if (streamId) { url += '?streamId=' + streamId; }
+  const response = await api.get(url);
+  return response.data;
+};

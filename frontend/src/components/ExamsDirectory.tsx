@@ -1,86 +1,146 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Search, BookOpen, GraduationCap, Award, Building, ArrowRight, Bookmark, Filter, ChevronDown, CheckCircle2, ChevronRight, HelpCircle, Star, Sparkles } from 'lucide-react';
-import { StructuredExam, StructuredDegree } from '../types';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Search, BookOpen, GraduationCap, Award, Building, Bookmark, Filter, ChevronDown, CheckCircle2, ChevronRight, HelpCircle, Star, Sparkles, X, Loader2 } from 'lucide-react';
+import { StructuredExam } from '../types';
+import { getExams, getExamRecommendations, saveExam, unsaveExam, getSavedExams } from '../api/examApi';
 import ExamComparisonModal from './ExamComparisonModal';
-import DegreeComparisonModal from './DegreeComparisonModal';
 
 interface ExamsDirectoryProps {
   initialTab?: 'exams' | 'degrees' | 'specializations' | 'compare' | 'saved';
 }
 
-const EDUCATION_LEVELS = ['All', 'After 10th', '12th / PUC', 'Diploma', 'ITI', 'UG', 'PG', 'PhD', 'Working Professional'];
-const CATEGORIES = [
-  'All', 'Engineering', 'Medical', 'Paramedical', 'Science', 'Commerce', 'Management', 
-  'Law', 'Design', 'Arts / Humanities', 'Architecture', 'Agriculture', 'Pharmacy', 'Nursing', 'Vocational'
+const EDUCATION_LEVELS = [
+  { value: 'All', label: 'All Levels' },
+  { value: 'AFTER_10TH', label: 'After 10th' },
+  { value: 'AFTER_12TH', label: 'After 12th' },
+  { value: 'UNDERGRADUATE', label: 'Undergraduate' },
+  { value: 'AFTER_DEGREE', label: 'After Degree' },
+  { value: 'POSTGRADUATE', label: 'Postgraduate' },
+  { value: 'PROFESSIONAL', label: 'Professional' },
+  { value: 'RESEARCH', label: 'Research' }
 ];
-const EXAM_LEVELS = ['All', 'National', 'State', 'University', 'Institute', 'International', 'Government', 'Professional'];
-const EXAM_TYPES = ['All', 'Entrance Exam', 'Admission Test', 'Professional Qualification', 'Government Recruitment', 'Scholarship Exam', 'Certification', 'Study Abroad'];
+
+const STREAMS = [
+  { value: 'All', label: 'All Streams' },
+  { value: 'PCM', label: 'Science (PCM)' },
+  { value: 'PCB', label: 'Science (PCB)' },
+  { value: 'COMMERCE', label: 'Commerce' },
+  { value: 'ARTS', label: 'Arts' },
+  { value: 'HUMANITIES', label: 'Humanities' },
+  { value: 'ANY_STREAM', label: 'Any Stream' }
+];
+
+const CATEGORIES = [
+  'All', 'ENGINEERING', 'MEDICAL', 'LAW', 'MANAGEMENT', 'COMMERCE', 'SCIENCE', 'ARTS', 'DEFENCE', 'GOVERNMENT'
+];
 
 export default function ExamsDirectory({ initialTab = 'exams' }: ExamsDirectoryProps) {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  
   const [activeTab, setActiveTab] = useState<'exams' | 'degrees' | 'specializations' | 'compare' | 'saved'>(initialTab);
   
   const [exams, setExams] = useState<StructuredExam[]>([]);
-  const [degrees, setDegrees] = useState<StructuredDegree[]>([]);
+  const [totalExams, setTotalExams] = useState(0);
+  const [savedExamIds, setSavedExamIds] = useState<Set<string>>(new Set());
   
-  // Filters
-  const [search, setSearch] = useState('');
-  const [edLevel, setEdLevel] = useState('All');
-  const [category, setCategory] = useState('All');
-  const [examLevel, setExamLevel] = useState('All');
-  const [examType, setExamType] = useState('All');
+  const [search, setSearch] = useState(searchParams.get('search') || '');
+  const [edLevel, setEdLevel] = useState(searchParams.get('level') || 'All');
+  const [stream, setStream] = useState(searchParams.get('stream') || 'All');
+  const [category, setCategory] = useState(searchParams.get('category') || 'All');
   
   const [loading, setLoading] = useState(true);
+  const [aiRecommendations, setAiRecommendations] = useState<StructuredExam[]>([]);
+  const [loadingAi, setLoadingAi] = useState(false);
   
-  // Comparison state
   const [selectedExams, setSelectedExams] = useState<StructuredExam[]>([]);
-  const [selectedDegrees, setSelectedDegrees] = useState<StructuredDegree[]>([]);
   const [isCompareExamModalOpen, setIsCompareExamModalOpen] = useState(false);
-  const [isCompareDegreeModalOpen, setIsCompareDegreeModalOpen] = useState(false);
 
+  // Load Saved Exams
   useEffect(() => {
-    fetchData();
-  }, [search, edLevel, category, examLevel, examType, activeTab]);
+    const fetchSaved = async () => {
+      try {
+        const saved = await getSavedExams();
+        setSavedExamIds(new Set(saved.map(e => e._id)));
+      } catch (err) {
+        console.log("Not logged in or error fetching saved exams");
+      }
+    };
+    fetchSaved();
+  }, []);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     try {
       if (activeTab === 'exams') {
-        const query = new URLSearchParams();
-        if (search) query.append('search', search);
-        
-        // Map UI names to DB names roughly
-        const mappedEdLevel = edLevel === '12th / PUC' ? 'After 12th' : edLevel;
-        if (edLevel !== 'All') query.append('educationLevel', mappedEdLevel);
-        
-        if (category !== 'All') query.append('category', category);
-        if (examLevel !== 'All') query.append('level', examLevel);
-        if (examType !== 'All') query.append('type', examType);
-        
-        const res = await fetch(`http://localhost:5000/api/exams?${query.toString()}`);
-        if(res.ok) {
-           const data = await res.json();
-           setExams(data);
-        }
-      } else if (activeTab === 'degrees') {
-        const query = new URLSearchParams();
-        if (search) query.append('search', search);
-        if (category !== 'All') query.append('category', category);
-        if (edLevel !== 'All') {
-             query.append('level', edLevel);
-        }
-        
-        const res = await fetch(`http://localhost:5000/api/degrees?${query.toString()}`);
-        if(res.ok) {
-           const data = await res.json();
-           setDegrees(data);
-        }
+        const data = await getExams({
+          search: search || undefined,
+          education_level: edLevel !== 'All' ? edLevel : undefined,
+          stream: stream !== 'All' ? stream : undefined,
+          category: category !== 'All' ? category : undefined,
+          page: 1,
+          limit: 50
+        });
+        setExams(data.items);
+        setTotalExams(data.total);
+
+        // Update URL
+        const params: any = {};
+        if (search) params.search = search;
+        if (edLevel !== 'All') params.level = edLevel;
+        if (stream !== 'All') params.stream = stream;
+        if (category !== 'All') params.category = category;
+        setSearchParams(params);
       }
     } catch (err) {
       console.error(err);
     }
     setLoading(false);
+  }, [search, edLevel, stream, category, activeTab, setSearchParams]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  // AI Recommendations
+  useEffect(() => {
+    const fetchRecs = async () => {
+      if (edLevel !== 'All' || stream !== 'All' || category !== 'All') {
+        setLoadingAi(true);
+        try {
+          const recs = await getExamRecommendations({
+            education_level: edLevel !== 'All' ? edLevel : undefined,
+            stream: stream !== 'All' ? stream : undefined,
+            category: category !== 'All' ? category : undefined
+          });
+          setAiRecommendations(recs.items);
+        } catch (e) {
+          console.error(e);
+        }
+        setLoadingAi(false);
+      } else {
+        setAiRecommendations([]);
+      }
+    };
+    fetchRecs();
+  }, [edLevel, stream, category]);
+
+  const toggleSave = async (examId: string) => {
+    try {
+      if (savedExamIds.has(examId)) {
+        await unsaveExam(examId);
+        setSavedExamIds(prev => {
+          const next = new Set(prev);
+          next.delete(examId);
+          return next;
+        });
+      } else {
+        await saveExam(examId);
+        setSavedExamIds(prev => new Set(prev).add(examId));
+      }
+    } catch (err) {
+      alert("Please login to save exams.");
+    }
   };
 
   const toggleExamComparison = (exam: StructuredExam) => {
@@ -95,20 +155,19 @@ export default function ExamsDirectory({ initialTab = 'exams' }: ExamsDirectoryP
     }
   };
 
-  const toggleDegreeComparison = (degree: StructuredDegree) => {
-    if (selectedDegrees.some(d => d._id === degree._id)) {
-      setSelectedDegrees(selectedDegrees.filter(d => d._id !== degree._id));
-    } else {
-      if (selectedDegrees.length < 3) {
-        setSelectedDegrees([...selectedDegrees, degree]);
-      } else {
-        alert("You can only compare up to 3 degrees at a time.");
-      }
-    }
+  const clearAllFilters = () => {
+    setSearch('');
+    setEdLevel('All');
+    setStream('All');
+    setCategory('All');
   };
+
+  const hasActiveFilters = search || edLevel !== 'All' || stream !== 'All' || category !== 'All';
 
   const renderExamCard = (exam: StructuredExam) => {
     const isSelected = selectedExams.some(e => e._id === exam._id);
+    const isSaved = savedExamIds.has(exam._id);
+
     return (
       <div key={exam._id} className="bg-white rounded-2xl p-6 border border-gray-100 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:border-blue-200 hover:-translate-y-1 transition-all relative flex flex-col h-full">
         <div className="absolute top-4 right-4 z-10 flex gap-2">
@@ -121,29 +180,31 @@ export default function ExamsDirectory({ initialTab = 'exams' }: ExamsDirectoryP
               />
               <span className="text-[10px] font-bold text-gray-600 uppercase tracking-wider">Compare</span>
            </label>
-           <button className="text-gray-400 hover:text-blue-600 bg-white shadow-sm border border-gray-200 rounded-md p-1.5">
-             <Bookmark className="w-4 h-4" />
+           <button onClick={() => toggleSave(exam._id)} className={`shadow-sm border rounded-md p-1.5 transition-colors ${isSaved ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-white border-gray-200 text-gray-400 hover:text-blue-600'}`}>
+             <Bookmark className={`w-4 h-4 ${isSaved ? 'fill-blue-600' : ''}`} />
            </button>
         </div>
 
         <div className="flex gap-4 mb-5">
           <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100/50 border border-blue-100 text-blue-600 flex items-center justify-center font-bold text-xl shrink-0">
-            {exam.name.charAt(0)}
+            {exam.exam_name.charAt(0)}
           </div>
           <div className="pr-16">
-            <h3 className="text-xl font-bold text-gray-900 leading-tight">{exam.name}</h3>
+            <h3 className="text-xl font-bold text-gray-900 leading-tight">{exam.short_name || exam.exam_name}</h3>
             <div className="flex flex-wrap gap-2 mt-2.5">
-              <span className="px-2.5 py-1 bg-blue-50 text-blue-700 text-[10px] font-bold uppercase tracking-wider rounded-md border border-blue-100">{exam.category}</span>
-              <span className="px-2.5 py-1 bg-gray-50 text-gray-600 text-[10px] font-bold uppercase tracking-wider rounded-md border border-gray-200">{exam.level}</span>
+              <span className="px-2.5 py-1 bg-blue-50 text-blue-700 text-[10px] font-bold uppercase tracking-wider rounded-md border border-blue-100">
+                {exam.education_level.replace('_', ' ')}
+              </span>
+              {exam.streams[0] && (
+                <span className="px-2.5 py-1 bg-purple-50 text-purple-700 text-[10px] font-bold uppercase tracking-wider rounded-md border border-purple-100">
+                  {exam.streams[0]}
+                </span>
+              )}
             </div>
           </div>
         </div>
         
         <div className="space-y-3 mb-6 flex-grow">
-           <div>
-             <span className="text-xs font-semibold text-gray-500 uppercase">For</span>
-             <p className="text-sm font-medium text-gray-800">{exam.ugPg} {exam.category}</p>
-           </div>
            <div>
              <span className="text-xs font-semibold text-gray-500 uppercase">Conducting Body</span>
              <p className="text-sm font-medium text-gray-800 line-clamp-1">{exam.conducting_body}</p>
@@ -155,57 +216,11 @@ export default function ExamsDirectory({ initialTab = 'exams' }: ExamsDirectoryP
         </div>
 
         <div className="mt-auto pt-4 border-t border-gray-100 flex gap-2">
-           <button onClick={() => navigate(`/exams/${exam.slug}`)} className="flex-1 bg-[#2B3B94] hover:bg-blue-800 text-white py-2.5 rounded-xl text-sm font-bold transition-colors">
+           <button onClick={() => navigate(`/exams/${exam.canonical_slug}`)} className="flex-1 bg-[#2B3B94] hover:bg-blue-800 text-white py-2.5 rounded-xl text-sm font-bold transition-colors">
              View Details
            </button>
-           <button onClick={() => window.open(exam.official_website_url, '_blank')} className="flex-1 bg-gray-50 hover:bg-gray-100 text-gray-700 py-2.5 rounded-xl text-sm font-bold border border-gray-200 transition-colors">
+           <button onClick={() => window.open(exam.official_website, '_blank')} className="flex-1 bg-gray-50 hover:bg-gray-100 text-gray-700 py-2.5 rounded-xl text-sm font-bold border border-gray-200 transition-colors">
              Official Site
-           </button>
-        </div>
-      </div>
-    );
-  };
-
-  const renderDegreeCard = (degree: StructuredDegree) => {
-    const isSelected = selectedDegrees.some(d => d._id === degree._id);
-    return (
-      <div key={degree._id} className="bg-white rounded-2xl p-6 border border-gray-100 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:border-purple-200 hover:-translate-y-1 transition-all relative flex flex-col h-full">
-        <div className="absolute top-4 right-4 z-10 flex gap-2">
-           <label className="flex items-center gap-1.5 cursor-pointer bg-white/90 px-2.5 py-1 rounded-md shadow-sm border border-gray-200 hover:bg-gray-50 transition-colors">
-              <input 
-                  type="checkbox" 
-                  className="w-4 h-4 text-purple-600 rounded border-gray-300 focus:ring-purple-600"
-                  checked={isSelected}
-                  onChange={() => toggleDegreeComparison(degree)}
-              />
-              <span className="text-[10px] font-bold text-gray-600 uppercase tracking-wider">Compare</span>
-           </label>
-           <button className="text-gray-400 hover:text-purple-600 bg-white shadow-sm border border-gray-200 rounded-md p-1.5">
-             <Bookmark className="w-4 h-4" />
-           </button>
-        </div>
-
-        <div className="flex gap-4 mb-5">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-50 to-purple-100/50 border border-purple-100 text-purple-600 flex items-center justify-center font-bold text-xl shrink-0">
-            <GraduationCap className="w-6 h-6" />
-          </div>
-          <div className="pr-16">
-            <h3 className="text-lg font-bold text-gray-900 leading-tight">{degree.name}</h3>
-            <div className="flex flex-wrap gap-2 mt-2.5">
-              <span className="px-2.5 py-1 bg-purple-50 text-purple-700 text-[10px] font-bold uppercase tracking-wider rounded-md border border-purple-100">{degree.level}</span>
-              <span className="px-2.5 py-1 bg-orange-50 text-orange-700 text-[10px] font-bold uppercase tracking-wider rounded-md border border-orange-100">{degree.duration} {degree.duration_unit}</span>
-            </div>
-          </div>
-        </div>
-        
-        <p className="text-sm text-gray-600 mb-6 line-clamp-2 flex-grow">{degree.overview}</p>
-
-        <div className="mt-auto pt-4 border-t border-gray-100 flex gap-2">
-           <button onClick={() => navigate(`/degrees/${degree.slug}`)} className="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-2.5 rounded-xl text-sm font-bold transition-colors">
-             View Details
-           </button>
-           <button onClick={() => navigate(`/colleges?category=${degree.category}`)} className="flex-1 bg-gray-50 hover:bg-gray-100 text-gray-700 py-2.5 rounded-xl text-sm font-bold border border-gray-200 transition-colors">
-             Colleges
            </button>
         </div>
       </div>
@@ -222,20 +237,20 @@ export default function ExamsDirectory({ initialTab = 'exams' }: ExamsDirectoryP
           
           <div className="text-white max-w-2xl z-10 w-full relative">
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-500/20 border border-blue-400/30 rounded-full text-blue-100 text-xs font-bold uppercase tracking-widest mb-6">
-              <Sparkles className="w-3.5 h-3.5 text-yellow-400" /> Complete Explorer
+              <Sparkles className="w-3.5 h-3.5 text-yellow-400" /> Real, Verified Data Only
             </div>
             <h1 className="text-4xl md:text-[46px] font-black mb-4 leading-[1.1] tracking-tight">
-              Explore Exams & <br/>Degrees Directory
+              Explore Entrance & <br/>Competitive Exams
             </h1>
             <p className="text-blue-100/90 mb-10 max-w-xl text-[15px] leading-relaxed pr-8 font-medium">
-              Find the right entrance exam, degree and career pathway for you. Search across Engineering, Medical, Law, Design, ITI, and more.
+              Discover verified exams based on your education level, stream, category, and career goal.
             </p>
             
             <div className="relative mb-4 max-w-[500px]">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-300 w-5 h-5" />
               <input
                 type="text"
-                placeholder="Search exams, degrees, courses, careers..."
+                placeholder='Try "12th PCM", "medical", "law after 12th"...'
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="w-full bg-white/10 backdrop-blur-md border border-white/20 text-white placeholder-blue-200 rounded-xl pl-12 pr-4 py-4 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:bg-white/20 transition-all font-medium"
@@ -245,165 +260,159 @@ export default function ExamsDirectory({ initialTab = 'exams' }: ExamsDirectoryP
           
           <div className="hidden lg:block relative z-10 w-1/3">
              <div className="bg-white/10 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
-                <h3 className="text-white font-bold mb-4 flex items-center gap-2"><Star className="w-4 h-4 text-yellow-400 fill-yellow-400"/> Recommended For You</h3>
-                <div className="space-y-3">
-                   <div className="bg-white/5 hover:bg-white/10 p-3 rounded-xl border border-white/10 cursor-pointer transition-colors">
-                     <div className="text-xs text-blue-200 font-bold mb-1">95% Match</div>
-                     <div className="text-white font-bold text-sm">Computer Science Engineering</div>
-                   </div>
-                   <div className="bg-white/5 hover:bg-white/10 p-3 rounded-xl border border-white/10 cursor-pointer transition-colors">
-                     <div className="text-xs text-blue-200 font-bold mb-1">Recommended Exam</div>
-                     <div className="text-white font-bold text-sm">JEE Main</div>
-                   </div>
-                </div>
+                <h3 className="text-white font-bold mb-4 flex items-center gap-2">
+                  <Star className="w-4 h-4 text-yellow-400 fill-yellow-400"/> AI Recommendations
+                </h3>
+                {loadingAi ? (
+                   <div className="flex justify-center p-4"><Loader2 className="w-6 h-6 animate-spin text-white"/></div>
+                ) : aiRecommendations.length > 0 ? (
+                  <div className="space-y-3">
+                     {aiRecommendations.map(rec => (
+                       <div key={rec._id} onClick={() => navigate(`/exams/${rec.canonical_slug}`)} className="bg-white/5 hover:bg-white/10 p-3 rounded-xl border border-white/10 cursor-pointer transition-colors">
+                         <div className="text-xs text-blue-200 font-bold mb-1 line-clamp-1">{rec.recommendation_reason}</div>
+                         <div className="text-white font-bold text-sm">{rec.short_name || rec.exam_name}</div>
+                       </div>
+                     ))}
+                  </div>
+                ) : (
+                  <div className="text-sm text-blue-200">
+                     Select your Education Level and Stream in the filters below to get personalized recommendations.
+                  </div>
+                )}
              </div>
           </div>
         </div>
 
-        {/* TABS */}
-        <div className="flex flex-wrap gap-3 mb-8">
-          {[
-            { id: 'exams', label: 'Exams Hub', icon: BookOpen },
-            { id: 'degrees', label: 'Degrees & Profiles', icon: GraduationCap },
-            { id: 'specializations', label: 'Specializations Hub', icon: Award },
-            { id: 'compare', label: 'Compare', icon: Building },
-            { id: 'saved', label: 'Saved', icon: Bookmark }
-          ].map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all ${
-                activeTab === tab.id 
-                  ? 'bg-white text-[#2B3B94] shadow-sm border border-gray-200' 
-                  : 'bg-transparent text-gray-500 hover:bg-gray-200/50 hover:text-gray-900'
-              }`}
-            >
-              <tab.icon className={`w-4 h-4 ${activeTab === tab.id ? 'text-blue-600' : ''}`} /> {tab.label}
-            </button>
-          ))}
+        {/* FILTERS */}
+        <div className="bg-white border border-gray-200 rounded-2xl p-5 mb-6 flex flex-wrap items-center gap-4 shadow-sm">
+          <div className="flex items-center gap-2 text-gray-700 font-bold mr-2">
+            <Filter className="w-5 h-5 text-[#2B3B94]" /> Filters:
+          </div>
+          
+          <div className="flex flex-col gap-1">
+            <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider pl-1">Education Level</span>
+            <div className="relative group">
+              <select 
+                value={edLevel} 
+                onChange={e => setEdLevel(e.target.value)}
+                className="appearance-none bg-gray-50 border border-gray-200 text-gray-800 text-sm font-semibold rounded-xl pl-4 pr-10 py-2.5 outline-none focus:ring-2 focus:ring-[#2B3B94] cursor-pointer min-w-[160px]"
+              >
+                {EDUCATION_LEVELS.map(l => <option key={l.value} value={l.value}>{l.label}</option>)}
+              </select>
+              <ChevronDown className="w-4 h-4 text-gray-500 absolute right-3 top-3 pointer-events-none" />
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider pl-1">Stream</span>
+            <div className="relative group">
+              <select 
+                value={stream} 
+                onChange={e => setStream(e.target.value)}
+                className="appearance-none bg-gray-50 border border-gray-200 text-gray-800 text-sm font-semibold rounded-xl pl-4 pr-10 py-2.5 outline-none focus:ring-2 focus:ring-[#2B3B94] cursor-pointer min-w-[160px]"
+              >
+                {STREAMS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+              </select>
+              <ChevronDown className="w-4 h-4 text-gray-500 absolute right-3 top-3 pointer-events-none" />
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider pl-1">Category</span>
+            <div className="relative group">
+              <select 
+                value={category} 
+                onChange={e => setCategory(e.target.value)}
+                className="appearance-none bg-gray-50 border border-gray-200 text-gray-800 text-sm font-semibold rounded-xl pl-4 pr-10 py-2.5 outline-none focus:ring-2 focus:ring-[#2B3B94] cursor-pointer min-w-[160px]"
+              >
+                {CATEGORIES.map(c => <option key={c} value={c}>{c === 'All' ? 'All Categories' : c}</option>)}
+              </select>
+              <ChevronDown className="w-4 h-4 text-gray-500 absolute right-3 top-3 pointer-events-none" />
+            </div>
+          </div>
         </div>
 
-        {/* FILTERS */}
-        {(activeTab === 'exams' || activeTab === 'degrees') && (
-          <div className="bg-white border border-gray-200 rounded-2xl p-5 mb-8 flex flex-wrap items-center gap-4 shadow-sm">
-            <div className="flex items-center gap-2 text-gray-700 font-bold mr-2">
-              <Filter className="w-5 h-5 text-[#2B3B94]" /> Filters:
-            </div>
-            
-            <div className="flex flex-col gap-1">
-              <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider pl-1">Education Level</span>
-              <div className="relative group">
-                <select 
-                  value={edLevel} 
-                  onChange={e => setEdLevel(e.target.value)}
-                  className="appearance-none bg-gray-50 border border-gray-200 text-gray-800 text-sm font-semibold rounded-xl pl-4 pr-10 py-2.5 outline-none focus:ring-2 focus:ring-[#2B3B94] cursor-pointer min-w-[160px]"
-                >
-                  {EDUCATION_LEVELS.map(l => <option key={l} value={l}>{l === 'All' ? 'All Levels' : l}</option>)}
-                </select>
-                <ChevronDown className="w-4 h-4 text-gray-500 absolute right-3 top-3 pointer-events-none" />
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-1">
-              <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider pl-1">Category</span>
-              <div className="relative group">
-                <select 
-                  value={category} 
-                  onChange={e => setCategory(e.target.value)}
-                  className="appearance-none bg-gray-50 border border-gray-200 text-gray-800 text-sm font-semibold rounded-xl pl-4 pr-10 py-2.5 outline-none focus:ring-2 focus:ring-[#2B3B94] cursor-pointer min-w-[160px]"
-                >
-                  {CATEGORIES.map(c => <option key={c} value={c}>{c === 'All' ? 'All Categories' : c}</option>)}
-                </select>
-                <ChevronDown className="w-4 h-4 text-gray-500 absolute right-3 top-3 pointer-events-none" />
-              </div>
-            </div>
-
-            {activeTab === 'exams' && (
-              <>
-                <div className="flex flex-col gap-1">
-                  <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider pl-1">Exam Level</span>
-                  <div className="relative group">
-                    <select 
-                      value={examLevel} 
-                      onChange={e => setExamLevel(e.target.value)}
-                      className="appearance-none bg-gray-50 border border-gray-200 text-gray-800 text-sm font-semibold rounded-xl pl-4 pr-10 py-2.5 outline-none focus:ring-2 focus:ring-[#2B3B94] cursor-pointer min-w-[160px]"
-                    >
-                      {EXAM_LEVELS.map(l => <option key={l} value={l}>{l === 'All' ? 'All Exam Levels' : l}</option>)}
-                    </select>
-                    <ChevronDown className="w-4 h-4 text-gray-500 absolute right-3 top-3 pointer-events-none" />
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-1">
-                  <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider pl-1">Exam Type</span>
-                  <div className="relative group">
-                    <select 
-                      value={examType} 
-                      onChange={e => setExamType(e.target.value)}
-                      className="appearance-none bg-gray-50 border border-gray-200 text-gray-800 text-sm font-semibold rounded-xl pl-4 pr-10 py-2.5 outline-none focus:ring-2 focus:ring-[#2B3B94] cursor-pointer min-w-[160px]"
-                    >
-                      {EXAM_TYPES.map(l => <option key={l} value={l}>{l === 'All' ? 'All Types' : l}</option>)}
-                    </select>
-                    <ChevronDown className="w-4 h-4 text-gray-500 absolute right-3 top-3 pointer-events-none" />
-                  </div>
-                </div>
-              </>
+        {/* ACTIVE FILTER CHIPS */}
+        {hasActiveFilters && (
+          <div className="flex flex-wrap items-center gap-2 mb-6">
+            <span className="text-sm font-semibold text-gray-500 mr-2">Active Filters:</span>
+            {search && (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 text-xs font-bold rounded-lg border border-blue-100">
+                Search: {search}
+                <button onClick={() => setSearch('')} className="hover:text-red-500"><X className="w-3.5 h-3.5" /></button>
+              </span>
             )}
-
-            <div className="ml-auto flex items-end h-full mt-5">
-              <button 
-                onClick={() => { setEdLevel('All'); setCategory('All'); setExamLevel('All'); setExamType('All'); setSearch(''); }}
-                className="text-sm font-bold text-gray-500 hover:text-gray-900 transition-colors px-4 py-2"
-              >
-                Clear All
-              </button>
-            </div>
+            {edLevel !== 'All' && (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 text-xs font-bold rounded-lg border border-blue-100">
+                Level: {EDUCATION_LEVELS.find(l => l.value === edLevel)?.label}
+                <button onClick={() => setEdLevel('All')} className="hover:text-red-500"><X className="w-3.5 h-3.5" /></button>
+              </span>
+            )}
+            {stream !== 'All' && (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 text-xs font-bold rounded-lg border border-blue-100">
+                Stream: {STREAMS.find(s => s.value === stream)?.label}
+                <button onClick={() => setStream('All')} className="hover:text-red-500"><X className="w-3.5 h-3.5" /></button>
+              </span>
+            )}
+            {category !== 'All' && (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 text-xs font-bold rounded-lg border border-blue-100">
+                Category: {category}
+                <button onClick={() => setCategory('All')} className="hover:text-red-500"><X className="w-3.5 h-3.5" /></button>
+              </span>
+            )}
+            <button 
+              onClick={clearAllFilters}
+              className="text-xs font-bold text-gray-500 hover:text-gray-900 ml-2 underline"
+            >
+              Clear All
+            </button>
           </div>
         )}
 
+        {/* REAL-TIME COUNT */}
+        <div className="mb-4">
+           <h2 className="text-xl font-bold text-gray-900">
+             {loading ? 'Loading...' : `Showing ${totalExams} ${hasActiveFilters ? 'exams matching your filters' : 'verified exams'}`}
+           </h2>
+        </div>
+
         {/* CONTENT GRID */}
         {loading ? (
-          <div className="flex justify-center items-center py-32">
-            <div className="animate-spin rounded-full h-10 w-10 border-b-4 border-[#2B3B94]"></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
+              <div key={i} className="bg-white rounded-2xl p-6 border border-gray-100 h-[300px] animate-pulse">
+                <div className="flex gap-4 mb-5">
+                   <div className="w-12 h-12 bg-gray-200 rounded-xl"></div>
+                   <div className="flex-1 space-y-2 py-1">
+                      <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                      <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                   </div>
+                </div>
+                <div className="space-y-3">
+                   <div className="h-3 bg-gray-200 rounded w-full"></div>
+                   <div className="h-3 bg-gray-200 rounded w-5/6"></div>
+                </div>
+              </div>
+            ))}
           </div>
         ) : (
-          <>
-            {activeTab === 'exams' && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {exams.length > 0 ? exams.map(renderExamCard) : (
-                  <div className="col-span-full py-20 text-center bg-white rounded-3xl border border-dashed border-gray-300">
-                    <Search className="w-10 h-10 text-gray-300 mx-auto mb-4" />
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">No exams found</h3>
-                    <p className="text-gray-500">Try adjusting your filters or search query.</p>
-                  </div>
-                )}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {exams.length > 0 ? exams.map(renderExamCard) : (
+              <div className="col-span-full py-20 text-center bg-white rounded-3xl border border-dashed border-gray-300">
+                <Search className="w-10 h-10 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-xl font-bold text-gray-900 mb-2">No verified exams match your current filters.</h3>
+                <p className="text-gray-500 mb-6">We only show officially verified examination data. Try adjusting your search criteria.</p>
+                <button onClick={clearAllFilters} className="bg-[#2B3B94] text-white px-6 py-2.5 rounded-xl font-bold text-sm">
+                   Clear Filters
+                </button>
               </div>
             )}
-            
-            {activeTab === 'degrees' && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {degrees.length > 0 ? degrees.map(renderDegreeCard) : (
-                  <div className="col-span-full py-20 text-center bg-white rounded-3xl border border-dashed border-gray-300">
-                    <Search className="w-10 h-10 text-gray-300 mx-auto mb-4" />
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">No degrees found</h3>
-                    <p className="text-gray-500">Try adjusting your filters or search query.</p>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {activeTab !== 'exams' && activeTab !== 'degrees' && (
-               <div className="py-20 text-center bg-white rounded-3xl border border-dashed border-gray-300">
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">Coming Soon</h3>
-                  <p className="text-gray-500">This section is currently under development.</p>
-               </div>
-            )}
-          </>
+          </div>
         )}
       </div>
 
       {/* FLOATING ACTION BAR FOR EXAM COMPARISON */}
-      {selectedExams.length > 0 && activeTab === 'exams' && (
+      {selectedExams.length > 0 && (
          <div className="fixed bottom-8 left-1/2 -translate-x-1/2 bg-[#1c2968] text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-6 z-50 animate-in slide-in-from-bottom-10 border border-blue-400/20">
             <div className="flex items-center gap-3">
               <span className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-500/20 text-blue-200 font-black">
@@ -415,7 +424,7 @@ export default function ExamsDirectory({ initialTab = 'exams' }: ExamsDirectoryP
             <div className="flex gap-2">
               {selectedExams.map(exam => (
                 <div key={exam._id} className="bg-black/20 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-2">
-                  <span className="max-w-[80px] truncate">{exam.name}</span>
+                  <span className="max-w-[80px] truncate">{exam.short_name || exam.exam_name}</span>
                   <button onClick={() => toggleExamComparison(exam)} className="hover:text-red-400 text-gray-400">&times;</button>
                 </div>
               ))}
@@ -443,60 +452,11 @@ export default function ExamsDirectory({ initialTab = 'exams' }: ExamsDirectoryP
          </div>
       )}
 
-      {/* FLOATING ACTION BAR FOR DEGREE COMPARISON */}
-      {selectedDegrees.length > 0 && activeTab === 'degrees' && (
-         <div className="fixed bottom-8 left-1/2 -translate-x-1/2 bg-[#2d1b69] text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-6 z-50 animate-in slide-in-from-bottom-10 border border-purple-400/20">
-            <div className="flex items-center gap-3">
-              <span className="flex items-center justify-center w-8 h-8 rounded-full bg-purple-500/20 text-purple-200 font-black">
-                {selectedDegrees.length}
-              </span>
-              <span className="font-bold">Degrees Selected</span>
-            </div>
-            
-            <div className="flex gap-2">
-              {selectedDegrees.map(degree => (
-                <div key={degree._id} className="bg-black/20 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-2">
-                  <span className="max-w-[100px] truncate">{degree.name}</span>
-                  <button onClick={() => toggleDegreeComparison(degree)} className="hover:text-red-400 text-gray-400">&times;</button>
-                </div>
-              ))}
-            </div>
-
-            <div className="w-px h-8 bg-white/10 mx-2"></div>
-
-            <button 
-              onClick={() => setSelectedDegrees([])} 
-              className="text-sm font-semibold text-purple-200 hover:text-white transition-colors"
-            >
-              Clear
-            </button>
-            <button 
-              onClick={() => setIsCompareDegreeModalOpen(true)}
-              disabled={selectedDegrees.length < 2}
-              className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-colors ${
-                selectedDegrees.length >= 2 
-                  ? 'bg-purple-600 hover:bg-purple-500 text-white shadow-lg shadow-purple-600/20' 
-                  : 'bg-white/10 text-white/40 cursor-not-allowed'
-              }`}
-            >
-              Compare Now
-            </button>
-         </div>
-      )}
-
       {isCompareExamModalOpen && (
          <ExamComparisonModal 
             isOpen={isCompareExamModalOpen} 
             onClose={() => setIsCompareExamModalOpen(false)} 
             exams={selectedExams} 
-         />
-      )}
-
-      {isCompareDegreeModalOpen && (
-         <DegreeComparisonModal 
-            isOpen={isCompareDegreeModalOpen} 
-            onClose={() => setIsCompareDegreeModalOpen(false)} 
-            degrees={selectedDegrees} 
          />
       )}
     </div>

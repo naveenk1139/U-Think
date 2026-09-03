@@ -68,25 +68,46 @@ export const getPathwayTree = async (req: Request, res: Response, next: NextFunc
 
        const courses = await Course.find({ streamId: stream._id, active: true }).sort({ order: 1 }).lean();
        
-       const coursesWithDetails = await Promise.all(courses.map(async (course) => {
-           const branches = await Branch.find({ courseId: course._id, active: true })
-               .populate('relatedCareers')
-               .populate('relatedExams')
-               .populate('higherStudies')
-               .populate('furtherStudies')
-               .sort({ order: 1 })
-               .lean();
+       if (courses && courses.length > 0) {
+           const coursesWithDetails = await Promise.all(courses.map(async (course) => {
+               const branches = await Branch.find({ courseId: course._id, active: true })
+                   .populate('relatedCareers')
+                   .populate('relatedExams')
+                   .populate('higherStudies')
+                   .populate('furtherStudies')
+                   .sort({ order: 1 })
+                   .lean();
+                   
+               const branchesWithDetails = await Promise.all(branches.map(async (branch) => {
+                   const specializations = await mongoose.model('Specialization').find({ branchId: branch._id, active: true }).lean();
+                   const colleges = await mongoose.model('College').find({ offeredBranchesRef: branch._id, active: true }).lean();
+                   return { ...branch, specializations, colleges };
+               }));
                
+               return { ...course, branches: branchesWithDetails };
+           }));
+           
+           return res.json({ ...stream, courses: coursesWithDetails });
+       }
+       
+       const branches = await Branch.find({ streamId: stream._id, active: true })
+           .populate('relatedCareers')
+           .populate('relatedExams')
+           .populate('higherStudies')
+           .populate('furtherStudies')
+           .sort({ order: 1 })
+           .lean();
+           
+       if (branches && branches.length > 0) {
            const branchesWithDetails = await Promise.all(branches.map(async (branch) => {
                const specializations = await mongoose.model('Specialization').find({ branchId: branch._id, active: true }).lean();
                const colleges = await mongoose.model('College').find({ offeredBranchesRef: branch._id, active: true }).lean();
                return { ...branch, specializations, colleges };
            }));
-           
-           return { ...course, branches: branchesWithDetails };
-       }));
+           return res.json({ ...stream, branches: branchesWithDetails });
+       }
        
-       return res.json({ ...stream, courses: coursesWithDetails });
+       return res.json({ ...stream });
     }
 
     // Default: fetch Education Levels and Pathways and Streams

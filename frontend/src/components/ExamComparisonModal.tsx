@@ -30,17 +30,20 @@ export default function ExamComparisonModal({ isOpen, onClose, exams }: ExamComp
             {/* Row Headers */}
             <div className="col-span-1 flex flex-col gap-4 font-bold text-gray-500 text-sm uppercase tracking-wider">
                <div className="h-28"></div> {/* Spacer for header */}
-               <div className="p-4 bg-white rounded-xl shadow-sm border border-gray-100 h-24 flex items-center">Level & Type</div>
+               <div className="p-4 bg-white rounded-xl shadow-sm border border-gray-100 h-24 flex items-center">Level & Category</div>
                <div className="p-4 bg-white rounded-xl shadow-sm border border-gray-100 h-24 flex items-center">Conducting Body</div>
                <div className="p-4 bg-white rounded-xl shadow-sm border border-gray-100 min-h-[120px] flex items-center">Eligibility</div>
                <div className="p-4 bg-white rounded-xl shadow-sm border border-gray-100 h-24 flex items-center">Exam Mode</div>
-               <div className="p-4 bg-white rounded-xl shadow-sm border border-gray-100 min-h-[100px] flex items-center">Subjects</div>
+               <div className="p-4 bg-white rounded-xl shadow-sm border border-gray-100 min-h-[100px] flex items-center">Streams</div>
                <div className="p-4 bg-white rounded-xl shadow-sm border border-gray-100 min-h-[100px] flex items-center">Important Dates</div>
-               <div className="p-4 bg-white rounded-xl shadow-sm border border-gray-100 min-h-[100px] flex items-center">Accepted For</div>
+               <div className="p-4 bg-white rounded-xl shadow-sm border border-gray-100 min-h-[100px] flex items-center">Target Courses</div>
             </div>
 
             {/* Exam Columns */}
-            {exams.map((exam, idx) => (
+            {exams.map((exam, idx) => {
+               const latestYear = exam.years && exam.years.length > 0 ? exam.years[0] : null;
+               
+               return (
                <div key={exam._id} className="col-span-1 flex flex-col gap-4">
                   
                   {/* Header Card */}
@@ -49,14 +52,14 @@ export default function ExamComparisonModal({ isOpen, onClose, exams }: ExamComp
                      idx === 1 ? 'bg-purple-50 border-purple-200' :
                      'bg-emerald-50 border-emerald-200'
                   }`}>
-                     <h3 className="text-xl font-black text-gray-900 leading-tight">{exam.name}</h3>
-                     <p className="text-xs font-bold text-gray-500 uppercase mt-2">{exam.category}</p>
+                     <h3 className="text-xl font-black text-gray-900 leading-tight truncate">{exam.short_name || exam.exam_name}</h3>
+                     <p className="text-xs font-bold text-gray-500 uppercase mt-2 truncate" title={exam.exam_name}>{exam.exam_name}</p>
                   </div>
 
-                  {/* Level */}
+                  {/* Level & Category */}
                   <div className="p-4 bg-white rounded-xl shadow-sm border border-gray-100 h-24 flex flex-col justify-center gap-1">
-                     <span className="font-bold text-gray-900">{exam.level}</span>
-                     <span className="text-sm text-gray-500">{exam.type}</span>
+                     <span className="font-bold text-gray-900">{exam.education_level.replace('_', ' ')}</span>
+                     <span className="text-sm text-gray-500">{exam.ownership}</span>
                   </div>
 
                   {/* Conducting Body */}
@@ -66,9 +69,9 @@ export default function ExamComparisonModal({ isOpen, onClose, exams }: ExamComp
 
                   {/* Eligibility */}
                   <div className="p-4 bg-white rounded-xl shadow-sm border border-gray-100 min-h-[120px] flex flex-col justify-center">
-                     <p className="text-sm text-gray-800 font-medium mb-2">{exam.eligibility?.minimum_qualification || 'N/A'}</p>
-                     {exam.eligibility?.age_requirement && (
-                        <p className="text-xs text-gray-500 bg-gray-50 p-2 rounded-lg">{exam.eligibility.age_requirement}</p>
+                     <p className="text-sm text-gray-800 font-medium mb-2 line-clamp-3" title={exam.eligibility}>{exam.eligibility || 'N/A'}</p>
+                     {exam.age_min !== undefined && (
+                        <p className="text-xs text-gray-500 bg-gray-50 p-2 rounded-lg">Age: {exam.age_min} - {exam.age_max || 'No limit'}</p>
                      )}
                   </div>
 
@@ -77,10 +80,10 @@ export default function ExamComparisonModal({ isOpen, onClose, exams }: ExamComp
                      {exam.exam_mode?.join(', ') || 'N/A'}
                   </div>
 
-                  {/* Subjects */}
+                  {/* Streams */}
                   <div className="p-4 bg-white rounded-xl shadow-sm border border-gray-100 min-h-[100px] flex items-center">
                      <div className="flex flex-wrap gap-2">
-                        {exam.subjects && exam.subjects.length > 0 ? exam.subjects.map(sub => (
+                        {exam.streams && exam.streams.length > 0 ? exam.streams.map(sub => (
                            <span key={sub} className="px-2 py-1 bg-gray-50 text-gray-700 text-xs font-semibold border border-gray-200 rounded-md">{sub}</span>
                         )) : <span className="text-sm text-gray-500">N/A</span>}
                      </div>
@@ -89,18 +92,25 @@ export default function ExamComparisonModal({ isOpen, onClose, exams }: ExamComp
                   {/* Dates */}
                   <div className="p-4 bg-white rounded-xl shadow-sm border border-gray-100 min-h-[100px] flex flex-col justify-center gap-2">
                      <div className="text-xs">
-                        <span className="font-bold text-gray-500 uppercase">App Start:</span> <span className="font-semibold text-gray-900">{exam.importantDates?.application_start ? new Date(exam.importantDates.application_start).toLocaleDateString() : 'TBA'}</span>
+                        <span className="font-bold text-gray-500 uppercase">App Start:</span> <span className="font-semibold text-gray-900">{latestYear?.registration_start ? new Date(latestYear.registration_start).toLocaleDateString() : 'TBA'}</span>
                      </div>
                      <div className="text-xs">
-                        <span className="font-bold text-gray-500 uppercase">Exam:</span> <span className="font-semibold text-[#2B3B94]">{exam.importantDates?.exam_date ? new Date(exam.importantDates.exam_date).toLocaleDateString() : 'TBA'}</span>
+                        <span className="font-bold text-gray-500 uppercase">Exam:</span> <span className="font-semibold text-[#2B3B94]">{latestYear?.exam_start ? new Date(latestYear.exam_start).toLocaleDateString() : 'TBA'}</span>
                      </div>
                   </div>
 
-                  {/* Accepted For */}
-                     {exam.description || 'N/A'}
+                  {/* Target Courses */}
+                  <div className="p-4 bg-white rounded-xl shadow-sm border border-gray-100 min-h-[100px] flex items-center">
+                     <div className="flex flex-wrap gap-2">
+                        {exam.target_courses && exam.target_courses.length > 0 ? exam.target_courses.map(course => (
+                           <span key={course} className="px-2 py-1 bg-blue-50 text-blue-700 text-xs font-semibold border border-blue-200 rounded-md">{course}</span>
+                        )) : <span className="text-sm text-gray-500">N/A</span>}
+                     </div>
+                  </div>
 
                </div>
-            ))}
+               );
+            })}
           </div>
         </div>
 

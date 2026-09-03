@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search, GraduationCap, ArrowRight, BookOpen, ChevronRight, Briefcase, Filter, TrendingUp, Sparkles, AlertCircle, Building, Wrench, HeartPulse, Layers, Target, Trophy, Building2, ClipboardList, Users, CheckCircle, Target as TargetIcon, PiggyBank, SearchX, MousePointerClick, Activity } from 'lucide-react';
-import { getPathwayTree, getPathwayStats, getStreamDetails, searchPathways, EducationLevelData, PathwayStats, StreamData, CourseData } from '../api/pathwayApi';
+import { getPathwayTree, getPathwayStats, getStreamDetails, getExamSchedule, searchPathways, EducationLevelData, PathwayStats, StreamData, CourseData, ExamScheduleData } from '../api/pathwayApi';
 import { useNavigate, useSearchParams, useParams, Link } from 'react-router-dom';
 import PathwayTree from './PathwayTree';
 import CourseComparisonModal from './CourseComparisonModal';
@@ -18,6 +18,9 @@ const PathwaysExplorer: React.FC = () => {
   // Try to match slugs to ids for the tree data, since the tree returns populated nested objects
   const [streamDetails, setStreamDetails] = useState<StreamData | null>(null);
   const [loadingStream, setLoadingStream] = useState(false);
+  
+  const [examSchedules, setExamSchedules] = useState<ExamScheduleData[]>([]);
+  const [loadingSchedules, setLoadingSchedules] = useState(false);
   
   // Comparison State
   const [selectedCourses, setSelectedCourses] = useState<CourseData[]>([]);
@@ -51,16 +54,16 @@ const PathwaysExplorer: React.FC = () => {
     if (stream) {
       navigate(`/pathways/${activeLevelSlug}/${pathwaySlug}/${stream}`);
     } else {
-      navigatePathway(pathwaySlug || null);
+      navigate(`/pathways/${activeLevelSlug}/${pathwaySlug}`);
     }
   };
 
   const navigateCombo = (combo: string | null) => {
-     if (combo) {
-         navigate(`/pathways/${activeLevelSlug}/${pathwaySlug}/${streamSlug}/${combo}`);
-     } else {
-         navigateStream(streamSlug || null);
-     }
+    if (combo) {
+      navigate(`/pathways/${activeLevelSlug}/${pathwaySlug}/${streamSlug}/${combo}`);
+    } else {
+      navigate(`/pathways/${activeLevelSlug}/${pathwaySlug}/${streamSlug}`);
+    }
   };
 
   useEffect(() => {
@@ -97,15 +100,29 @@ const PathwaysExplorer: React.FC = () => {
   useEffect(() => {
     if (streamSlug) {
       setLoadingStream(true);
+      setLoadingSchedules(true);
       getStreamDetails(streamSlug).then(data => {
         setStreamDetails(data);
         setLoadingStream(false);
+        if (data && data._id) {
+          getExamSchedule(data._id).then(schedules => {
+            setExamSchedules(schedules);
+            setLoadingSchedules(false);
+          }).catch(err => {
+            console.error(err);
+            setLoadingSchedules(false);
+          });
+        } else {
+          setLoadingSchedules(false);
+        }
       }).catch(err => {
         console.error(err);
         setLoadingStream(false);
+        setLoadingSchedules(false);
       });
     } else {
       setStreamDetails(null);
+      setExamSchedules([]);
     }
   }, [streamSlug]);
 
@@ -491,6 +508,37 @@ const PathwaysExplorer: React.FC = () => {
                         )}
                     </div>
                     
+                    {/* EXAM SCHEDULES */}
+                      {!loadingSchedules && examSchedules && examSchedules.length > 0 && (
+                        <div className="bg-white border border-gray-200 rounded-[24px] p-6 shadow-sm mb-8">
+                          <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                            <TargetIcon className="w-5 h-5 text-[#2B3B94]" /> Official Exam Schedule
+                          </h3>
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-left border-collapse">
+                              <thead>
+                                <tr className="border-b border-gray-200 bg-gray-50">
+                                  <th className="p-3 text-xs font-bold text-gray-500 uppercase">Exam Type</th>
+                                  <th className="p-3 text-xs font-bold text-gray-500 uppercase">Subject</th>
+                                  <th className="p-3 text-xs font-bold text-gray-500 uppercase">Date</th>
+                                  <th className="p-3 text-xs font-bold text-gray-500 uppercase">Time</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {examSchedules.map(schedule => (
+                                  <tr key={schedule._id} className="border-b border-gray-100 hover:bg-gray-50">
+                                    <td className="p-3 text-sm font-semibold text-gray-700">{schedule.examType}</td>
+                                    <td className="p-3 text-sm font-bold text-[#1C64F2]">{schedule.subjectName}</td>
+                                    <td className="p-3 text-sm text-gray-600">{schedule.date}</td>
+                                    <td className="p-3 text-sm text-gray-500">{schedule.time || 'N/A'}</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      )}
+
                     {/* COMBINATIONS CARDS GRID */}
                     {streamDetails.subjectCombinations && streamDetails.subjectCombinations.length > 0 ? (
                         <div>
@@ -500,13 +548,21 @@ const PathwaysExplorer: React.FC = () => {
                                     <div key={combo._id} className="bg-white border border-gray-200 rounded-2xl p-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:border-blue-300 hover:shadow-lg transition-all flex flex-col h-full">
                                         <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">{streamDetails.name}</div>
                                         <h4 className="text-2xl font-black text-[#2B3B94] mb-4">{combo.name}</h4>
-                                        <ul className="space-y-2 mb-6">
-                                            {combo.subjects?.map(sub => sub && (
-                                                <li key={sub._id} className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                                                    <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div> {sub.name}
-                                                </li>
-                                            ))}
-                                        </ul>
+                                          <ul className="space-y-3 mb-6">
+                                              {combo.subjects?.map(sub => sub && (
+                                                  <li key={sub._id} className="text-sm font-semibold text-gray-700 flex flex-col gap-1">
+                                                      <div className="flex items-center gap-2">
+                                                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div> {sub.name}
+                                                      </div>
+                                                      {(sub.syllabusWeightage || sub.practicalComponent) && (
+                                                        <div className="pl-3.5 text-xs text-gray-500 font-medium">
+                                                          {sub.syllabusWeightage && <span className="block border-l-2 border-blue-200 pl-2 mb-0.5">{sub.syllabusWeightage}</span>}
+                                                          {sub.practicalComponent && <span className="block border-l-2 border-green-200 pl-2">{sub.practicalComponent}</span>}
+                                                        </div>
+                                                      )}
+                                                  </li>
+                                              ))}
+                                          </ul>
                                         <div className="mt-auto pt-5 border-t border-gray-100">
                                             <p className="text-xs text-gray-500 mb-4 font-medium line-clamp-2">Best suited for: {streamDetails.name} and related fields.</p>
                                             <button onClick={() => navigateCombo(combo.slug)} className="w-full bg-[#1C64F2] hover:bg-blue-700 text-white font-bold text-sm py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2">
@@ -562,9 +618,21 @@ const PathwaysExplorer: React.FC = () => {
                                                     {course.branches.map(branch => (
                                                         <li key={branch._id} 
                                                             onClick={(e) => { e.stopPropagation(); navigate(`/courses/${branch.slug}`); }}
-                                                            className="text-sm font-semibold text-gray-700 flex items-start gap-2 bg-gray-50 p-2.5 rounded-lg border border-gray-100 cursor-pointer hover:border-blue-300 hover:shadow-sm transition-all group">
-                                                          <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 shrink-0 group-hover:bg-[#1C64F2] transition-colors"></span>
-                                                          <span className="leading-tight group-hover:text-blue-700 transition-colors">{branch.name}</span>
+                                                            className="text-sm font-semibold text-gray-700 flex flex-col items-start gap-1 bg-gray-50 p-2.5 rounded-lg border border-gray-100 cursor-pointer hover:border-blue-300 hover:shadow-sm transition-all group">
+                                                          <div className="flex items-center gap-2">
+                                                            <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 shrink-0 group-hover:bg-[#1C64F2] transition-colors"></span>
+                                                            <span className="leading-tight group-hover:text-blue-700 transition-colors">{branch.name}</span>
+                                                          </div>
+                                                          {branch.specializations && branch.specializations.length > 0 && (
+                                                            <div className="pl-3.5 text-xs text-gray-500 font-medium">
+                                                              <span className="font-semibold">Specializations:</span> {branch.specializations.join(', ')}
+                                                            </div>
+                                                          )}
+                                                          {branch.exampleInstitutions && branch.exampleInstitutions.length > 0 && (
+                                                            <div className="pl-3.5 text-xs text-emerald-600 font-medium mt-1">
+                                                              <span className="font-semibold">E.g.,</span> {branch.exampleInstitutions.join(', ')}
+                                                            </div>
+                                                          )}
                                                         </li>
                                                     ))}
                                                 </ul>
@@ -586,13 +654,58 @@ const PathwaysExplorer: React.FC = () => {
                                             </div>
                                             <h4 className="font-bold text-lg text-gray-900">{trade.name}</h4>
                                         </div>
-                                        <div className="space-y-2 mt-4 text-sm text-gray-600">
-                                            {trade.duration && <p><strong>Duration:</strong> {trade.duration}</p>}
-                                            {trade.eligibility && <p><strong>Eligibility:</strong> {trade.eligibility}</p>}
-                                            {trade.apprenticeshipOpportunities && <p><strong>Apprenticeship:</strong> Yes</p>}
+                                          <div className="space-y-2 mt-4 text-sm text-gray-600">
+                                              {trade.duration && <p><strong>Duration:</strong> {trade.duration}</p>}
+                                              {trade.eligibility && <p><strong>Eligibility:</strong> {trade.eligibility}</p>}
+                                              {trade.averageStartingSalary && <p><strong>Starting Salary:</strong> <span className="text-emerald-700 font-semibold">{trade.averageStartingSalary}</span></p>}
+                                              {trade.apprenticeshipOpportunities && <p><strong>Apprenticeship:</strong> Yes</p>}
+                                              {trade.careerOpportunities && trade.careerOpportunities.length > 0 && (
+                                                <div className="mt-2 pt-2 border-t border-gray-100">
+                                                  <p className="font-semibold text-xs text-gray-500 mb-1">Career Opportunities</p>
+                                                  <div className="flex flex-wrap gap-1">
+                                                    {trade.careerOpportunities.map((opp: string, idx: number) => (
+                                                      <span key={idx} className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-[10px] font-medium">{opp}</span>
+                                                    ))}
+                                                  </div>
+                                                </div>
+                                              )}
+                                          </div>
+                                      </div>
+                                  ))}
+                            </div>
+                        </div>
+                    ) : streamDetails.branches && streamDetails.branches.length > 0 ? (
+                        <div className="bg-white border border-gray-200 rounded-[24px] p-8 shadow-sm">
+                            <h3 className="font-bold text-gray-900 mb-6 text-xl">{streamDetails.name} Specializations</h3>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {streamDetails.branches.map((branch: any) => (
+                                    <div key={branch._id} className="border border-gray-100 rounded-xl p-6 shadow-sm hover:border-blue-300 transition-colors cursor-pointer group" onClick={() => navigate(`/branches/${branch.slug}`)}>
+                                        <div className="flex items-center gap-3 mb-4">
+                                            <div className="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                                                <Layers className="w-5 h-5" />
+                                            </div>
+                                            <h4 className="font-bold text-lg text-gray-900 group-hover:text-blue-600 transition-colors">{branch.name}</h4>
                                         </div>
-                                    </div>
-                                ))}
+                                          <div className="space-y-2 mt-4 text-sm text-gray-600">
+                                              {branch.duration && <p><strong>Duration:</strong> {branch.duration}</p>}
+                                              {branch.specializations && branch.specializations.length > 0 && (
+                                                <div className="mt-3">
+                                                  <p className="font-semibold text-xs text-gray-500 mb-1">Key Focus Areas</p>
+                                                  <div className="flex flex-wrap gap-1">
+                                                    {branch.specializations.map((spec: string, idx: number) => (
+                                                      <span key={idx} className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-[10px] font-medium">{spec}</span>
+                                                    ))}
+                                                  </div>
+                                                </div>
+                                              )}
+                                              {branch.exampleInstitutions && branch.exampleInstitutions.length > 0 && (
+                                                <div className="mt-3 pt-3 border-t border-gray-100 text-xs text-emerald-700 font-medium">
+                                                  <span className="font-bold">E.g.,</span> {branch.exampleInstitutions.join(', ')}
+                                                </div>
+                                              )}
+                                          </div>
+                                      </div>
+                                  ))}
                             </div>
                         </div>
                     ) : (
@@ -662,9 +775,21 @@ const PathwaysExplorer: React.FC = () => {
                                                                   {ug.branches?.map((branch: any) => (
                                                                     <li key={branch._id} 
                                                                         onClick={(e) => { e.stopPropagation(); navigate(`/courses/${branch.slug}`); }}
-                                                                        className="text-sm font-semibold text-gray-700 flex items-start gap-2 bg-gray-50 p-2.5 rounded-lg border border-gray-100 cursor-pointer hover:border-blue-300 hover:shadow-sm transition-all group">
-                                                                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 shrink-0 group-hover:bg-blue-500 transition-colors"></span>
-                                                                      <span className="leading-tight group-hover:text-blue-700 transition-colors">{branch.name}</span>
+                                                                        className="text-sm font-semibold text-gray-700 flex flex-col items-start gap-1 bg-gray-50 p-2.5 rounded-lg border border-gray-100 cursor-pointer hover:border-blue-300 hover:shadow-sm transition-all group">
+                                                                      <div className="flex items-center gap-2">
+                                                                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0 group-hover:bg-blue-500 transition-colors"></span>
+                                                                        <span className="leading-tight group-hover:text-blue-700 transition-colors">{branch.name}</span>
+                                                                      </div>
+                                                                      {branch.specializations && branch.specializations.length > 0 && (
+                                                                        <div className="pl-3.5 text-xs text-gray-500 font-medium">
+                                                                          <span className="font-semibold">Specializations:</span> {branch.specializations.join(', ')}
+                                                                        </div>
+                                                                      )}
+                                                                      {branch.exampleInstitutions && branch.exampleInstitutions.length > 0 && (
+                                                                        <div className="pl-3.5 text-xs text-emerald-600 font-medium mt-1">
+                                                                          <span className="font-semibold">E.g.,</span> {branch.exampleInstitutions.join(', ')}
+                                                                        </div>
+                                                                      )}
                                                                     </li>
                                                                   ))}
                                                                 </ul>

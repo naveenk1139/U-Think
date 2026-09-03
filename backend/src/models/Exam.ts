@@ -1,129 +1,134 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IExam extends Document {
-  examId: string;
-  slug: string;
-  name: string;
+  canonical_slug: string;
+  exam_name: string;
   short_name?: string;
-  category: string; // Engineering, Medical, Law, etc.
-  sub_category?: string;
-  level: string; // National, State, University, Institution
-  education_stage?: string[]; // After 10th, After 12th, UG, PG, Professional
-  description?: string;
-
-  conducting_body?: string;
-  official_website_url?: string;
-  official_application_url?: string;
-  official_notification_url?: string;
-  official_brochure_url?: string;
-  official_syllabus_url?: string;
-  official_counselling_url?: string;
-
-  eligibility?: {
-    minimum_qualification?: string;
-    required_subjects?: string[];
-    minimum_marks?: string;
-    age_requirement?: string;
-    attempt_rules?: string;
-    nationality_rules?: string;
-  };
-
-  exam_mode?: string[]; // computer_based, offline, hybrid
-
-  importantDates?: {
-    application_start?: Date;
-    application_end?: Date;
-    correction_start?: Date;
-    correction_end?: Date;
-    exam_date?: Date;
-    result_date?: Date;
-    counselling_date?: Date;
-  };
-
-  application_fee?: string;
-  fee_details?: string;
   
-  academic_year?: string;
-  status?: string; // Active, Discontinued, TBA, Application Open, Application Closed
-
-  source_id?: string;
-  source_url?: string;
+  status: 'ACTIVE' | 'DISCONTINUED' | 'MERGED';
+  
+  education_level: 'AFTER_10TH' | 'AFTER_12TH' | 'UNDERGRADUATE' | 'AFTER_DEGREE' | 'POSTGRADUATE' | 'PROFESSIONAL' | 'RESEARCH' | 'OTHER';
+  minimum_education: string;
+  
+  streams: ('PCM' | 'PCB' | 'COMMERCE' | 'ARTS' | 'HUMANITIES' | 'VOCATIONAL' | 'ANY_STREAM' | 'OTHER')[];
+  exam_categories: string[];
+  exam_type: string;
+  
+  ownership: 'GOVERNMENT' | 'PRIVATE' | 'UNIVERSITY' | 'AUTONOMOUS' | 'OTHER';
+  conducting_body: string;
+  conducting_body_id?: string;
+  
+  official_website?: string;
+  official_application_url?: string;
+  official_information_url?: string;
+  
+  description?: string;
+  eligibility: string;
+  
+  age_min?: number;
+  age_max?: number;
+  attempt_limit?: number;
+  nationality_requirement?: string;
+  reservation_information?: string;
+  
+  exam_mode: string[];
+  exam_frequency: string;
+  
+  exam_pattern?: string;
+  syllabus_url?: string;
+  admit_card_url?: string;
+  result_url?: string;
+  counselling_url?: string;
+  
+  target_courses: string[];
+  target_degrees: string[];
+  target_institutions?: string[];
+  
+  // Provenance
   source_name?: string;
+  source_url?: string;
+  source_type?: string;
+  source_record?: string;
   last_verified_at?: Date;
+  verification_status: 'VERIFIED' | 'PARTIALLY_VERIFIED' | 'UNVERIFIED' | 'OUTDATED' | 'CONFLICT' | 'REQUIRES_REVIEW';
 
-  createdAt?: Date;
-  updatedAt?: Date;
-
-  // Legacy fields to not break existing references entirely immediately
-  type?: string; 
-  ugPg?: string;
-  streams?: string[];
-  courses?: string[];
-  subjects?: string[];
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const ExamSchema = new Schema(
   {
-    examId: { type: String, required: true, unique: true },
-    slug: { type: String, required: true, unique: true },
-    name: { type: String, required: true },
+    canonical_slug: { type: String, required: true, unique: true },
+    exam_name: { type: String, required: true },
     short_name: { type: String },
-    category: { type: String, required: true, index: true },
-    sub_category: { type: String },
-    level: { type: String, required: true, index: true },
-    education_stage: [{ type: String, index: true }],
-    description: { type: String },
-
-    conducting_body: { type: String },
-    official_website_url: { type: String },
+    
+    status: { type: String, enum: ['ACTIVE', 'DISCONTINUED', 'MERGED'], default: 'ACTIVE' },
+    
+    education_level: { 
+      type: String, 
+      enum: ['AFTER_10TH', 'AFTER_12TH', 'UNDERGRADUATE', 'AFTER_DEGREE', 'POSTGRADUATE', 'PROFESSIONAL', 'RESEARCH', 'OTHER'],
+      required: true 
+    },
+    minimum_education: { type: String, required: true },
+    
+    streams: [{ 
+      type: String,
+      enum: ['PCM', 'PCB', 'COMMERCE', 'ARTS', 'HUMANITIES', 'VOCATIONAL', 'ANY_STREAM', 'OTHER']
+    }],
+    exam_categories: [{ type: String }],
+    exam_type: { type: String },
+    
+    ownership: { 
+      type: String,
+      enum: ['GOVERNMENT', 'PRIVATE', 'UNIVERSITY', 'AUTONOMOUS', 'OTHER'],
+      default: 'GOVERNMENT'
+    },
+    conducting_body: { type: String, required: true },
+    conducting_body_id: { type: String },
+    
+    official_website: { type: String },
     official_application_url: { type: String },
-    official_notification_url: { type: String },
-    official_brochure_url: { type: String },
-    official_syllabus_url: { type: String },
-    official_counselling_url: { type: String },
-
-    eligibility: {
-      minimum_qualification: { type: String },
-      required_subjects: [{ type: String }],
-      minimum_marks: { type: String },
-      age_requirement: { type: String },
-      attempt_rules: { type: String },
-      nationality_rules: { type: String },
-    },
-
+    official_information_url: { type: String },
+    
+    description: { type: String },
+    eligibility: { type: String, required: true },
+    
+    age_min: { type: Number },
+    age_max: { type: Number },
+    attempt_limit: { type: Number },
+    nationality_requirement: { type: String },
+    reservation_information: { type: String },
+    
     exam_mode: [{ type: String }],
-
-    importantDates: {
-      application_start: { type: Date },
-      application_end: { type: Date },
-      correction_start: { type: Date },
-      correction_end: { type: Date },
-      exam_date: { type: Date },
-      result_date: { type: Date },
-      counselling_date: { type: Date },
-    },
-
-    application_fee: { type: String },
-    fee_details: { type: String },
-
-    academic_year: { type: String, index: true },
-    status: { type: String, default: 'Active' },
-
-    source_id: { type: String },
-    source_url: { type: String },
+    exam_frequency: { type: String },
+    
+    exam_pattern: { type: String },
+    syllabus_url: { type: String },
+    admit_card_url: { type: String },
+    result_url: { type: String },
+    counselling_url: { type: String },
+    
+    target_courses: [{ type: String }],
+    target_degrees: [{ type: String }],
+    target_institutions: [{ type: String }],
+    
     source_name: { type: String },
+    source_url: { type: String },
+    source_type: { type: String },
+    source_record: { type: String },
     last_verified_at: { type: Date },
-
-    // Legacy support fields
-    type: { type: String },
-    ugPg: { type: String },
-    streams: [{ type: String }],
-    courses: [{ type: String }],
-    subjects: [{ type: String }],
+    verification_status: { 
+      type: String, 
+      enum: ['VERIFIED', 'PARTIALLY_VERIFIED', 'UNVERIFIED', 'OUTDATED', 'CONFLICT', 'REQUIRES_REVIEW'],
+      default: 'UNVERIFIED'
+    },
   },
   { timestamps: true }
 );
 
-ExamSchema.index({ name: 'text', short_name: 'text', category: 'text', conducting_body: 'text' });
+ExamSchema.index({ exam_name: 'text', short_name: 'text', conducting_body: 'text', description: 'text' });
+ExamSchema.index({ education_level: 1 });
+ExamSchema.index({ streams: 1 });
+ExamSchema.index({ exam_categories: 1 });
 
 export default mongoose.model<IExam>('Exam', ExamSchema);

@@ -13,6 +13,8 @@ export interface IBranch extends Document {
   averageFees?: string;
   relatedCareers?: mongoose.Types.ObjectId[];
   careerOpportunities?: string[];
+  specializations?: string[];
+  exampleInstitutions?: string[];
   relatedExams?: mongoose.Types.ObjectId[];
   higherStudies?: mongoose.Types.ObjectId[];
   furtherStudies?: mongoose.Types.ObjectId[]; // PG courses
@@ -36,6 +38,8 @@ const BranchSchema: Schema = new Schema({
   averageFees: { type: String },
   relatedCareers: [{ type: Schema.Types.ObjectId, ref: 'Career' }],
   careerOpportunities: [{ type: String }],
+  specializations: [{ type: String }],
+  exampleInstitutions: [{ type: String }],
   relatedExams: [{ type: Schema.Types.ObjectId, ref: 'Exam' }],
   higherStudies: [{ type: Schema.Types.ObjectId, ref: 'Course' }],
   furtherStudies: [{ type: Schema.Types.ObjectId, ref: 'Course' }],

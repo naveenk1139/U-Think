@@ -179,48 +179,67 @@ export interface StructuredMentor {
 }
 
 export interface StructuredExam {
-  _id: string;
-  examId: string;
-  slug: string;
-  name: string;
-  short_name?: string;
-  level: string;
-  category: string;
-  sub_category?: string;
-  education_stage: string[];
-  type: string;
-  ugPg?: string;
-  status: string;
-  conducting_body?: string;
-  official_website_url?: string;
-  description?: string;
-  application_fee?: string;
-  academic_year?: string;
-  source_name?: string;
-  exam_mode?: string[];
-  subjects?: string[];
-  eligibility?: {
-    minimum_qualification?: string;
-    minimum_marks?: string;
-    age_requirement?: string;
-    attempt_rules?: string;
-    nationality_rules?: string;
-    required_subjects?: string[];
-    qualification?: string;
-    details?: string;
-    ageCriteria?: string;
-  };
-  importantDates?: {
-    application_start?: string;
-    application_end?: string;
-    exam_date?: string;
+    _id: string;
+    canonical_slug: string;
+    exam_name: string;
+    short_name?: string;
+    status: 'ACTIVE' | 'DISCONTINUED' | 'MERGED';
+    education_level: 'AFTER_10TH' | 'AFTER_12TH' | 'UNDERGRADUATE' | 'AFTER_DEGREE' | 'POSTGRADUATE' | 'PROFESSIONAL' | 'RESEARCH' | 'OTHER';
+    minimum_education: string;
+    streams: string[];
+    exam_categories: string[];
+    exam_type: string;
+    ownership: string;
+    conducting_body: string;
+    official_website?: string;
+    official_application_url?: string;
+    official_information_url?: string;
+    description?: string;
+    eligibility: string;
+    age_min?: number;
+    age_max?: number;
+    attempt_limit?: number;
+    nationality_requirement?: string;
+    reservation_information?: string;
+    exam_mode: string[];
+    exam_frequency: string;
+    exam_pattern?: string;
+    syllabus_url?: string;
+    admit_card_url?: string;
+    result_url?: string;
+    counselling_url?: string;
+    target_courses: string[];
+    target_degrees: string[];
+    target_institutions?: string[];
+    source_name?: string;
+    source_url?: string;
+    last_verified_at?: string;
+    verification_status: string;
+    
+    // Virtual or nested for UI
+    recommendation_reason?: string;
+    years?: ExamYear[];
+}
+
+export interface ExamYear {
+    _id: string;
+    exam_id: string;
+    year: number;
+    registration_start?: string;
+    registration_end?: string;
+    correction_window_start?: string;
+    correction_window_end?: string;
+    admit_card_date?: string;
+    exam_start?: string;
+    exam_end?: string;
+    answer_key_date?: string;
     result_date?: string;
-    applicationStart?: string;
-    applicationEnd?: string;
-    examDate?: string;
-    resultDate?: string;
-  };
-  acceptedFor?: string;
+    counselling_start?: string;
+    counselling_end?: string;
+    official_notification_date?: string;
+    status: 'CONFIRMED' | 'TENTATIVE' | 'EXPECTED' | 'NOT_ANNOUNCED' | 'CLOSED';
+    source_name?: string;
+    source_url?: string;
 }
 
 export interface StructuredDegree {
