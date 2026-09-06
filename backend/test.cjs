@@ -1,0 +1,1 @@
+const mongoose = require('mongoose'); mongoose.connect('mongodb://127.0.0.1:27017/uthink').then(async () => { const db = mongoose.connection.db; const agg = await db.collection('colleges').aggregate([{ $group: { _id: '$district', count: { $sum: 1 } } }]).toArray(); console.log(agg); process.exit(0); });

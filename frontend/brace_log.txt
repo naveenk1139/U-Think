@@ -1,0 +1,439 @@
+001 000 import React, { useState, useEffect } fr
+002 000 import { Search, GraduationCap, ArrowRig
+003 000 import { getPathwayTree, getPathwayStats
+004 000 import { useNavigate, useSearchParams, u
+005 000 import PathwayTree from './PathwayTree';
+006 000 import CourseComparisonModal from './Cou
+007 000 
+008 001 const PathwaysExplorer: React.FC = () =>
+009 001 const [educationLevels, setEducationLeve
+010 001 const [stats, setStats] = useState<Pathw
+011 001 const [globalStats, setGlobalStats] = us
+012 001 const [loading, setLoading] = useState(t
+013 001 const [searchParams, setSearchParams] = 
+014 001 const { levelSlug, pathwaySlug, streamSl
+015 001 
+016 001 const activeLevelSlug = levelSlug || sea
+017 001 
+018 001 
+019 001 const [streamDetails, setStreamDetails] 
+020 001 const [loadingStream, setLoadingStream] 
+021 001 
+022 001 const [examSchedules, setExamSchedules] 
+023 001 const [loadingSchedules, setLoadingSched
+024 001 
+025 001 
+026 001 const [selectedCourses, setSelectedCours
+027 001 const [isCompareModalOpen, setIsCompareM
+028 001 
+029 001 
+030 002 const [filters, setFilters] = useState({
+031 002 duration: 'Any',
+032 002 courseType: 'Any',
+033 002 eligibility: 'Any'
+034 001 });
+035 001 
+036 001 const [searchQuery, setSearchQuery] = us
+037 001 const [searchResults, setSearchResults] 
+038 001 const [isSearching, setIsSearching] = us
+039 001 const navigate = useNavigate();
+040 001 
+041 002 const setActiveLevel = (level: string) =
+042 002 navigate(`/pathways/${level}`);
+043 001 };
+044 001 
+045 002 const navigatePathway = (pathway: string
+046 003 if (pathway) {
+047 003 navigate(`/pathways/${activeLevelSlug}/$
+048 003 } else {
+049 003 navigate(`/pathways/${activeLevelSlug}`)
+050 002 }
+051 001 };
+052 001 
+053 002 const navigateStream = (stream: string |
+054 003 if (stream) {
+055 003 navigate(`/pathways/${activeLevelSlug}/$
+056 003 } else {
+057 003 navigate(`/pathways/${activeLevelSlug}/$
+058 002 }
+059 001 };
+060 001 
+061 002 const navigateCombo = (combo: string | n
+062 003 if (combo) {
+063 003 navigate(`/pathways/${activeLevelSlug}/$
+064 003 } else {
+065 003 navigate(`/pathways/${activeLevelSlug}/$
+066 002 }
+067 001 };
+068 001 
+069 002 useEffect(() => {
+070 003 const fetchGlobalData = async () => {
+071 004 try {
+072 004 const [treeData, globalStatsData] = awai
+073 004 getPathwayTree(),
+074 004 getPathwayStats()
+075 004 ]);
+076 004 setEducationLevels(treeData || []);
+077 004 setGlobalStats(globalStatsData || null);
+078 004 } catch (error) {
+079 004 console.error("Failed to fetch global pa
+080 003 }
+081 002 };
+082 002 fetchGlobalData();
+083 001 }, []);
+084 001 
+085 002 useEffect(() => {
+086 003 const fetchLevelData = async () => {
+087 003 setLoading(true);
+088 004 try {
+089 004 const levelStatsData = await getPathwayS
+090 004 setStats(levelStatsData);
+091 004 } catch (error) {
+092 004 console.error("Failed to fetch level sta
+093 004 } finally {
+094 004 setLoading(false);
+095 003 }
+096 002 };
+097 002 fetchLevelData();
+098 001 }, [activeLevelSlug]);
+099 001 
+100 002 useEffect(() => {
+101 003 if (streamSlug) {
+102 003 setLoadingStream(true);
+103 003 setLoadingSchedules(true);
+104 004 getStreamDetails(streamSlug).then(data =
+105 004 setStreamDetails(data);
+106 004 setLoadingStream(false);
+107 005 if (data && data._id) {
+108 006 getExamSchedule(data._id).then(schedules
+109 006 setExamSchedules(schedules);
+110 006 setLoadingSchedules(false);
+111 006 }).catch(err => {
+112 006 console.error(err);
+113 006 setLoadingSchedules(false);
+114 005 });
+115 005 } else {
+116 005 setLoadingSchedules(false);
+117 004 }
+118 004 }).catch(err => {
+119 004 console.error(err);
+120 004 setLoadingStream(false);
+121 004 setLoadingSchedules(false);
+122 003 });
+123 003 } else {
+124 003 setStreamDetails(null);
+125 003 setExamSchedules([]);
+126 002 }
+127 001 }, [streamSlug]);
+128 001 
+129 002 useEffect(() => {
+130 003 const delayDebounceFn = setTimeout(async
+131 004 if (searchQuery.trim().length > 1) {
+132 004 setIsSearching(true);
+133 005 try {
+134 005 const results = await searchPathways(sea
+135 005 setSearchResults(results);
+136 005 } catch (error) {
+137 005 console.error(error);
+138 005 } finally {
+139 005 setIsSearching(false);
+140 004 }
+141 004 } else {
+142 004 setSearchResults([]);
+143 003 }
+144 002 }, 300);
+145 002 
+146 002 
+147 002 return (
+148 002 <div className="w-full bg-gray-50 min-h-
+149 002 <div className="max-w-[1600px] mx-auto w
+150 002 
+151 002 <div className="grid grid-cols-1 xl:grid
+152 002 
+153 002 {/* ============================== */}
+154 002 {/* LEFT MAIN CONTENT (9 Columns)  */}
+155 002 {/* ============================== */}
+156 002 <div className="xl:col-span-9 space-y-8"
+157 002 
+158 002 {/* 1. HERO BANNER */}
+159 002 <div className="bg-gradient-to-r from-bl
+160 002 {/* Left Content */}
+161 002 <div className="relative z-10 w-full md:
+162 002 <span className="inline-flex items-cente
+163 002 <Star className="w-3 h-3 fill-current" /
+164 002 </span>
+165 002 
+166 002 <h1 className="text-4xl lg:text-5xl font
+167 002 Explore Pathways & <br/>Streams for <spa
+168 002 </h1>
+169 002 
+170 002 <p className="text-slate-700 mb-6 text-s
+171 002 Discover the right streams, subjects, co
+172 002 </p>
+173 002 
+174 002 <div className="relative max-w-lg mb-4">
+175 002 <div className="absolute inset-y-0 left-
+176 002 <Search className="w-5 h-5 text-gray-400
+177 002 </div>
+178 002 <input
+179 002 type="text"
+180 002 placeholder="Search streams, subjects, c
+181 002 value={searchQuery}
+182 002 onChange={(e) => setSearchQuery(e.target
+183 002 className="w-full pl-12 pr-24 py-3.5 bg-
+184 002 />
+185 002 <div className="absolute inset-y-1.5 rig
+186 002 <button className="bg-blue-600 hover:bg-
+187 002 Search
+188 002 </button>
+189 002 </div>
+190 002 </div>
+191 002 
+192 002 <div className="flex flex-wrap gap-2">
+193 003 {['Science', 'Commerce', 'Arts', 'Diplom
+194 003 <button key={tag} className="text-[10px]
+195 003 <div className="w-1.5 h-1.5 rounded-full
+196 003 </button>
+197 002 ))}
+198 002 </div>
+199 002 </div>
+200 002 
+201 002 {/* Right Illustration & Stats */}
+202 002 <div className="w-full md:w-2/5 lg:w-1/3
+203 002 <div className="bg-white/80 backdrop-blu
+204 002 <div className="flex items-center gap-3"
+205 002 <div className="w-8 h-8 rounded-lg bg-te
+206 002 <div><div className="font-black text-sm 
+207 002 </div>
+208 002 <div className="flex items-center gap-3"
+209 002 <div className="w-8 h-8 rounded-lg bg-em
+210 002 <div><div className="font-black text-sm 
+211 002 </div>
+212 002 <div className="flex items-center gap-3"
+213 002 <div className="w-8 h-8 rounded-lg bg-bl
+214 002 <div><div className="font-black text-sm 
+215 002 </div>
+216 002 <div className="flex items-center gap-3"
+217 002 <div className="w-8 h-8 rounded-lg bg-pu
+218 002 <div><div className="font-black text-sm 
+219 002 </div>
+220 002 </div>
+221 002 
+222 002 <div className="absolute right-32 bottom
+223 002 <div className="absolute top-10 -left-10
+224 002 <span className="font-serif italic text-
+225 002 </div>
+226 002 </div>
+227 002 </div>
+228 002 </div>
+229 002 
+230 002 {/* DYNAMIC CONTENT AREA */}
+231 003 {loading ? (
+232 003 <div className="flex justify-center py-2
+233 003 <div className="animate-spin rounded-ful
+234 003 </div>
+235 003 ) : activeLevel ? (
+236 003 <>
+237 004 {streamSlug ? (
+238 004 
+239 004 <div className="bg-white border border-g
+240 004 <PathwayTree
+241 004 levelSlug={activeLevelSlug}
+242 004 pathwaySlug={pathwaySlug}
+243 004 streamSlug={streamSlug}
+244 004 comboSlug={comboSlug}
+245 004 levelName={activeLevel?.name}
+246 004 pathwayName={activePathway?.name}
+247 004 streamName={streamDetails?.name}
+248 004 comboName={selectedCombination?.name}
+249 004 />
+250 004 <div className="mt-8 text-center py-10">
+251 004 <h2 className="text-2xl font-black text-
+252 004 <p className="text-gray-500 mt-2">Explor
+253 004 <button onClick={() => navigate('/stream
+254 004 </div>
+255 004 </div>
+256 004 ) : pathwaySlug && activePathway ? (
+257 004 <div className="bg-white border border-g
+258 004 <h2 className="text-2xl font-black text-
+259 004 <button onClick={() => navigate('/stream
+260 004 </div>
+261 004 ) : (
+262 004 /* TOP LEVEL - Explore Streams After 10t
+263 004 <div>
+264 004 <div className="flex items-center justif
+265 004 <h2 className="text-xl font-black text-g
+266 004 <div className="flex items-center gap-4"
+267 004 <div className="flex items-center bg-gra
+268 004 <button className="bg-blue-600 text-whit
+269 004 <button className="text-gray-500 font-bo
+270 004 <button className="text-gray-500 font-bo
+271 004 </div>
+272 004 <button className="text-[11px] font-bold
+273 004 </div>
+274 004 </div>
+275 004 
+276 004 <div className="grid grid-cols-1 md:grid
+277 005 {[
+278 005 { title: 'Science', sub: 'Explore · Expe
+279 005 { title: 'Commerce', sub: 'Plan · Manage
+280 005 { title: 'Arts / Humanities', sub: 'Crea
+281 005 { title: 'Diploma / Polytechnic', sub: '
+282 005 { title: 'ITI (Industrial Training)', su
+283 005 { title: 'Vocational Courses', sub: 'Ski
+284 005 { title: 'Skill Development', sub: 'Upgr
+285 005 { title: 'Agriculture & Allied', sub: 'F
+286 005 ].map((card, i) => (
+287 005 <div key={i} className={`rounded-2xl bor
+288 005 <div className="p-4 border-b border-whit
+289 005 <card.icon className={`w-8 h-8 ${card.co
+290 005 <div>
+291 005 <h3 className={`font-black text-[13px] $
+292 005 <p className={`text-[9px] font-bold ${ca
+293 005 </div>
+294 005 </div>
+295 005 <div className="p-4 flex-1">
+296 005 <ul className="space-y-1.5">
+297 006 {card.items.slice(0, 7).map((item, j) =>
+298 006 <li key={j} className="text-[10px] font-
+299 006 <span className={`w-1 h-1 rounded-full $
+300 006 {item}
+301 006 </li>
+302 005 ))}
+303 005 </ul>
+304 005 </div>
+305 005 <div className="p-3 pt-0">
+306 005 <button className={`w-full ${card.btn} h
+307 005 Explore {card.title.split(' ')[0]} <Arro
+308 005 </button>
+309 005 </div>
+310 005 </div>
+311 004 ))}
+312 004 </div>
+313 004 </div>
+314 003 )}
+315 003 </>
+316 003 ) : (
+317 003 <div className="text-center py-20 bg-whi
+318 003 <p className="text-gray-500 font-bold">N
+319 003 </div>
+320 002 )}
+321 002 
+322 002 {/* Bottom Split Row (Journey + Assessme
+323 002 <div className="grid grid-cols-1 md:grid
+324 002 
+325 002 {/* Journey Timeline */}
+326 002 <div className="md:col-span-7 bg-[#f8faf
+327 002 <h3 className="font-black text-gray-900 
+328 002 
+329 002 <div className="flex items-center justif
+330 002 <div className="absolute left-8 right-8 
+331 002 
+332 003 {[
+333 003 { num: '01', title: 'Explore', sub: 'Dis
+334 003 { num: '02', title: 'Learn', sub: 'Under
+335 003 { num: '03', title: 'Plan', sub: 'Compar
+336 003 { num: '04', title: 'Achieve', sub: 'Get
+337 003 ].map((step, idx) => (
+338 003 <div key={idx} className="relative z-10 
+339 003 <div className="flex items-center gap-1.
+340 003 <div className="w-10 h-10 rounded-full b
+341 003 <step.icon className="w-4 h-4" />
+342 003 </div>
+343 003 <div className="bg-blue-600 text-white f
+344 003 </div>
+345 003 <h4 className="font-black text-[11px] te
+346 003 <p className="text-[8px] font-semibold t
+347 003 </div>
+348 002 ))}
+349 002 </div>
+350 002 </div>
+351 002 
+352 002 {/* Assessment CTA */}
+353 002 <div className="md:col-span-5 bg-gradien
+354 002 <div className="relative z-10 w-2/3 pr-2
+355 002 <div className="flex items-center gap-2 
+356 002 <div className="w-6 h-6 bg-orange-100 te
+357 002 <h3 className="font-black text-gray-900 
+358 002 </div>
+359 002 <p className="text-[9px] font-semibold t
+360 002 <button onClick={() => navigate('/quiz')
+361 002 Take Aptitude Test <ArrowRight className
+362 002 </button>
+363 002 </div>
+364 002 </div>
+365 002 </div>
+366 002 
+367 002 </div>
+368 002 
+369 002 {/* ============================== */}
+370 002 {/* RIGHT RAIL CONTENT (3 Columns) */}
+371 002 {/* ============================== */}
+372 002 <div className="xl:col-span-3 space-y-6"
+373 002 
+374 002 {/* Quick Actions */}
+375 002 <div className="bg-white border border-g
+376 002 <h3 className="font-black text-gray-900 
+377 002 <div className="space-y-3">
+378 003 {[
+379 003 { title: 'Stream Selector', sub: 'Find t
+380 003 { title: 'Compare Streams', sub: 'Analyz
+381 003 { title: 'Career Path Finder', sub: 'Exp
+382 003 { title: 'Aptitude Assessment', sub: 'Ge
+383 003 ].map((action, idx) => (
+384 003 <button key={idx} className="w-full bg-w
+385 003 <div className="flex items-center gap-3 
+386 003 <div className={`w-10 h-10 rounded-xl ${
+387 003 <div>
+388 003 <div className="font-bold text-xs text-g
+389 003 <div className="text-[9px] font-semibold
+390 003 </div>
+391 003 </div>
+392 003 <ChevronRight className="w-4 h-4 text-bl
+393 003 </button>
+394 002 ))}
+395 002 </div>
+396 002 </div>
+397 002 
+398 002 {/* Popular Pathways */}
+399 002 <div className="bg-white border border-g
+400 002 <div className="flex items-center justif
+401 002 <h3 className="font-black text-gray-900 
+402 002 <button className="text-[9px] font-bold 
+403 002 </div>
+404 002 <div className="space-y-4">
+405 003 {[
+406 003 { title: 'Engineering Pathway', sub: 'Fr
+407 003 { title: 'Medical Pathway', sub: 'From 1
+408 003 { title: 'Government Jobs Pathway', sub:
+409 003 { title: 'Design & Creative Pathway', su
+410 003 { title: 'Entrepreneurship Pathway', sub
+411 003 ].map((path, idx) => (
+412 003 <div key={idx} className="flex items-cen
+413 003 <div className={`w-8 h-8 rounded-lg ${pa
+414 003 <div>
+415 003 <div className="font-bold text-[11px] te
+416 003 <div className="text-[9px] font-semibold
+417 003 </div>
+418 003 </div>
+419 002 ))}
+420 002 </div>
+421 002 </div>
+422 002 
+423 002 {/* Inspirational Quote */}
+424 002 <div className="bg-orange-50/50 border b
+425 002 <div className="w-10 h-10 rounded-full b
+426 002 <div className="font-serif italic text-b
+427 002 "Right Guidance Today, A Brighter Tomorr
+428 002 </div>
+429 002 </div>
+430 002 
+431 002 </div>
+432 002 </div>
+433 002 
+434 002 </div>
+435 002 </div>
+436 002 );
+437 001 };
+438 001 
+439 001 export default PathwaysExplorer;

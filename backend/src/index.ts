@@ -59,6 +59,7 @@ import subjectCombinationRoutes from './routes/subjectCombinationRoutes.js';
 import courseRoutes from './routes/courseRoutes.js';
 import roadmapRoutes from './routes/roadmapRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
+import after10thRoutes from './routes/after10thRoutes.js';
 import { getPathwayTree, getPathwayStats, getFilteredPathways } from './controllers/pathwayController.js';
 
 // Middleware
@@ -124,6 +125,7 @@ app.use('/api/subject-combinations', subjectCombinationRoutes);
   app.use('/api/courses', courseRoutes);
   app.use('/api/roadmaps', roadmapRoutes);
   app.use('/api/admin', adminRoutes);
+  app.use('/api/after-10th', after10thRoutes);
 
 // Public Catalog API
 app.get('/api/education-catalog', getPathwayTree);

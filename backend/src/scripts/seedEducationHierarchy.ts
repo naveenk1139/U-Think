@@ -32,11 +32,10 @@ const seedEducationHierarchy = async () => {
       });
     }
 
-    // 2. Pathways
     const pathwaysData = [
       { name: 'PUC / 11th-12th', duration: '2 Years', eligibility: 'Passed 10th/SSLC', order: 1 },
       { name: 'Diploma / Polytechnic', duration: '3 Years', eligibility: 'Passed 10th/SSLC with minimum 35%', order: 2 },
-      { name: 'ITI', duration: '1-2 Years', eligibility: 'Passed 10th/SSLC', order: 3 },
+      { name: 'IT / Polytechnic', duration: '1-2 Years', eligibility: 'Passed 10th/SSLC', order: 3 },
       { name: 'Paramedical / Allied Health', duration: '2-3 Years', eligibility: 'Passed 10th/SSLC', order: 4 },
       { name: 'Vocational Education', duration: '1-2 Years', eligibility: 'Passed 10th/SSLC', order: 5 },
       { name: 'Apprenticeship / Skill Training', duration: '6 Months - 2 Years', eligibility: 'Passed 10th/SSLC', order: 6 },
@@ -56,37 +55,40 @@ const seedEducationHierarchy = async () => {
     // 3. PUC Streams
     const pucPathwayId = createdPathways['puc-11th-12th']._id;
     const streamsData = [
-      { name: 'Science', pathwayId: pucPathwayId, duration: '2 Years', order: 1 },
-      { name: 'Commerce', pathwayId: pucPathwayId, duration: '2 Years', order: 2 },
-      { name: 'Arts / Humanities', pathwayId: pucPathwayId, duration: '2 Years', order: 3 },
-      { name: 'Vocational', pathwayId: pucPathwayId, duration: '2 Years', order: 4 }
+      { name: 'Science', slug: 'science', pathwayId: pucPathwayId, duration: '2 Years', order: 1, description: 'Explore science subject combinations.' },
+      { name: 'Commerce', slug: 'commerce', pathwayId: pucPathwayId, duration: '2 Years', order: 2, description: 'Explore Commerce subject combinations and discover pathways in accounting, finance, economics, business, management, banking and entrepreneurship.', eligibility: 'Passed 10th/SSLC' },
+      { name: 'Arts / Humanities', slug: 'arts', pathwayId: pucPathwayId, duration: '2 Years', order: 3, description: 'Explore humanities and social science subject combinations and discover pathways to law, civil services, psychology, journalism, design, education, social sciences, management and more.', eligibility: 'Passed 10th/SSLC' },
+      { name: 'Vocational', slug: 'vocational', pathwayId: pucPathwayId, duration: '2 Years', order: 4 }
     ];
 
     const createdStreams: any = {};
     for (const s of streamsData) {
-      const slug = createSlug(s.name);
+      const slug = s.slug || createSlug(s.name);
       let stream = await Stream.findOne({ slug, pathwayId: s.pathwayId });
       if (!stream) {
         stream = await Stream.create({ ...s, slug });
+      } else {
+        await Stream.updateOne({ _id: stream._id }, { $set: { description: s.description, eligibility: s.eligibility } });
+        stream = await Stream.findById(stream._id);
       }
       createdStreams[slug] = stream;
     }
 
     // Helper to get or create subject
-    const getSubject = async (name: string) => {
+    const getSubject = async (name: string, description?: string) => {
       let subj = await Subject.findOne({ slug: createSlug(name) });
-      if (!subj) subj = await Subject.create({ name, slug: createSlug(name) });
+      if (!subj) subj = await Subject.create({ name, slug: createSlug(name), description });
       return subj._id;
     };
 
     // 4. Subject Combinations
     const scienceStreamId = createdStreams['science']._id;
     const commerceStreamId = createdStreams['commerce']._id;
-    const artsStreamId = createdStreams['arts-humanities']._id;
+    const artsStreamId = createdStreams['arts']._id;
 
     const combinationsData = [
       // Science
-      { name: 'PCMB', streamId: scienceStreamId, subjects: ['Physics', 'Chemistry', 'Mathematics', 'Biology'] },
+      { name: 'PCMB', streamId: scienceStreamId, description: 'PCMB is a flexible Science combination that keeps both Engineering/Technology and Medical/Life Science pathways open.', eligibility: 'Varies by board/college (Check specific requirements)', subjects: ['Physics', 'Chemistry', 'Mathematics', 'Biology'] },
       { name: 'PCMC', streamId: scienceStreamId, subjects: ['Physics', 'Chemistry', 'Mathematics', 'Computer Science'] },
       { name: 'PCME', streamId: scienceStreamId, subjects: ['Physics', 'Chemistry', 'Mathematics', 'Electronics'] },
       { name: 'PCMS', streamId: scienceStreamId, subjects: ['Physics', 'Chemistry', 'Mathematics', 'Statistics'] },
@@ -95,18 +97,23 @@ const seedEducationHierarchy = async () => {
       { name: 'PCMG', streamId: scienceStreamId, subjects: ['Physics', 'Chemistry', 'Mathematics', 'Geology'] },
       
       // Commerce
+      { name: 'Commerce with Mathematics', slug: 'commerce-with-math', streamId: commerceStreamId, description: 'Ideal for students aiming for CA, Finance, Economics, and Management.', eligibility: 'Passed 10th/SSLC', subjects: ['Accountancy', 'Business Studies', 'Economics', 'Mathematics'] },
+      { name: 'Commerce without Mathematics', slug: 'commerce-without-math', streamId: commerceStreamId, description: 'Suitable for Business, Management, Marketing, and Accounting pathways without advanced math requirements.', eligibility: 'Passed 10th/SSLC', subjects: ['Accountancy', 'Business Studies', 'Economics', 'Language'] },
       { name: 'CEBA', streamId: commerceStreamId, subjects: ['Computer Science', 'Economics', 'Business Studies', 'Accountancy'] },
       { name: 'SEBA', streamId: commerceStreamId, subjects: ['Statistics', 'Economics', 'Business Studies', 'Accountancy'] },
       { name: 'MEBA', streamId: commerceStreamId, subjects: ['Basic Mathematics', 'Economics', 'Business Studies', 'Accountancy'] },
-      { name: 'MSBA', streamId: commerceStreamId, subjects: ['Mathematics', 'Statistics', 'Business Studies', 'Accountancy'] },
+      { name: 'Commerce + Entrepreneurship', streamId: commerceStreamId, subjects: ['Accountancy', 'Business Studies', 'Economics', 'Entrepreneurship'] },
       
       // Arts
-      { name: 'HEPS', streamId: artsStreamId, subjects: ['History', 'Economics', 'Political Science', 'Sociology'] },
+      { name: 'HEPS (History, Economics, Political Science, Sociology)', slug: 'heps', streamId: artsStreamId, description: 'A robust combination for Law, Civil Services, and Social Sciences.', eligibility: 'Passed 10th/SSLC', subjects: ['History', 'Economics', 'Political Science', 'Sociology'] },
+      { name: 'History + Geography + Political Science', streamId: artsStreamId, subjects: ['History', 'Geography', 'Political Science'] },
+      { name: 'Psychology + Sociology + Political Science', streamId: artsStreamId, subjects: ['Psychology', 'Sociology', 'Political Science'] },
+      { name: 'Economics + Political Science + Sociology', streamId: artsStreamId, subjects: ['Economics', 'Political Science', 'Sociology'] },
       { name: 'HESP', streamId: artsStreamId, subjects: ['History', 'Economics', 'Sociology', 'Psychology'] }
     ];
 
     for (const [index, c] of combinationsData.entries()) {
-      const slug = createSlug(c.name);
+      const slug = c.slug || createSlug(c.name);
       
       const subjIds = [];
       for (const subjName of c.subjects) {
@@ -119,9 +126,13 @@ const seedEducationHierarchy = async () => {
           name: c.name,
           slug,
           streamId: c.streamId,
+          description: (c as any).description,
+          eligibility: (c as any).eligibility,
           subjects: subjIds,
           order: index + 1
         });
+      } else {
+        await SubjectCombination.updateOne({ _id: combo._id }, { $set: { description: (c as any).description, eligibility: (c as any).eligibility } });
       }
     }
 

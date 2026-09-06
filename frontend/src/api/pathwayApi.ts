@@ -68,7 +68,6 @@ export interface BranchData {
   eligibility?: string;
   averageFees?: string;
   careerOpportunities?: string[];
-  specializations?: string[];
   exampleInstitutions?: string[];
   requiredSkills?: string[];
   relatedCareers: { _id: string; name: string; slug: string }[];
@@ -111,6 +110,7 @@ export interface StreamData {
   slug: string;
   description?: string;
   duration?: string;
+  eligibility?: string;
   typicalStructure?: string[];
   courseCount?: number;
   comboCount?: number;
@@ -128,6 +128,7 @@ export interface PathwayData {
   slug: string;
   description?: string;
   duration?: string;
+  eligibility?: string;
   streams: StreamData[];
 }
 
@@ -157,6 +158,11 @@ export const getPathwayTree = (levelSlug?: string): Promise<EducationLevelData[]
 
 export const getStreamDetails = async (streamId: string): Promise<StreamData> => {
   const response = await api.get(`/api/education-catalog?streamSlug=${streamId}`);
+  return response.data;
+};
+
+export const getPathwayBySlug = async (slug: string): Promise<PathwayData> => {
+  const response = await api.get(`/api/pathways/slug/${slug}`);
   return response.data;
 };
 

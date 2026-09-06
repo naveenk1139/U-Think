@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import Pathway from '../models/Pathway.js';
 import Stream from '../models/Stream.js';
 import Branch from '../models/Branch.js';
+import Course from '../models/Course.js';
 import CourseCategory from '../models/CourseCategory.js';
 import CourseDetail from '../models/CourseDetail.js';
 import College from '../models/College.js';
@@ -16,6 +17,41 @@ router.get('/', async (req: Request, res: Response) => {
     res.json(pathways);
   } catch (error) {
     console.error('Error fetching pathways:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// GET /api/pathways/slug/:slug
+router.get('/slug/:slug', async (req: Request, res: Response) => {
+  try {
+    const pathway = await Pathway.findOne({ slug: req.params.slug, active: true }).lean();
+    if (!pathway) return res.status(404).json({ message: 'Pathway not found' });
+    
+    const streams = await Stream.find({ pathwayId: pathway._id, active: true }).sort({ order: 1 }).lean();
+    
+    // Fetch courses for these streams
+    const streamIds = streams.map(s => s._id);
+    const courses = await Course.find({ streamId: { $in: streamIds }, active: true }).sort({ order: 1 }).lean();
+    
+    // Fetch branches for these courses
+    const courseIds = courses.map(c => c._id);
+    const branches = await Branch.find({ courseId: { $in: courseIds }, active: true }).sort({ order: 1 }).lean();
+
+    // Map branches to courses
+    const coursesWithBranches = courses.map(c => ({
+      ...c,
+      branches: branches.filter(b => b.courseId?.toString() === c._id.toString())
+    }));
+
+    // Map courses to streams
+    const streamsWithCourses = streams.map(s => ({
+      ...s,
+      courses: coursesWithBranches.filter(c => c.streamId?.toString() === s._id.toString())
+    }));
+
+    res.json({ ...pathway, streams: streamsWithCourses });
+  } catch (error) {
+    console.error('Error fetching pathway by slug:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });

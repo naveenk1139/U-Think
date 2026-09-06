@@ -1,1072 +1,428 @@
 import React, { useState, useEffect } from 'react';
-import { Search, GraduationCap, ArrowRight, BookOpen, ChevronRight, Briefcase, Filter, TrendingUp, Sparkles, AlertCircle, Building, Wrench, HeartPulse, Layers, Target, Trophy, Building2, ClipboardList, Users, CheckCircle, Target as TargetIcon, PiggyBank, SearchX, MousePointerClick, Activity } from 'lucide-react';
-import { getPathwayTree, getPathwayStats, getStreamDetails, getExamSchedule, searchPathways, EducationLevelData, PathwayStats, StreamData, CourseData, ExamScheduleData } from '../api/pathwayApi';
-import { useNavigate, useSearchParams, useParams, Link } from 'react-router-dom';
-import PathwayTree from './PathwayTree';
-import CourseComparisonModal from './CourseComparisonModal';
+import { 
+  Search, GraduationCap, ArrowRight, BookOpen, ChevronRight, Briefcase, Filter, Target, 
+  Building2, Users, Target as TargetIcon, Zap, Map, ShieldAlert, Heart, CheckCircle, 
+  Wrench, BriefcaseMedical, Monitor, Settings, Palette, Plus, Lightbulb, Leaf, GitBranch
+} from 'lucide-react';
+import { getPathwayTree, getPathwayStats, EducationLevelData, PathwayStats, PathwayData } from '../api/pathwayApi';
+import { getExams } from '../api/examApi';
+import { StructuredExam } from '../types';
+import { useNavigate, useSearchParams, useParams } from 'react-router-dom';
 
-const PathwaysExplorer: React.FC = () => {
+export default function PathwaysExplorer() {
   const [educationLevels, setEducationLevels] = useState<EducationLevelData[]>([]);
   const [stats, setStats] = useState<PathwayStats | null>(null);
-  const [globalStats, setGlobalStats] = useState<PathwayStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [searchParams, setSearchParams] = useSearchParams();
-  const { levelSlug, pathwaySlug, streamSlug, comboSlug } = useParams();
+  const { levelSlug } = useParams();
+  const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [upcomingExams, setUpcomingExams] = useState<StructuredExam[]>([]);
   
   const activeLevelSlug = levelSlug || searchParams.get('level') || 'after-10th';
-  
-  // Try to match slugs to ids for the tree data, since the tree returns populated nested objects
-  const [streamDetails, setStreamDetails] = useState<StreamData | null>(null);
-  const [loadingStream, setLoadingStream] = useState(false);
-  
-  const [examSchedules, setExamSchedules] = useState<ExamScheduleData[]>([]);
-  const [loadingSchedules, setLoadingSchedules] = useState(false);
-  
-  // Comparison State
-  const [selectedCourses, setSelectedCourses] = useState<CourseData[]>([]);
-  const [isCompareModalOpen, setIsCompareModalOpen] = useState(false);
-
-  // Filters State
-  const [filters, setFilters] = useState({
-    duration: 'Any',
-    courseType: 'Any',
-    eligibility: 'Any'
-  });
-
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<any[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
-  const navigate = useNavigate();
-
-  const setActiveLevel = (level: string) => {
-    navigate(`/pathways/${level}`);
-  };
-
-  const navigatePathway = (pathway: string | null) => {
-    if (pathway) {
-      navigate(`/pathways/${activeLevelSlug}/${pathway}`);
-    } else {
-      navigate(`/pathways/${activeLevelSlug}`);
-    }
-  };
-
-  const navigateStream = (stream: string | null) => {
-    if (stream) {
-      navigate(`/pathways/${activeLevelSlug}/${pathwaySlug}/${stream}`);
-    } else {
-      navigate(`/pathways/${activeLevelSlug}/${pathwaySlug}`);
-    }
-  };
-
-  const navigateCombo = (combo: string | null) => {
-    if (combo) {
-      navigate(`/pathways/${activeLevelSlug}/${pathwaySlug}/${streamSlug}/${combo}`);
-    } else {
-      navigate(`/pathways/${activeLevelSlug}/${pathwaySlug}/${streamSlug}`);
-    }
-  };
 
   useEffect(() => {
-    const fetchGlobalData = async () => {
-      try {
-        const [treeData, globalStatsData] = await Promise.all([
-          getPathwayTree(),
-          getPathwayStats()
-        ]);
-        setEducationLevels(treeData || []);
-        setGlobalStats(globalStatsData || null);
-      } catch (error) {
-        console.error("Failed to fetch global pathways data", error);
-      }
-    };
-    fetchGlobalData();
-  }, []);
+    setLoading(true);
+    getPathwayStats().then(setStats).catch(console.error);
+    
+    getPathwayTree(activeLevelSlug).then(data => {
+      setEducationLevels(data);
+      setLoading(false);
+    }).catch(err => {
+      console.error(err);
+      setLoading(false);
+    });
 
-  useEffect(() => {
-    const fetchLevelData = async () => {
-      setLoading(true);
-      try {
-        const levelStatsData = await getPathwayStats(activeLevelSlug);
-        setStats(levelStatsData);
-      } catch (error) {
-        console.error("Failed to fetch level stats", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchLevelData();
+    getExams({ limit: 4 }).then(res => {
+      setUpcomingExams(res.items?.slice(0, 4) || []);
+    }).catch(console.error);
   }, [activeLevelSlug]);
 
-  useEffect(() => {
-    if (streamSlug) {
-      setLoadingStream(true);
-      setLoadingSchedules(true);
-      getStreamDetails(streamSlug).then(data => {
-        setStreamDetails(data);
-        setLoadingStream(false);
-        if (data && data._id) {
-          getExamSchedule(data._id).then(schedules => {
-            setExamSchedules(schedules);
-            setLoadingSchedules(false);
-          }).catch(err => {
-            console.error(err);
-            setLoadingSchedules(false);
-          });
-        } else {
-          setLoadingSchedules(false);
-        }
-      }).catch(err => {
-        console.error(err);
-        setLoadingStream(false);
-        setLoadingSchedules(false);
-      });
-    } else {
-      setStreamDetails(null);
-      setExamSchedules([]);
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/colleges?q=${encodeURIComponent(searchQuery)}`);
     }
-  }, [streamSlug]);
-
-  useEffect(() => {
-    const delayDebounceFn = setTimeout(async () => {
-      if (searchQuery.trim().length > 1) {
-        setIsSearching(true);
-        try {
-          const results = await searchPathways(searchQuery);
-          setSearchResults(results);
-        } catch (error) {
-          console.error(error);
-        } finally {
-          setIsSearching(false);
-        }
-      } else {
-        setSearchResults([]);
-      }
-    }, 300);
-
-    return () => clearTimeout(delayDebounceFn);
-  }, [searchQuery]);
-
-  const toggleCourseComparison = (course: CourseData) => {
-    setSelectedCourses(prev => {
-      const exists = prev.find(c => c._id === course._id);
-      if (exists) {
-        return prev.filter(c => c._id !== course._id);
-      }
-      if (prev.length >= 3) {
-        alert("You can compare up to 3 courses at a time.");
-        return prev;
-      }
-      return [...prev, course];
-    });
   };
 
-  const activeLevel = educationLevels?.find(l => l.slug === activeLevelSlug);
-  const activePathway = activeLevel?.pathways?.find(p => p.slug === pathwaySlug);
+  const getActiveLevelData = () => {
+    return educationLevels.find(l => l.slug === activeLevelSlug) || educationLevels[0];
+  };
   
-  const selectedCombination = comboSlug && streamDetails?.subjectCombinations 
-    ? streamDetails.subjectCombinations.find(c => c.slug === comboSlug) 
-    : null;
-
-  // Helper for icons based on name
-  const getPathwayIcon = (name: string, index: number) => {
-    const n = name.toLowerCase();
-    if (n.includes('12') || n.includes('intermediate')) return { icon: BookOpen, color: 'text-purple-600', bg: 'bg-purple-100' };
-    if (n.includes('diploma') || n.includes('poly')) return { icon: Building, color: 'text-blue-600', bg: 'bg-blue-100' };
-    if (n.includes('iti')) return { icon: Wrench, color: 'text-green-600', bg: 'bg-green-100' };
-    if (n.includes('para') || n.includes('med')) return { icon: HeartPulse, color: 'text-rose-600', bg: 'bg-rose-100' };
-    if (n.includes('vocational')) return { icon: Briefcase, color: 'text-orange-600', bg: 'bg-orange-100' };
-    
-    // Fallbacks
-    const colors = [
-      { color: 'text-purple-600', bg: 'bg-purple-100' },
-      { color: 'text-blue-600', bg: 'bg-blue-100' },
-      { color: 'text-green-600', bg: 'bg-green-100' },
-      { color: 'text-rose-600', bg: 'bg-rose-100' },
-      { color: 'text-orange-600', bg: 'bg-orange-100' }
-    ];
-    return { icon: Layers, ...colors[index % colors.length] };
-  };
-
-  // Compute local stream stats if viewing stream
-  let streamStats = { combos: 0, subjects: 0, courses: 0, branches: 0, careers: 0 };
-  if (streamDetails && streamDetails.subjectCombinations) {
-      streamStats.combos = streamDetails.subjectCombinations.length;
-      const subSet = new Set();
-      const courseSet = new Set();
-      const branchSet = new Set();
-      const careerSet = new Set();
-      
-      streamDetails.subjectCombinations.forEach(c => {
-         c.subjects?.forEach(s => { if (s) subSet.add(s._id) });
-         c.ugCourses?.forEach(ug => {
-             if (!ug) return;
-             courseSet.add(ug._id);
-             ug.branches?.forEach(b => {
-                 if (!b) return;
-                 branchSet.add(b._id);
-                 b.relatedCareers?.forEach((rc: any) => { if (rc) careerSet.add(rc._id || rc) });
-             });
-         });
-      });
-      streamStats.subjects = subSet.size;
-      streamStats.courses = courseSet.size;
-      streamStats.branches = branchSet.size;
-      streamStats.careers = careerSet.size;
-  } else if (streamDetails?.courses) {
-      streamStats.courses = streamDetails.courses.length;
-      const branchSet = new Set();
-      const careerSet = new Set();
-      streamDetails.courses.forEach(c => {
-          c.branches?.forEach(b => {
-              if (!b) return;
-              branchSet.add(b._id);
-              b.relatedCareers?.forEach((rc: any) => { if (rc) careerSet.add(rc._id || rc) });
-          });
-      });
-      streamStats.branches = branchSet.size;
-      streamStats.careers = careerSet.size;
-  }
+  const levelData = getActiveLevelData();
+  const pathways = levelData?.pathways || [];
 
   return (
-    <div className="w-full bg-gray-50 min-h-screen font-sans">
-      <div className="max-w-[1600px] mx-auto w-full">
-      
-      {/* HERO SECTION */}
-      <div className="bg-[#2B3B94] rounded-[24px] p-10 relative overflow-hidden flex flex-col md:flex-row items-center justify-between mb-8 shadow-sm">
-        <div className="absolute inset-0 opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
-        <div className="absolute right-0 top-0 bottom-0 w-1/2 bg-gradient-to-l from-blue-600/20 to-transparent pointer-events-none"></div>
-
-        <div className="text-white max-w-2xl z-10 w-full">
-          <h1 className="text-4xl md:text-[42px] font-bold mb-4 leading-[1.1] tracking-tight">
-            Explore Post-10th<br/>Pathways & Streams
-          </h1>
-          <p className="text-blue-100/90 mb-8 max-w-xl text-sm leading-relaxed pr-8">
-            Choose the right education pathway after 10th. Compare 12th, Diploma, ITI, Paramedical and Vocational options and discover courses, branches and career opportunities.
-          </p>
+    <div className="font-sans pb-10 min-h-screen bg-[#F7F9FC]">
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 relative">
+        
+        {/* ======================= */}
+        {/* LEFT MAIN CONTENT (9 cols) */}
+        {/* ======================= */}
+        <div className="xl:col-span-9 space-y-6 min-w-0">
           
-          <div className="relative mb-8 max-w-[480px]">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-300 w-5 h-5" />
-            <input 
-              type="text" 
-              placeholder="Search pathways, streams, courses, branches, careers..." 
-              className="w-full bg-[#3B4A9E]/80 border border-blue-400/30 text-white placeholder-blue-300 rounded-xl pl-12 pr-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all text-sm"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            {/* Search Dropdown */}
-            {(searchQuery.trim().length > 1) && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden z-50 max-h-[300px] overflow-y-auto">
-                {isSearching ? (
-                  <div className="p-4 text-sm text-gray-500 text-center">Searching...</div>
-                ) : searchResults.length > 0 ? (
-                  <ul className="py-2">
-                    {searchResults.map((result, idx) => (
-                      <li key={idx}>
-                        <Link 
-                          to={result.type === 'Branch' || result.type === 'Course' ? `/courses/${result.slug}` : result.type === 'Career' ? `/careers` : `/pathways/${activeLevelSlug}`}
-                          className="px-4 py-3 hover:bg-blue-50 flex flex-col transition-colors border-b border-gray-50 last:border-0"
-                          onClick={() => { setSearchQuery(''); setSearchResults([]); }}
-                        >
-                          <span className="text-sm font-bold text-gray-900">{result.name}</span>
-                          <span className="text-xs text-blue-600 font-semibold uppercase tracking-wider">{result.type}</span>
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <div className="p-4 text-sm text-gray-500 text-center">No results found for "{searchQuery}"</div>
-                )}
+          {/* HERO SECTION */}
+          <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-2xl overflow-hidden shadow-sm border border-blue-200 relative flex flex-col lg:flex-row min-h-[320px]">
+            {/* Left Content */}
+            <div className="p-8 md:p-10 flex-1 relative z-10 flex flex-col justify-center">
+              <span className="bg-blue-600 text-white text-[10px] font-black tracking-wider uppercase px-3 py-1 rounded-full w-max mb-4 shadow-sm">
+                Discover Your Possibilities
+              </span>
+              
+              <h1 className="text-3xl md:text-4xl font-black text-gray-900 leading-tight mb-3">
+                Explore <span className="text-blue-600">Pathways & Streams</span>
+              </h1>
+              
+              <p className="text-sm font-medium text-gray-600 mb-6 max-w-lg">
+                Find the right education pathway, compare streams and discover courses and careers that match your interests, goals and future plans.
+              </p>
+
+              {/* Search Bar */}
+              <form onSubmit={handleSearch} className="relative max-w-xl mb-4">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <input
+                  type="text"
+                  placeholder="Search pathways, streams, courses, branches..."
+                  className="w-full pl-11 pr-32 py-3.5 rounded-xl border border-blue-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg font-bold text-sm transition-colors shadow-sm">
+                  Search
+                </button>
+              </form>
+
+              {/* Quick Filter Badges */}
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { label: 'Explore After 10th', icon: BookOpen, color: 'text-blue-600', path: '/pathways/after-10th' },
+                  { label: 'Explore After 12th', icon: BookOpen, color: 'text-emerald-600', path: '/pathways/after-12th' },
+                  { label: 'Explore Degrees', icon: GraduationCap, color: 'text-purple-600', path: '/pathways/undergraduate' },
+                  { label: 'Explore Careers', icon: Briefcase, color: 'text-orange-600', path: '/jobs' }
+                ].map((tag, idx) => (
+                  <button key={idx} onClick={() => navigate(tag.path)} className="flex items-center gap-1.5 bg-white border border-blue-100 hover:border-blue-300 px-3 py-1.5 rounded-lg text-xs font-bold text-gray-700 hover:text-blue-600 transition-colors shadow-sm">
+                    <tag.icon className={`w-3.5 h-3.5 ${tag.color}`} /> {tag.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Right Side Stats & Image */}
+            <div className="w-full lg:w-[300px] relative bg-white/40 p-6 flex flex-col justify-center border-l border-white/50 backdrop-blur-sm">
+               <div className="space-y-3">
+                 {[
+                   { label: 'Pathways', value: stats?.pathways ? `${stats.pathways}` : '58', icon: BookOpen, color: 'text-blue-600', bg: 'bg-blue-50' },
+                   { label: 'Streams', value: stats?.streams ? `${stats.streams}` : '243', icon: GraduationCap, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+                   { label: 'Courses', value: stats?.courses ? `${stats.courses}` : '1,254', icon: Target, color: 'text-purple-600', bg: 'bg-purple-50' },
+                   { label: 'Branches', value: stats?.branches ? `${stats.branches}` : '4,836', icon: Briefcase, color: 'text-orange-600', bg: 'bg-orange-50' }
+                 ].map((stat, i) => (
+                   <div key={i} className="bg-white rounded-xl p-3 shadow-sm border border-white flex items-center gap-4">
+                     <div className={`w-10 h-10 rounded-lg ${stat.bg} ${stat.color} flex items-center justify-center shrink-0`}>
+                       <stat.icon className="w-5 h-5"/>
+                     </div>
+                     <div>
+                       <div className="text-lg font-black text-gray-900 leading-none">{stat.value}</div>
+                       <div className="text-[10px] font-bold text-gray-500 mt-1 uppercase tracking-wide">{stat.label}</div>
+                     </div>
+                   </div>
+                 ))}
+               </div>
+            </div>
+          </div>
+
+          {/* EDUCATION LEVEL TABS */}
+          <div className="flex items-center justify-between border-b border-gray-200">
+            <div className="flex gap-1 overflow-x-auto hide-scrollbar">
+              {[
+                { label: 'After 10th', slug: 'after-10th' },
+                { label: 'After 12th', slug: 'after-12th' },
+                { label: 'Degree', slug: 'undergraduate' },
+                { label: 'Postgraduate', slug: 'postgraduate' }
+              ].map(tab => (
+                <button 
+                  key={tab.slug}
+                  onClick={() => navigate(`/pathways/${tab.slug}`)}
+                  className={`px-6 py-3 text-sm font-bold border-b-2 whitespace-nowrap transition-colors ${activeLevelSlug === tab.slug ? 'border-blue-600 text-blue-600 bg-blue-50/50' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'}`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+            <button className="hidden md:flex items-center gap-1 text-xs font-bold text-blue-600 hover:underline shrink-0 pl-4">
+              Help Me Choose <ArrowRight className="w-3 h-3"/>
+            </button>
+          </div>
+
+          {/* POPULAR PATHWAYS GRID */}
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-black text-gray-900">Popular Pathways {levelData?.name || 'After 10th'}</h2>
+              <button className="text-xs font-bold text-blue-600 hover:underline">View All Pathways →</button>
+            </div>
+            
+            {loading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4">
+                {[1,2,3,4,5,6].map(i => <div key={i} className="h-64 bg-white rounded-2xl border border-gray-200 animate-pulse"></div>)}
+              </div>
+            ) : pathways.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4">
+                {pathways.map((pathway: PathwayData, idx) => {
+                  const icons = [GraduationCap, Settings, Wrench, BriefcaseMedical, Briefcase, Leaf];
+                  const colors = [
+                    { t: 'text-blue-600', b: 'bg-blue-50', br: 'border-blue-100', h: 'hover:border-blue-300' },
+                    { t: 'text-orange-500', b: 'bg-orange-50', br: 'border-orange-100', h: 'hover:border-orange-300' },
+                    { t: 'text-emerald-600', b: 'bg-emerald-50', br: 'border-emerald-100', h: 'hover:border-emerald-300' },
+                    { t: 'text-rose-500', b: 'bg-rose-50', br: 'border-rose-100', h: 'hover:border-rose-300' },
+                    { t: 'text-purple-600', b: 'bg-purple-50', br: 'border-purple-100', h: 'hover:border-purple-300' },
+                    { t: 'text-lime-600', b: 'bg-lime-50', br: 'border-lime-100', h: 'hover:border-lime-300' }
+                  ];
+                  const c = colors[idx % colors.length];
+                  const Icon = icons[idx % icons.length];
+                  
+                  return (
+                    <div key={idx} className={`bg-white border ${c.br} rounded-2xl p-5 shadow-sm ${c.h} transition-colors flex flex-col group cursor-pointer`} onClick={() => navigate(`/pathways/${activeLevelSlug}/${pathway.slug}`)}>
+                      <div className={`w-12 h-12 rounded-xl ${c.b} ${c.t} flex items-center justify-center mb-4`}><Icon className="w-6 h-6"/></div>
+                      <h3 className="font-bold text-sm text-gray-900 leading-tight mb-1">{pathway.name}</h3>
+                      <p className="text-[10px] font-medium text-gray-500 mb-4">{pathway.description || 'Typically 2-4 years'}</p>
+                      
+                      <div className="space-y-2 mb-6 flex-1">
+                        {pathway.streams?.slice(0,3).map((s, i) => (
+                          <div key={i} className="flex items-center gap-2 text-[11px] font-bold text-gray-700">
+                            <CheckCircle className={`w-3.5 h-3.5 ${c.t}`} /> {s.name}
+                          </div>
+                        )) || (
+                          <div className="text-[11px] font-medium text-gray-400 italic">No streams listed</div>
+                        )}
+                        {(pathway.streams?.length || 0) > 3 && (
+                          <div className="text-[10px] font-bold text-blue-600 pl-5">+ More streams</div>
+                        )}
+                      </div>
+                      
+                      <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-100">
+                        <button className={`text-[11px] font-bold ${c.t} group-hover:underline flex items-center gap-1`}>
+                          Explore {pathway.streams?.length ? 'Streams' : 'Courses'} <ArrowRight className="w-3 h-3"/>
+                        </button>
+                        <button className="w-7 h-7 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-rose-500 transition-colors" onClick={(e) => { e.stopPropagation(); }}>
+                          <Heart className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="text-center py-10 bg-white rounded-2xl border border-gray-200">
+                <Target className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+                <h3 className="text-sm font-bold text-gray-900">No Pathways Found</h3>
+                <p className="text-[11px] text-gray-500 mt-1">Try selecting a different education level.</p>
               </div>
             )}
           </div>
-          
-          <div className="flex flex-wrap items-center gap-3">
-            <button onClick={() => navigate('/pathways/after-10th')} className="bg-[#1C64F2] hover:bg-blue-600 px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors shadow-sm">Explore After 10th</button>
-            <button onClick={() => navigate('/pathways/after-12th')} className="bg-transparent border border-blue-400/40 hover:bg-white/10 px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors">Explore After 12th</button>
-            <button onClick={() => navigate('/pathways/degree')} className="bg-transparent border border-blue-400/40 hover:bg-white/10 px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors">Explore Degrees</button>
-            <button onClick={() => navigate('/careers')} className="bg-transparent border border-blue-400/40 hover:bg-white/10 px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors">Explore Careers</button>
-          </div>
-        </div>
-        
-        <div className="absolute top-8 right-8 z-20">
-          <button onClick={() => navigate('/aptitude')} className="bg-white text-[#2B3B94] px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 hover:bg-gray-50 transition-colors shadow-[0_4px_14px_rgba(0,0,0,0.1)]">
-            <Sparkles className="w-4 h-4 text-yellow-500" /> Take Aptitude Test <ArrowRight className="w-4 h-4" />
-          </button>
-        </div>
-        
-        <div className="hidden md:flex absolute right-4 bottom-0 top-0 w-[35%] items-end justify-center pointer-events-none z-0">
-           <img 
-             src="/images/education_hero_3d.jpg" 
-             alt="Education" 
-             className="w-[80%] object-contain mb-10 drop-shadow-2xl rounded-[32px] mix-blend-luminosity hover:mix-blend-normal transition-all duration-700" 
-           />
-        </div>
-      </div>
 
-      {/* TOP STATS STRIP */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-5 mb-8">
-        <div className="bg-white border border-gray-100 shadow-sm rounded-2xl p-5 flex flex-col justify-between hover:-translate-y-1 transition-transform">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-8 h-8 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center shrink-0"><Layers className="w-4 h-4" /></div>
-            <div className="text-xs font-bold text-gray-500 uppercase tracking-wider">Pathways</div>
-          </div>
-          {stats ? <div className="text-2xl font-black text-[#2B3B94]">{stats.pathways}</div> : <div className="h-8 bg-gray-100 rounded w-12"></div>}
-        </div>
-        <div className="bg-white border border-gray-100 shadow-sm rounded-2xl p-5 flex flex-col justify-between hover:-translate-y-1 transition-transform">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-8 h-8 rounded-full bg-slate-50 text-slate-600 flex items-center justify-center shrink-0"><BookOpen className="w-4 h-4" /></div>
-            <div className="text-xs font-bold text-gray-500 uppercase tracking-wider">Streams</div>
-          </div>
-          {stats ? <div className="text-2xl font-black text-[#2B3B94]">{stats.streams}</div> : <div className="h-8 bg-gray-100 rounded w-12"></div>}
-        </div>
-        <div className="bg-white border border-gray-100 shadow-sm rounded-2xl p-5 flex flex-col justify-between hover:-translate-y-1 transition-transform">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-8 h-8 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center shrink-0"><GraduationCap className="w-4 h-4" /></div>
-            <div className="text-xs font-bold text-gray-500 uppercase tracking-wider">Courses</div>
-          </div>
-          {stats ? <div className="text-2xl font-black text-emerald-600">{stats.courses.toLocaleString()}</div> : <div className="h-8 bg-gray-100 rounded w-16"></div>}
-        </div>
-        <div className="bg-white border border-gray-100 shadow-sm rounded-2xl p-5 flex flex-col justify-between hover:-translate-y-1 transition-transform">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-8 h-8 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center shrink-0"><Building className="w-4 h-4" /></div>
-            <div className="text-xs font-bold text-gray-500 uppercase tracking-wider">Branches</div>
-          </div>
-          {stats ? <div className="text-2xl font-black text-purple-600">{stats.branches.toLocaleString()}</div> : <div className="h-8 bg-gray-100 rounded w-16"></div>}
-        </div>
-        <div className="bg-white border border-gray-100 shadow-sm rounded-2xl p-5 flex flex-col justify-between hover:-translate-y-1 transition-transform">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-8 h-8 rounded-full bg-orange-50 text-orange-500 flex items-center justify-center shrink-0"><Briefcase className="w-4 h-4" /></div>
-            <div className="text-xs font-bold text-gray-500 uppercase tracking-wider">Careers</div>
-          </div>
-          {stats ? <div className="text-2xl font-black text-orange-600">{stats.careers.toLocaleString()}</div> : <div className="h-8 bg-gray-100 rounded w-16"></div>}
-        </div>
-      </div>
-
-      {/* FILTERS SECTION */}
-      <div className="bg-white border border-gray-200 rounded-2xl p-5 mb-10 flex flex-wrap items-center gap-4 shadow-sm">
-        <div className="flex items-center gap-2 text-gray-700 font-bold mr-2">
-          <Filter className="w-5 h-5 text-[#2B3B94]" /> Filters:
-        </div>
-        
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold text-gray-500 uppercase">Duration</span>
-          <select 
-            value={filters.duration} 
-            onChange={(e) => setFilters({...filters, duration: e.target.value})}
-            className="bg-gray-50 border border-gray-200 text-sm rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-[#2B3B94] outline-none"
-          >
-            <option value="Any">Any</option>
-            <option value="1-2 Years">1-2 Years</option>
-            <option value="3 Years">3 Years</option>
-            <option value="4+ Years">4+ Years</option>
-          </select>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold text-gray-500 uppercase">Course Type</span>
-          <select 
-            value={filters.courseType} 
-            onChange={(e) => setFilters({...filters, courseType: e.target.value})}
-            className="bg-gray-50 border border-gray-200 text-sm rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-[#2B3B94] outline-none"
-          >
-            <option value="Any">Any</option>
-            <option value="Degree">Degree</option>
-            <option value="Diploma">Diploma</option>
-            <option value="Certification">Certification</option>
-          </select>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold text-gray-500 uppercase">Eligibility</span>
-          <select 
-            value={filters.eligibility} 
-            onChange={(e) => setFilters({...filters, eligibility: e.target.value})}
-            className="bg-gray-50 border border-gray-200 text-sm rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-[#2B3B94] outline-none"
-          >
-            <option value="Any">Any</option>
-            <option value="10th Pass">10th Pass</option>
-            <option value="12th Pass">12th Pass</option>
-            <option value="UG Degree">UG Degree</option>
-          </select>
-        </div>
-
-        <div className="ml-auto flex items-center gap-3">
-           <button 
-             onClick={() => setFilters({ duration: 'Any', courseType: 'Any', eligibility: 'Any' })}
-             className="text-sm font-semibold text-gray-500 hover:text-gray-800 transition-colors"
-           >
-             Clear All
-           </button>
-           <button className="bg-[#2B3B94] text-white px-5 py-1.5 rounded-lg text-sm font-bold shadow-sm hover:bg-blue-800 transition-colors">
-             Apply
-           </button>
-        </div>
-      </div>
-
-      {/* EDUCATION LEVEL TABS */}
-      <div className="mb-6">
-        <h3 className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-3 pl-1">EDUCATION LEVEL</h3>
-        <div className="flex space-x-2 overflow-x-auto hide-scrollbar pb-2">
-          {educationLevels.map(level => (
-            <button
-              key={level._id}
-              onClick={() => setActiveLevel(level.slug)}
-              className={`px-6 py-2.5 rounded-lg text-sm font-bold whitespace-nowrap transition-all ${
-                activeLevelSlug === level.slug
-                  ? 'bg-[#1C64F2] text-white shadow-[0_2px_10px_rgba(28,100,242,0.3)]'
-                  : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50 hover:text-gray-900'
-              }`}
-            >
-              {level.name}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* DYNAMIC CONTENT AREA */}
-      {loading ? (
-        <div className="flex justify-center py-20">
-          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#1C64F2]"></div>
-        </div>
-      ) : activeLevel ? (
-        <>
-          {/* VIEW: COURSE EXPLORER (STREAM SELECTED) */}
-          {streamSlug ? (
-            loadingStream ? (
-              <div className="flex justify-center py-20">
-                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#1C64F2]"></div>
-              </div>
-            ) : streamDetails ? (
-              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 mb-16">
-                
-                {/* PATHWAY TREE */}
-                <PathwayTree 
-                  levelSlug={activeLevelSlug} 
-                  pathwaySlug={pathwaySlug} 
-                  streamSlug={streamSlug} 
-                  comboSlug={comboSlug}
-                  levelName={activeLevel?.name}
-                  pathwayName={activePathway?.name}
-                  streamName={streamDetails.name}
-                  comboName={selectedCombination?.name}
-                />
-
-                {/* STREAM HEADER (When viewing stream root) */}
-                {!comboSlug && (
-                  <>
-                    <div className="bg-white border border-gray-200 rounded-[24px] p-8 shadow-sm mb-8">
-                        <div className="flex flex-col md:flex-row md:items-center gap-6 justify-between border-b border-gray-100 pb-8 mb-8">
-                            <div className="flex items-center gap-5">
-                                <div className="w-16 h-16 bg-[#2B3B94] text-white rounded-2xl flex items-center justify-center shrink-0 shadow-md">
-                                    <Activity className="w-8 h-8" />
-                                </div>
-                                <div>
-                                    <div className="text-[11px] font-extrabold tracking-widest text-[#1C64F2] uppercase mb-1">STREAM</div>
-                                    <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">{streamDetails.name?.toUpperCase() || 'STREAM'}</h2>
-                                    <p className="text-gray-500 mt-1">Explore {streamDetails.name || 'this stream\'s'} subject combinations, higher-education courses, branches, entrance exams and career opportunities.</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* DYNAMIC STREAM STATS */}
-                        {( (streamDetails.subjectCombinations && streamDetails.subjectCombinations.length > 0) || 
-                           (streamDetails.courses && streamDetails.courses.length > 0) ) && (
-                            <div className="flex flex-wrap gap-4 items-center bg-gray-50 p-4 rounded-xl border border-gray-100">
-                                {streamStats.combos > 0 && (
-                                    <>
-                                        <div className="text-center px-4 border-r border-gray-200">
-                                            <div className="text-2xl font-black text-gray-900">{streamStats.combos}</div>
-                                            <div className="text-[10px] uppercase font-bold text-gray-500">Subject Combinations</div>
-                                        </div>
-                                        <div className="text-center px-4 border-r border-gray-200">
-                                            <div className="text-2xl font-black text-gray-900">{streamStats.subjects}</div>
-                                            <div className="text-[10px] uppercase font-bold text-gray-500">Subjects</div>
-                                        </div>
-                                    </>
-                                )}
-                                <div className="text-center px-4 border-r border-gray-200">
-                                    <div className="text-2xl font-black text-emerald-600">{streamStats.courses}</div>
-                                    <div className="text-[10px] uppercase font-bold text-gray-500">Courses</div>
-                                </div>
-                                <div className="text-center px-4 border-r border-gray-200">
-                                    <div className="text-2xl font-black text-purple-600">{streamStats.branches}</div>
-                                    <div className="text-[10px] uppercase font-bold text-gray-500">Branches</div>
-                                </div>
-                                <div className="text-center px-4">
-                                    <div className="text-2xl font-black text-orange-600">{streamStats.careers}</div>
-                                    <div className="text-[10px] uppercase font-bold text-gray-500">Careers</div>
-                                </div>
-                            </div>
-                        )}
-                        {(streamDetails.trades && streamDetails.trades.length > 0) && (
-                            <div className="flex flex-wrap gap-4 items-center bg-gray-50 p-4 rounded-xl border border-gray-100">
-                                <div className="text-center px-4 border-r border-gray-200">
-                                    <div className="text-2xl font-black text-emerald-600">{streamDetails.trades.length}</div>
-                                    <div className="text-[10px] uppercase font-bold text-gray-500">Trades</div>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                    
-                    {/* EXAM SCHEDULES */}
-                      {!loadingSchedules && examSchedules && examSchedules.length > 0 && (
-                        <div className="bg-white border border-gray-200 rounded-[24px] p-6 shadow-sm mb-8">
-                          <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-                            <TargetIcon className="w-5 h-5 text-[#2B3B94]" /> Official Exam Schedule
-                          </h3>
-                          <div className="overflow-x-auto">
-                            <table className="w-full text-left border-collapse">
-                              <thead>
-                                <tr className="border-b border-gray-200 bg-gray-50">
-                                  <th className="p-3 text-xs font-bold text-gray-500 uppercase">Exam Type</th>
-                                  <th className="p-3 text-xs font-bold text-gray-500 uppercase">Subject</th>
-                                  <th className="p-3 text-xs font-bold text-gray-500 uppercase">Date</th>
-                                  <th className="p-3 text-xs font-bold text-gray-500 uppercase">Time</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {examSchedules.map(schedule => (
-                                  <tr key={schedule._id} className="border-b border-gray-100 hover:bg-gray-50">
-                                    <td className="p-3 text-sm font-semibold text-gray-700">{schedule.examType}</td>
-                                    <td className="p-3 text-sm font-bold text-[#1C64F2]">{schedule.subjectName}</td>
-                                    <td className="p-3 text-sm text-gray-600">{schedule.date}</td>
-                                    <td className="p-3 text-sm text-gray-500">{schedule.time || 'N/A'}</td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          </div>
-                        </div>
-                      )}
-
-                    {/* COMBINATIONS CARDS GRID */}
-                    {streamDetails.subjectCombinations && streamDetails.subjectCombinations.length > 0 ? (
-                        <div>
-                            <h3 className="font-extrabold text-xl text-gray-900 mb-6">Choose a subject combination</h3>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                                {streamDetails.subjectCombinations.map(combo => (
-                                    <div key={combo._id} className="bg-white border border-gray-200 rounded-2xl p-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:border-blue-300 hover:shadow-lg transition-all flex flex-col h-full">
-                                        <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">{streamDetails.name}</div>
-                                        <h4 className="text-2xl font-black text-[#2B3B94] mb-4">{combo.name}</h4>
-                                          <ul className="space-y-3 mb-6">
-                                              {combo.subjects?.map(sub => sub && (
-                                                  <li key={sub._id} className="text-sm font-semibold text-gray-700 flex flex-col gap-1">
-                                                      <div className="flex items-center gap-2">
-                                                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div> {sub.name}
-                                                      </div>
-                                                      {(sub.syllabusWeightage || sub.practicalComponent) && (
-                                                        <div className="pl-3.5 text-xs text-gray-500 font-medium">
-                                                          {sub.syllabusWeightage && <span className="block border-l-2 border-blue-200 pl-2 mb-0.5">{sub.syllabusWeightage}</span>}
-                                                          {sub.practicalComponent && <span className="block border-l-2 border-green-200 pl-2">{sub.practicalComponent}</span>}
-                                                        </div>
-                                                      )}
-                                                  </li>
-                                              ))}
-                                          </ul>
-                                        <div className="mt-auto pt-5 border-t border-gray-100">
-                                            <p className="text-xs text-gray-500 mb-4 font-medium line-clamp-2">Best suited for: {streamDetails.name} and related fields.</p>
-                                            <button onClick={() => navigateCombo(combo.slug)} className="w-full bg-[#1C64F2] hover:bg-blue-700 text-white font-bold text-sm py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2">
-                                                Explore Combination <ArrowRight className="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    ) : streamDetails.courses && streamDetails.courses.length > 0 ? (
-                        <div className="bg-white border border-gray-200 rounded-[24px] p-8 shadow-sm">
-                            <h3 className="font-bold text-gray-900 mb-6 text-xl">{streamDetails.name} Courses</h3>
-                            <div className="grid grid-cols-1 gap-6">
-                                {streamDetails.courses.map(course => (
-                                    <div key={course._id} className="border border-gray-100 rounded-xl p-6 shadow-sm hover:border-emerald-200 transition-colors relative">
-                                        <div className="absolute top-4 right-4 z-10">
-                                            <label className="flex items-center gap-2 cursor-pointer bg-white/90 px-2 py-1 rounded-md shadow-sm border border-gray-100">
-                                                <input 
-                                                    type="checkbox" 
-                                                    className="w-4 h-4 text-[#2B3B94] rounded border-gray-300 focus:ring-[#2B3B94]"
-                                                    checked={selectedCourses.some(c => c._id === course._id)}
-                                                    onChange={() => toggleCourseComparison(course as unknown as CourseData)}
-                                                />
-                                                <span className="text-xs font-bold text-gray-500 uppercase">Compare</span>
-                                            </label>
-                                        </div>
-                                        <div className="flex items-center gap-3 mb-4">
-                                            <div className="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-                                                <GraduationCap className="w-5 h-5" />
-                                            </div>
-                                            <h4 className="font-bold text-lg text-gray-900">{course.name}</h4>
-                                        </div>
-                                        {course.description && (
-                                            <p className="text-sm text-gray-600 mb-4 line-clamp-2">{course.description}</p>
-                                        )}
-                                        <div className="flex flex-wrap gap-2 mb-4">
-                                          {course.duration && (
-                                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-blue-50 text-blue-700 border border-blue-100">
-                                              <Activity className="w-3.5 h-3.5" /> Duration: {course.duration}
-                                            </span>
-                                          )}
-                                          {course.eligibility && (
-                                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-purple-50 text-purple-700 border border-purple-100">
-                                              <CheckCircle className="w-3.5 h-3.5" /> {course.eligibility}
-                                            </span>
-                                          )}
-                                        </div>
-                                        {course.branches && course.branches.length > 0 && (
-                                            <div className="mt-4 pt-4 border-t border-gray-100">
-                                                <h5 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Available Branches / Options</h5>
-                                                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                                    {course.branches.map(branch => (
-                                                        <li key={branch._id} 
-                                                            onClick={(e) => { e.stopPropagation(); navigate(`/courses/${branch.slug}`); }}
-                                                            className="text-sm font-semibold text-gray-700 flex flex-col items-start gap-1 bg-gray-50 p-2.5 rounded-lg border border-gray-100 cursor-pointer hover:border-blue-300 hover:shadow-sm transition-all group">
-                                                          <div className="flex items-center gap-2">
-                                                            <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 shrink-0 group-hover:bg-[#1C64F2] transition-colors"></span>
-                                                            <span className="leading-tight group-hover:text-blue-700 transition-colors">{branch.name}</span>
-                                                          </div>
-                                                          {branch.specializations && branch.specializations.length > 0 && (
-                                                            <div className="pl-3.5 text-xs text-gray-500 font-medium">
-                                                              <span className="font-semibold">Specializations:</span> {branch.specializations.join(', ')}
-                                                            </div>
-                                                          )}
-                                                          {branch.exampleInstitutions && branch.exampleInstitutions.length > 0 && (
-                                                            <div className="pl-3.5 text-xs text-emerald-600 font-medium mt-1">
-                                                              <span className="font-semibold">E.g.,</span> {branch.exampleInstitutions.join(', ')}
-                                                            </div>
-                                                          )}
-                                                        </li>
-                                                    ))}
-                                                </ul>
-                                            </div>
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    ) : streamDetails.trades && streamDetails.trades.length > 0 ? (
-                        <div className="bg-white border border-gray-200 rounded-[24px] p-8 shadow-sm">
-                            <h3 className="font-bold text-gray-900 mb-6 text-xl">{streamDetails.name} Trades</h3>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {streamDetails.trades.map((trade: any) => (
-                                    <div key={trade._id} className="border border-gray-100 rounded-xl p-6 shadow-sm hover:border-blue-300 transition-colors">
-                                        <div className="flex items-center gap-3 mb-4">
-                                            <div className="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-                                                <Wrench className="w-5 h-5" />
-                                            </div>
-                                            <h4 className="font-bold text-lg text-gray-900">{trade.name}</h4>
-                                        </div>
-                                          <div className="space-y-2 mt-4 text-sm text-gray-600">
-                                              {trade.duration && <p><strong>Duration:</strong> {trade.duration}</p>}
-                                              {trade.eligibility && <p><strong>Eligibility:</strong> {trade.eligibility}</p>}
-                                              {trade.averageStartingSalary && <p><strong>Starting Salary:</strong> <span className="text-emerald-700 font-semibold">{trade.averageStartingSalary}</span></p>}
-                                              {trade.apprenticeshipOpportunities && <p><strong>Apprenticeship:</strong> Yes</p>}
-                                              {trade.careerOpportunities && trade.careerOpportunities.length > 0 && (
-                                                <div className="mt-2 pt-2 border-t border-gray-100">
-                                                  <p className="font-semibold text-xs text-gray-500 mb-1">Career Opportunities</p>
-                                                  <div className="flex flex-wrap gap-1">
-                                                    {trade.careerOpportunities.map((opp: string, idx: number) => (
-                                                      <span key={idx} className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-[10px] font-medium">{opp}</span>
-                                                    ))}
-                                                  </div>
-                                                </div>
-                                              )}
-                                          </div>
-                                      </div>
-                                  ))}
-                            </div>
-                        </div>
-                    ) : streamDetails.branches && streamDetails.branches.length > 0 ? (
-                        <div className="bg-white border border-gray-200 rounded-[24px] p-8 shadow-sm">
-                            <h3 className="font-bold text-gray-900 mb-6 text-xl">{streamDetails.name} Specializations</h3>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {streamDetails.branches.map((branch: any) => (
-                                    <div key={branch._id} className="border border-gray-100 rounded-xl p-6 shadow-sm hover:border-blue-300 transition-colors cursor-pointer group" onClick={() => navigate(`/branches/${branch.slug}`)}>
-                                        <div className="flex items-center gap-3 mb-4">
-                                            <div className="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-                                                <Layers className="w-5 h-5" />
-                                            </div>
-                                            <h4 className="font-bold text-lg text-gray-900 group-hover:text-blue-600 transition-colors">{branch.name}</h4>
-                                        </div>
-                                          <div className="space-y-2 mt-4 text-sm text-gray-600">
-                                              {branch.duration && <p><strong>Duration:</strong> {branch.duration}</p>}
-                                              {branch.specializations && branch.specializations.length > 0 && (
-                                                <div className="mt-3">
-                                                  <p className="font-semibold text-xs text-gray-500 mb-1">Key Focus Areas</p>
-                                                  <div className="flex flex-wrap gap-1">
-                                                    {branch.specializations.map((spec: string, idx: number) => (
-                                                      <span key={idx} className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-[10px] font-medium">{spec}</span>
-                                                    ))}
-                                                  </div>
-                                                </div>
-                                              )}
-                                              {branch.exampleInstitutions && branch.exampleInstitutions.length > 0 && (
-                                                <div className="mt-3 pt-3 border-t border-gray-100 text-xs text-emerald-700 font-medium">
-                                                  <span className="font-bold">E.g.,</span> {branch.exampleInstitutions.join(', ')}
-                                                </div>
-                                              )}
-                                          </div>
-                                      </div>
-                                  ))}
-                            </div>
-                        </div>
-                    ) : (
-                         <div className="bg-white border border-gray-200 rounded-[24px] p-8 shadow-sm text-center">
-                            <h3 className="font-bold text-gray-900 mb-2 text-lg">No Information Available</h3>
-                            <p className="text-gray-500 text-sm">We are still compiling details for this stream. Please check back later.</p>
-                        </div>
-                    )}
-                  </>
-                )}
-
-                {/* COMBINATION DETAIL VIEW */}
-                {comboSlug && selectedCombination && (
-                    (() => {
-                        const combo = selectedCombination;
-                        if (!combo) return null;
-                        return (
-                            <div className="bg-white border border-gray-200 rounded-[24px] p-8 shadow-sm">
-                                <div className="border-b border-gray-100 pb-8 mb-8">
-                                    <div className="text-[11px] font-extrabold tracking-widest text-[#1C64F2] uppercase mb-2">SUBJECT COMBINATION</div>
-                                    <h2 className="text-4xl font-black text-[#2B3B94] mb-6">{combo.name}</h2>
-                                    
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                        <div className="bg-blue-50/50 border border-blue-100 rounded-2xl p-6">
-                                            <h4 className="text-[11px] font-bold uppercase tracking-widest text-blue-600 mb-4">SUBJECTS</h4>
-                                            <ul className="space-y-3">
-                                                {combo.subjects?.map(sub => sub && (
-                                                    <li key={sub._id} className="text-sm font-bold text-gray-800 flex items-center gap-3">
-                                                        <div className="w-2 h-2 rounded-full bg-blue-500"></div> {sub.name}
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        </div>
-                                        <div className="bg-gray-50 border border-gray-200 rounded-2xl p-6">
-                                            <h4 className="text-[11px] font-bold uppercase tracking-widest text-gray-500 mb-4">ELIGIBILITY</h4>
-                                            <p className="text-sm text-gray-800 font-medium leading-relaxed">
-                                                {combo.eligibility || 'Passed 10th / SSLC or equivalent.'}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <h3 className="font-black text-xl text-gray-900 mb-8 uppercase tracking-wide">POSSIBLE HIGHER EDUCATION AREAS</h3>
-                                    
-                                    {/* Group courses by higherStudyArea */}
-                                    <div className="space-y-8">
-                                        {Object.entries(
-                                            (combo.ugCourses || []).reduce((acc: any, ug: any) => {
-                                                const area = ug.higherStudyArea || 'Other';
-                                                if (!acc[area]) acc[area] = [];
-                                                acc[area].push(ug);
-                                                return acc;
-                                            }, {})
-                                        ).map(([area, ugs]: [string, any]) => (
-                                            <div key={area} className="border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
-                                                <div className="bg-gray-50 px-6 py-4 border-b border-gray-200 flex items-center gap-3">
-                                                    <GraduationCap className="w-6 h-6 text-emerald-600" />
-                                                    <h4 className="font-extrabold text-lg text-gray-900 uppercase tracking-widest">{area}</h4>
-                                                </div>
-                                                <div className="p-6">
-                                                    <div className="grid grid-cols-1 gap-6">
-                                                        {ugs.map((ug: any) => (
-                                                            <div key={ug._id} className="border border-gray-100 rounded-xl p-5 hover:border-emerald-200 transition-colors">
-                                                                <h5 className="font-bold text-emerald-700 text-lg mb-4">{ug.name}</h5>
-                                                                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                                                  {ug.branches?.map((branch: any) => (
-                                                                    <li key={branch._id} 
-                                                                        onClick={(e) => { e.stopPropagation(); navigate(`/courses/${branch.slug}`); }}
-                                                                        className="text-sm font-semibold text-gray-700 flex flex-col items-start gap-1 bg-gray-50 p-2.5 rounded-lg border border-gray-100 cursor-pointer hover:border-blue-300 hover:shadow-sm transition-all group">
-                                                                      <div className="flex items-center gap-2">
-                                                                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0 group-hover:bg-blue-500 transition-colors"></span>
-                                                                        <span className="leading-tight group-hover:text-blue-700 transition-colors">{branch.name}</span>
-                                                                      </div>
-                                                                      {branch.specializations && branch.specializations.length > 0 && (
-                                                                        <div className="pl-3.5 text-xs text-gray-500 font-medium">
-                                                                          <span className="font-semibold">Specializations:</span> {branch.specializations.join(', ')}
-                                                                        </div>
-                                                                      )}
-                                                                      {branch.exampleInstitutions && branch.exampleInstitutions.length > 0 && (
-                                                                        <div className="pl-3.5 text-xs text-emerald-600 font-medium mt-1">
-                                                                          <span className="font-semibold">E.g.,</span> {branch.exampleInstitutions.join(', ')}
-                                                                        </div>
-                                                                      )}
-                                                                    </li>
-                                                                  ))}
-                                                                </ul>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-                        );
-                    })()
-                )}
-
-              </div>
-            ) : null
-          ) 
-
-          /* VIEW: STREAMS EXPLORER (PATHWAY SELECTED) */
-          : pathwaySlug && activePathway ? (
-            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 mb-16">
-              <PathwayTree 
-                  levelSlug={activeLevelSlug} 
-                  pathwaySlug={pathwaySlug}
-                  levelName={activeLevel?.name}
-                  pathwayName={activePathway?.name}
-              />
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {activePathway.streams.map((stream, idx) => (
-                  <div key={stream._id} onClick={() => navigateStream(stream.slug)} className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:-translate-y-1 transition-all cursor-pointer flex flex-col h-[280px]">
-                    <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-5 shrink-0">
-                      <BookOpen className="w-6 h-6" />
-                    </div>
-                    <h3 className="text-lg font-bold text-gray-900 mb-2">{stream.name}</h3>
-                    <p className="text-sm text-gray-500 mb-4 line-clamp-3">Explore specialized subject combinations, courses and detailed branches available under this stream.</p>
-                    
-                    <div className="mt-auto pt-4 border-t border-gray-100 flex flex-col gap-2">
-                      <div className="flex justify-between items-center text-xs font-semibold text-gray-500">
-                        <span>{stream.comboCount || 0} Subject Combinations</span>
-                        <span>{stream.courseCount || 0} Courses</span>
-                      </div>
-                      <button className="text-blue-600 text-sm font-bold flex items-center gap-1 group-hover:text-blue-700 w-full justify-center bg-blue-50 py-2 rounded-lg mt-2">
-                        Explore Stream <ArrowRight className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
+          {/* FEATURED STREAMS */}
+          <div className="mt-8">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-black text-gray-900">Featured Streams (After 10th → 12th)</h2>
+              <button className="text-xs font-bold text-blue-600 hover:underline">View All Streams →</button>
             </div>
-          )
-
-          /* VIEW: PATHWAYS EXPLORER (DEFAULT TOP-LEVEL) */
-          : (
-            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-              {activeLevel.pathways && activeLevel.pathways.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-5 mb-6">
-                    {activeLevel.pathways.map((pathway, i) => {
-                      const ui = getPathwayIcon(pathway.name, i);
-                      
-                      let durationStr = pathway.duration || '2 Years';
-
-                      return (
-                        <div key={pathway._id} className="bg-white border border-gray-200 rounded-2xl p-6 flex flex-col h-[380px] hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] hover:border-gray-300 transition-all group">
-                          <div className={`w-10 h-10 rounded-lg ${ui.bg} ${ui.color} flex items-center justify-center mb-4 shrink-0`}>
-                            <ui.icon className="w-5 h-5" />
-                          </div>
-                          <h4 className="font-bold text-gray-900 text-sm mb-1 leading-snug">{pathway.name}</h4>
-                          <p className="text-[11px] text-gray-500 mb-5 font-medium">Duration: {durationStr}</p>
-                          
-                          <div className="flex-1 overflow-hidden">
-                            <p className="text-[11px] text-gray-500 font-semibold mb-2 uppercase tracking-wider">Streams:</p>
-                            <ul className="space-y-2 mb-4">
-                              {pathway.streams.slice(0, 5).map(stream => (
-                                <li key={stream._id} className="text-[13px] text-gray-700 flex items-start gap-2 leading-tight">
-                                  <span className="w-1 h-1 rounded-full bg-gray-400 mt-1.5 shrink-0"></span>
-                                  <span className="line-clamp-2">{stream.name}</span>
-                                </li>
-                              ))}
-                              {pathway.streams.length > 5 && (
-                                <li className="text-[11px] text-blue-600 font-medium pl-3 italic">
-                                  + {pathway.streams.length - 5} more streams
-                                </li>
-                              )}
-                            </ul>
-                          </div>
-                          
-                          <button 
-                            onClick={() => navigatePathway(pathway.slug)}
-                            className="text-blue-600 text-[13px] font-bold flex items-center justify-center gap-1.5 mt-auto pt-3 pb-1 border border-blue-100 rounded-lg bg-blue-50 group-hover:bg-blue-600 group-hover:text-white transition-colors"
-                          >
-                            Explore Streams <ArrowRight className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      );
-                    })}
-                  </div>
-              ) : (
-                  <div className="bg-white border border-gray-200 rounded-2xl p-10 flex flex-col items-center justify-center text-center shadow-sm mb-8 min-h-[300px]">
-                      <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                          <BookOpen className="w-8 h-8 text-gray-400" />
-                      </div>
-                      <h3 className="font-bold text-xl text-gray-900 mb-2">No Pathways Available</h3>
-                      <p className="text-gray-500 max-w-md">We are currently compiling and updating the pathways for this education level. Please check back later or explore the "After 10th" level.</p>
-                      <button 
-                        onClick={() => navigate('/pathways/after-10th')}
-                        className="mt-6 px-6 py-2.5 bg-[#1C64F2] text-white font-bold rounded-lg hover:bg-blue-700 transition-colors"
-                      >
-                        Explore After 10th
-                      </button>
-                  </div>
-              )}
-            </div>
-          )}
-
-          {/* RESTORED BOTTOM CONTENT (Flow, Why, Explores) */}
-          <div className="mt-16 border-t border-gray-200 pt-16">
             
-            {/* HOW IT WORKS / FLOW */}
-            <div className="mb-20">
-              <div className="text-center mb-12">
-                <div className="inline-flex items-center justify-center px-4 py-1.5 bg-blue-100 text-blue-700 font-bold text-xs uppercase tracking-widest rounded-full mb-4">
-                  The Journey
-                </div>
-                <h2 className="text-3xl font-black text-gray-900 tracking-tight">How to Plan Your Pathway</h2>
-                <p className="text-gray-500 mt-3 max-w-2xl mx-auto">Follow these steps to discover the perfect educational and career trajectory for your future.</p>
-              </div>
+            <div className="flex gap-4 overflow-x-auto pb-4 snap-x hide-scrollbar" style={{ scrollbarWidth: 'none' }}>
+               {[
+                 { title: 'Science', combinations: '3 major combinations', desc: 'PCM, PCB, PCMB + more', icon: TargetIcon, color: 'text-blue-600', bg: 'bg-blue-50' },
+                 { title: 'Commerce', combinations: '2 major combinations', desc: 'With Math, Without Math', icon: Briefcase, color: 'text-orange-600', bg: 'bg-orange-50' },
+                 { title: 'Arts / Humanities', combinations: 'Multiple subjects', desc: 'History, Economics + more', icon: Palette, color: 'text-purple-600', bg: 'bg-purple-50' }
+               ].map((stream, idx) => (
+                 <div key={idx} className="snap-start shrink-0 w-[260px] bg-white border border-gray-200 rounded-2xl p-5 shadow-sm hover:border-blue-300 transition-colors flex gap-4 cursor-pointer" onClick={() => navigate(`/pathways/${activeLevelSlug}/12th-intermediate/${stream.title.split(' ')[0].toLowerCase()}`)}>
+                   <div className={`w-10 h-10 rounded-xl ${stream.bg} ${stream.color} flex items-center justify-center shrink-0`}><stream.icon className="w-5 h-5"/></div>
+                   <div>
+                     <h3 className="font-bold text-sm text-gray-900 leading-tight mb-1">{stream.title}</h3>
+                     <div className="text-[10px] font-bold text-gray-600 mb-0.5">{stream.combinations}</div>
+                     <div className="text-[9px] font-medium text-gray-400 mb-3">{stream.desc}</div>
+                     <button className="text-[10px] font-bold text-blue-600 hover:underline flex items-center gap-1">View Details <ArrowRight className="w-3 h-3"/></button>
+                   </div>
+                 </div>
+               ))}
+               
+               {/* Recommended For You */}
+               <div className="snap-start shrink-0 w-[300px] bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-100 rounded-2xl p-5 shadow-sm flex gap-4">
+                 <div className="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-sm"><TargetIcon className="w-5 h-5"/></div>
+                 <div>
+                   <h3 className="font-bold text-sm text-gray-900 leading-tight mb-1">Recommended For You</h3>
+                   <div className="text-[10px] font-medium text-emerald-800 mb-3">Based on your profile and interests</div>
+                   <div className="flex flex-wrap gap-1.5 mb-3">
+                     <span className="text-[9px] font-bold bg-white text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded">Science</span>
+                     <span className="text-[9px] font-bold bg-white text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded">Engineering</span>
+                     <span className="text-[9px] font-bold bg-white text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded">Computer Science</span>
+                   </div>
+                   <button className="text-[10px] font-bold text-emerald-700 hover:underline flex items-center gap-1" onClick={() => navigate('/dashboard')}>View Recommendations <ArrowRight className="w-3 h-3"/></button>
+                 </div>
+               </div>
+            </div>
+          </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6 max-w-5xl mx-auto relative">
-                <div className="hidden md:block absolute top-1/2 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-100 via-blue-200 to-transparent -translate-y-1/2 z-0"></div>
-                
-                {[
-                  { step: '01', title: 'Explore Pathways', desc: 'Browse various options like 12th, Diploma, or ITI available after 10th.', icon: Search },
-                  { step: '02', title: 'Choose Stream', desc: 'Select a stream or subject combination that aligns with your interests.', icon: Target },
-                  { step: '03', title: 'Find Courses', desc: 'Discover Undergraduate and Professional courses for your chosen stream.', icon: GraduationCap },
-                  { step: '04', title: 'Pick Career', desc: 'Map your education directly to high-growth career opportunities.', icon: Briefcase }
-                ].map((item, idx) => (
-                  <div key={idx} className="relative z-10 flex flex-col items-center text-center group">
-                    <div className="w-16 h-16 rounded-2xl bg-white border border-gray-200 shadow-sm flex items-center justify-center mb-5 group-hover:scale-110 group-hover:border-blue-300 group-hover:shadow-md transition-all duration-300">
-                       <item.icon className="w-7 h-7 text-blue-600" />
-                    </div>
-                    <div className="text-sm font-black text-gray-300 mb-1">{item.step}</div>
-                    <h3 className="font-bold text-gray-900 text-lg mb-2">{item.title}</h3>
-                    <p className="text-sm text-gray-500 leading-relaxed px-4">{item.desc}</p>
+          {/* EDUCATION JOURNEY */}
+          <div className="mt-8 mb-8 bg-white border border-gray-200 rounded-2xl p-6 shadow-sm overflow-hidden">
+            <h2 className="text-base font-black text-gray-900 mb-6">Your Education Journey</h2>
+            
+            <div className="flex items-center justify-between relative">
+              <div className="absolute top-5 left-8 right-8 h-0.5 bg-gray-100 z-0"></div>
+              
+              {[
+                { label: '10th', desc: 'Complete 10th', icon: CheckCircle, color: 'text-emerald-500', bg: 'bg-emerald-50' },
+                { label: 'Choose Pathway', desc: 'Select your path', icon: Map, color: 'text-rose-500', bg: 'bg-rose-50' },
+                { label: 'Stream', desc: 'Pick your stream', icon: Target, color: 'text-blue-500', bg: 'bg-blue-50' },
+                { label: 'Course', desc: 'Choose a course', icon: BookOpen, color: 'text-teal-500', bg: 'bg-teal-50' },
+                { label: 'Branch', desc: 'Specialize further', icon: GitBranch, color: 'text-orange-500', bg: 'bg-orange-50' },
+                { label: 'Career', desc: 'Explore career options', icon: Briefcase, color: 'text-purple-500', bg: 'bg-purple-50' },
+                { label: 'Jobs', desc: 'Find job opportunities', icon: TargetIcon, color: 'text-pink-500', bg: 'bg-pink-50' }
+              ].map((step, idx) => (
+                <div key={idx} className="relative z-10 flex flex-col items-center w-20 text-center cursor-pointer group" onClick={() => navigate('/streams')}>
+                  <div className={`w-10 h-10 rounded-full ${step.bg} ${step.color} border-2 border-white shadow-sm flex items-center justify-center mb-2 group-hover:scale-110 transition-transform`}>
+                    <step.icon className="w-4 h-4"/>
                   </div>
-                ))}
-              </div>
-            </div>
-
-            {/* APTITUDE TEST CTA */}
-            <div className="bg-gradient-to-br from-[#2B3B94] to-[#1C64F2] rounded-[32px] p-10 md:p-14 text-white flex flex-col md:flex-row items-center justify-between shadow-2xl relative overflow-hidden group mb-8">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform duration-700"></div>
-              <div className="max-w-2xl relative z-10 mb-8 md:mb-0">
-                <h2 className="text-3xl md:text-4xl font-black mb-4 tracking-tight">Not sure which pathway is right for you?</h2>
-                <p className="text-blue-100 text-lg leading-relaxed">
-                  Take our AI-powered Aptitude Assessment. We analyze your strengths, interests, and personality to recommend the perfect educational stream and career path.
-                </p>
-              </div>
-              <div className="relative z-10 w-full md:w-auto flex shrink-0">
-                <button onClick={() => navigate('/aptitude')} className="w-full md:w-auto bg-white text-[#2B3B94] hover:bg-gray-50 px-8 py-4 rounded-2xl font-bold text-lg shadow-[0_8px_30px_rgba(0,0,0,0.2)] hover:shadow-[0_8px_30px_rgba(255,255,255,0.3)] transition-all flex items-center justify-center gap-3">
-                  Take Aptitude Test <ArrowRight className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-
-          </div>
-
-        </>
-      ) : (
-        <div className="text-center py-20 bg-white border border-gray-200 rounded-3xl">
-          <p className="text-gray-500 text-lg">No pathways found for this level.</p>
-        </div>
-      )}
-
-      {/* OVERALL OVERVIEW SECTION */}
-      {globalStats && (
-        <div className="mt-16 mb-8 border-t border-gray-200 pt-12">
-          <h3 className="text-sm font-extrabold text-gray-400 uppercase tracking-widest mb-6">Overall Overview</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-white border border-gray-100 rounded-xl p-5 hover:shadow-md transition-shadow flex items-center justify-between group cursor-pointer" onClick={() => navigate('/pathways')}>
-              <div>
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">All Pathways</p>
-                <p className="text-2xl font-black text-[#2B3B94]">{globalStats.pathways}</p>
-              </div>
-              <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-500 group-hover:bg-blue-500 group-hover:text-white transition-colors"><Layers className="w-5 h-5" /></div>
-            </div>
-            <div className="bg-white border border-gray-100 rounded-xl p-5 hover:shadow-md transition-shadow flex items-center justify-between group cursor-pointer" onClick={() => navigate('/pathways')}>
-              <div>
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">All Streams</p>
-                <p className="text-2xl font-black text-[#2B3B94]">{globalStats.streams}</p>
-              </div>
-              <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-500 group-hover:bg-slate-500 group-hover:text-white transition-colors"><BookOpen className="w-5 h-5" /></div>
-            </div>
-            <div className="bg-white border border-gray-100 rounded-xl p-5 hover:shadow-md transition-shadow flex items-center justify-between group cursor-pointer" onClick={() => navigate('/pathways')}>
-              <div>
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">All Courses</p>
-                <p className="text-2xl font-black text-emerald-600">{globalStats.courses.toLocaleString()}</p>
-              </div>
-              <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-500 group-hover:bg-emerald-500 group-hover:text-white transition-colors"><GraduationCap className="w-5 h-5" /></div>
-            </div>
-            <div className="bg-white border border-gray-100 rounded-xl p-5 hover:shadow-md transition-shadow flex items-center justify-between group cursor-pointer" onClick={() => navigate('/pathways')}>
-              <div>
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">All Branches</p>
-                <p className="text-2xl font-black text-purple-600">{globalStats.branches.toLocaleString()}</p>
-              </div>
-              <div className="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center text-purple-500 group-hover:bg-purple-500 group-hover:text-white transition-colors"><Building className="w-5 h-5" /></div>
-            </div>
-            <div className="bg-white border border-gray-100 rounded-xl p-5 hover:shadow-md transition-shadow flex items-center justify-between group cursor-pointer" onClick={() => navigate('/careers')}>
-              <div>
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">All Careers</p>
-                <p className="text-2xl font-black text-orange-600">{globalStats.careers.toLocaleString()}</p>
-              </div>
-              <div className="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center text-orange-500 group-hover:bg-orange-500 group-hover:text-white transition-colors"><Briefcase className="w-5 h-5" /></div>
-            </div>
-            <div className="bg-white border border-gray-100 rounded-xl p-5 hover:shadow-md transition-shadow flex items-center justify-between group cursor-pointer" onClick={() => navigate('/colleges')}>
-              <div>
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">All Colleges</p>
-                <p className="text-2xl font-black text-teal-600">{globalStats.colleges.toLocaleString()}</p>
-              </div>
-              <div className="w-10 h-10 rounded-full bg-teal-50 flex items-center justify-center text-teal-500 group-hover:bg-teal-500 group-hover:text-white transition-colors"><Building2 className="w-5 h-5" /></div>
-            </div>
-            <div className="bg-white border border-gray-100 rounded-xl p-5 hover:shadow-md transition-shadow flex items-center justify-between group cursor-pointer" onClick={() => navigate('/exams')}>
-              <div>
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">All Exams</p>
-                <p className="text-2xl font-black text-amber-500">{globalStats.exams.toLocaleString()}</p>
-              </div>
-              <div className="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center text-amber-500 group-hover:bg-amber-500 group-hover:text-white transition-colors"><ClipboardList className="w-5 h-5" /></div>
-            </div>
-            <div className="bg-white border border-gray-100 rounded-xl p-5 hover:shadow-md transition-shadow flex items-center justify-between group cursor-pointer" onClick={() => navigate('/jobs')}>
-              <div>
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">All Jobs</p>
-                <p className="text-2xl font-black text-indigo-500">{globalStats.jobs.toLocaleString()}</p>
-              </div>
-              <div className="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-500 group-hover:bg-indigo-500 group-hover:text-white transition-colors"><Users className="w-5 h-5" /></div>
+                  <div className="font-bold text-[10px] text-gray-900 leading-tight mb-0.5">{step.label}</div>
+                  <div className="text-[8px] font-medium text-gray-500 leading-tight">{step.desc}</div>
+                </div>
+              ))}
             </div>
           </div>
+
         </div>
-      )}
-      
+
+        {/* ======================= */}
+        {/* RIGHT RAIL CONTEXT (3 cols) */}
+        {/* ======================= */}
+        <div className="xl:col-span-3 flex flex-col gap-6">
+          
+          {/* Filter Pathways */}
+          <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-black text-gray-900 text-sm">Filter Pathways</h3>
+              <button className="text-[10px] font-bold text-blue-600 hover:underline">Reset</button>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-[10px] font-bold text-gray-700 mb-1">Education Level</label>
+                <select className="w-full bg-gray-50 border border-gray-200 text-xs font-medium text-gray-900 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+                  <option>After 10th</option>
+                  <option>After 12th</option>
+                  <option>Undergraduate</option>
+                  <option>Postgraduate</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-gray-700 mb-1">Pathway Type</label>
+                <select className="w-full bg-gray-50 border border-gray-200 text-xs font-medium text-gray-900 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+                  <option>All Pathways</option>
+                  <option>Diploma</option>
+                  <option>Degree</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-gray-700 mb-1">Stream</label>
+                <select className="w-full bg-gray-50 border border-gray-200 text-xs font-medium text-gray-900 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+                  <option>All Streams</option>
+                  <option>Science</option>
+                  <option>Commerce</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-gray-700 mb-1">Duration</label>
+                <select className="w-full bg-gray-50 border border-gray-200 text-xs font-medium text-gray-900 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+                  <option>All Durations</option>
+                  <option>1-2 Years</option>
+                  <option>3-4 Years</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-gray-700 mb-1">Location</label>
+                <select className="w-full bg-gray-50 border border-gray-200 text-xs font-medium text-gray-900 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+                  <option>All India</option>
+                </select>
+              </div>
+              
+              <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 rounded-lg transition-colors">
+                Apply Filters
+              </button>
+            </div>
+          </div>
+
+          {/* Quick Actions */}
+          <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-black text-gray-900 text-sm">Quick Actions</h3>
+              <button className="text-[10px] font-bold text-blue-600 hover:underline">See All →</button>
+            </div>
+            <div className="space-y-1">
+               {[
+                 { title: 'Find Colleges', desc: 'Explore colleges for your pathway', icon: Building2, color: 'text-teal-600', bg: 'bg-teal-50', path: '/colleges' },
+                 { title: 'Compare Pathways', desc: 'Compare different education paths', icon: Zap, color: 'text-purple-600', bg: 'bg-purple-50', path: '/pathways/after-10th/compare' },
+                 { title: 'Eligibility Checker', desc: 'Check your eligibility', icon: ShieldAlert, color: 'text-orange-600', bg: 'bg-orange-50', path: '/exams' },
+                 { title: 'Explore Careers', desc: 'See career options after each pathway', icon: Briefcase, color: 'text-blue-600', bg: 'bg-blue-50', path: '/jobs' },
+                 { title: 'Aptitude Test', desc: 'Discover your strengths', icon: Target, color: 'text-rose-600', bg: 'bg-rose-50', path: '/quiz' },
+                 { title: 'Download Report', desc: 'Get your personalized report', icon: BookOpen, color: 'text-indigo-600', bg: 'bg-indigo-50', path: '/settings' }
+               ].map((action, idx) => (
+                 <button key={idx} onClick={() => navigate(action.path)} className="w-full p-2 flex items-center justify-between hover:bg-gray-50 rounded-xl transition-all group text-left">
+                   <div className="flex items-center gap-3">
+                     <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${action.bg} ${action.color}`}><action.icon className="w-4 h-4"/></div>
+                     <div>
+                       <div className="font-bold text-[11px] text-gray-900 group-hover:text-blue-600 transition-colors">{action.title}</div>
+                       <div className="text-[9px] text-gray-500 font-medium">{action.desc}</div>
+                     </div>
+                   </div>
+                   <ArrowRight className="w-4 h-4 text-gray-300 group-hover:text-blue-600 transition-colors shrink-0" />
+                 </button>
+               ))}
+            </div>
+          </div>
+
+          {/* Latest Updates */}
+          <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-black text-gray-900 text-sm">Latest Updates</h3>
+              <button className="text-[10px] font-bold text-blue-600 hover:underline">View All →</button>
+            </div>
+            <div className="space-y-4">
+               {upcomingExams.length > 0 ? upcomingExams.map((exam, idx) => {
+                 const statusColors = ['bg-blue-50 text-blue-600 border-blue-100', 'bg-rose-50 text-rose-600 border-rose-100', 'bg-purple-50 text-purple-600 border-purple-100', 'bg-orange-50 text-orange-600 border-orange-100'];
+                 const c = statusColors[idx % statusColors.length];
+                 return (
+                 <div key={idx} className="flex gap-3 cursor-pointer group" onClick={() => navigate(`/exams/${exam._id}`)}>
+                   <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 border ${c}`}>
+                     <span className="text-[9px] font-black">{(exam.short_name || exam.exam_name).substring(0, 4)}</span>
+                   </div>
+                   <div className="flex-1 min-w-0 flex flex-col justify-center">
+                     <div className="text-[11px] font-bold text-gray-900 leading-tight mb-1 group-hover:text-blue-600 transition-colors truncate">{exam.exam_name}</div>
+                     <div className="text-[9px] font-medium text-gray-400 shrink-0">{exam.education_level || 'Registration soon'}</div>
+                   </div>
+                 </div>
+               )}) : (
+                 <div className="text-center py-4 text-[10px] font-medium text-gray-500">No recent updates available.</div>
+               )}
+            </div>
+          </div>
+
+          {/* Guidance Card */}
+          <div className="bg-[#0B1F44] rounded-2xl p-6 text-white shadow-xl relative overflow-hidden flex flex-col items-center text-center">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/20 rounded-bl-full pointer-events-none"></div>
+            
+            <div className="w-12 h-12 rounded-full bg-yellow-400/20 flex items-center justify-center text-yellow-400 mb-3 shrink-0 relative z-10">
+              <Lightbulb className="w-6 h-6"/>
+            </div>
+            <h3 className="font-serif italic text-lg font-bold text-white mb-2 leading-tight relative z-10">
+              Not sure which path<br/>is right for you?
+            </h3>
+            <p className="text-[10px] text-blue-200 font-medium leading-relaxed mb-5 relative z-10">
+              Take the U-THINK aptitude assessment and get personalized pathway recommendations.
+            </p>
+            <button onClick={() => navigate('/quiz')} className="w-full bg-white text-blue-900 hover:bg-blue-50 text-xs font-bold py-2.5 rounded-lg transition-colors shadow-sm relative z-10">
+              Take Aptitude Test →
+            </button>
+          </div>
+
+        </div>
       </div>
-
-      {/* Floating Action Bar for Comparison */}
-      {selectedCourses.length > 0 && (
-        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-6 py-4 rounded-full shadow-2xl flex items-center gap-6 z-40 animate-slide-up">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center font-bold">
-              {selectedCourses.length}
-            </div>
-            <span className="font-medium text-sm">Courses selected</span>
-          </div>
-          <div className="flex gap-2">
-            <button 
-              onClick={() => setIsCompareModalOpen(true)}
-              className="px-5 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold rounded-full text-sm transition-colors shadow-lg shadow-emerald-500/20"
-            >
-              Compare Now
-            </button>
-            <button 
-              onClick={() => setSelectedCourses([])}
-              className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium rounded-full text-sm transition-colors"
-            >
-              Clear
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Comparison Modal */}
-      <CourseComparisonModal 
-        isOpen={isCompareModalOpen}
-        onClose={() => setIsCompareModalOpen(false)}
-        courses={selectedCourses}
-      />
     </div>
   );
-};
-
-export default PathwaysExplorer;
+}
