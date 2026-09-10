@@ -55,16 +55,13 @@ async function issueOtp(
   const salt = await bcrypt.genSalt(10);
   const hashedOtp = await bcrypt.hash(otp, salt);
 
-  // Attempt to send SMS/Email BEFORE saving to database. 
-  // This prevents delivery failures from counting towards the rate limit.
-  try {
-    if (mobileNumber) {
-      await sendOtpSms(mobileNumber, otp, type as any);
-    } else {
-      await sendOtpEmail(email, otp, type as any);
-    }
-  } catch (deliveryError) {
-    console.error("Delivery failed but proceeding to OTP screen to allow bypass code.", deliveryError);
+  // Send SMS/Email BEFORE saving to database. 
+  // If delivery fails, it will throw an error and abort the process, 
+  // preventing bypasses and rate limit consumption.
+  if (mobileNumber) {
+    await sendOtpSms(mobileNumber, otp, type as any);
+  } else {
+    await sendOtpEmail(email, otp, type as any);
   }
 
   // If we reach here, email was successful. Save to database.

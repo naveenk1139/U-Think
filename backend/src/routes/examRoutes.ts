@@ -15,15 +15,23 @@ router.get('/', async (req: Request, res: Response, next: NextFunction) => {
       education_level, 
       stream, 
       category, 
+      state,
       type, 
       ownership,
+      mode,
+      status,
       page = '1', 
       limit = '10' 
     } = req.query;
     
-    let query: any = { status: 'ACTIVE' }; // Only show active exams by default
+    let query: any = {};
+    if (status && status !== 'All') {
+      const statuses = (status as string).split(',');
+      query.status = { $in: statuses };
+    } else {
+      query.status = 'ACTIVE';
+    }
 
-    // Handle array of values or single values for filters (Logical OR within same filter group)
     if (education_level && education_level !== 'All') {
       const levels = (education_level as string).split(',');
       query.education_level = { $in: levels };
@@ -39,6 +47,13 @@ router.get('/', async (req: Request, res: Response, next: NextFunction) => {
       query.exam_categories = { $in: categories };
     }
     
+    if (state && state !== 'All') {
+      const states = (state as string).split(',');
+      // Match either the specific state, or 'All India' exams if applicable
+      // But typically state filter wants specific state OR national exams
+      query.state = { $in: states };
+    }
+
     if (type && type !== 'All') {
       const types = (type as string).split(',');
       query.exam_type = { $in: types };
@@ -48,9 +63,12 @@ router.get('/', async (req: Request, res: Response, next: NextFunction) => {
       const ownerships = (ownership as string).split(',');
       query.ownership = { $in: ownerships };
     }
+    
+    if (mode && mode !== 'All') {
+      query.exam_mode = { $in: [(mode as string)] };
+    }
 
     if (search) {
-      // Use text search for performance, fallback to regex if needed
       query.$text = { $search: search as string };
     }
 
@@ -70,6 +88,60 @@ router.get('/', async (req: Request, res: Response, next: NextFunction) => {
       page_size: limitNum,
       total_pages: Math.ceil(total / limitNum)
     });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// GET /api/exams/states - Get distinct states
+router.get('/states', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const states = await Exam.distinct('state', { status: 'ACTIVE' });
+    res.json(states.filter(Boolean).sort());
+  } catch (err) {
+    next(err);
+  }
+});
+
+// GET /api/exams/categories - Get distinct categories
+router.get('/categories', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const categories = await Exam.distinct('exam_categories', { status: 'ACTIVE' });
+    res.json(categories.filter(Boolean).sort());
+  } catch (err) {
+    next(err);
+  }
+});
+
+// GET /api/exams/deadlines - Get upcoming deadlines (legacy)
+router.get('/deadlines', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const now = new Date();
+    // Find exam years where registration end date is in the future
+    const upcomingYears = await ExamYear.find({
+      registration_end: { $gte: now }
+    }).populate('exam_id', 'exam_name short_name canonical_slug exam_categories').sort({ registration_end: 1 }).limit(10).lean();
+    
+    res.json(upcomingYears);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// GET /api/exams/upcoming - Get upcoming exams grouped by status
+router.get('/upcoming', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const now = new Date();
+    // Get active ExamYears
+    const examYears = await ExamYear.find({
+       $or: [
+         { registration_end: { $gte: now } },
+         { exam_start: { $gte: now } },
+         { result_date: { $gte: now } }
+       ]
+    }).populate('exam_id').sort({ exam_start: 1 }).limit(30).lean();
+
+    res.json(examYears);
   } catch (err) {
     next(err);
   }

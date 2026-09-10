@@ -120,8 +120,11 @@ const UserSchema = new Schema<IUser>(
 // Encrypt password before saving
 UserSchema.pre<IUser>('save', async function (next) {
   if (this.isModified('password') && this.password) {
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
+    // Prevent double hashing if password is already a bcrypt hash
+    if (!this.password.startsWith('$2a$') && !this.password.startsWith('$2b$')) {
+      const salt = await bcrypt.genSalt(10);
+      this.password = await bcrypt.hash(this.password, salt);
+    }
   }
 
   // Calculate Profile Completion

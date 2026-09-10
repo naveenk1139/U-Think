@@ -88,7 +88,7 @@ export default function TopBar() {
     { name: 'Exams', path: '/exams' },
     { name: 'Colleges', path: '/colleges' },
     { name: 'Careers', path: '/jobs' },
-    { name: 'Resources', path: '/resources' },
+    { name: 'Resources', path: '/professional-courses' },
   ];
 
   const isActive = (path: string) => {

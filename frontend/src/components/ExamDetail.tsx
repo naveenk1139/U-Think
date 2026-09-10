@@ -201,6 +201,21 @@ export default function ExamDetail() {
                   <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">Mode</span>
                   <span className="font-semibold text-gray-900">{exam.exam_mode.join(', ')}</span>
                 </div>
+                {exam.state && (
+                  <div className="md:col-span-2">
+                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">State / Region</span>
+                    <span className="font-semibold text-gray-900 flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                      {exam.state}
+                    </span>
+                  </div>
+                )}
+                {exam.applicable_states && exam.applicable_states.length > 0 && exam.applicable_states[0] !== exam.state && (
+                  <div className="md:col-span-2">
+                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">Applicable For</span>
+                    <span className="font-semibold text-gray-900 text-sm">{exam.applicable_states.join(', ')}</span>
+                  </div>
+                )}
              </div>
           </div>
 
@@ -318,7 +333,31 @@ export default function ExamDetail() {
                     <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-blue-600" />
                  </a>
                )}
-               {!exam.official_website && !exam.official_application_url && (
+               {exam.officialNotificationUrl && (
+                 <a href={exam.officialNotificationUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-3 rounded-xl border border-gray-100 hover:border-blue-200 hover:bg-blue-50 transition-colors group">
+                    <span className="font-semibold text-gray-700 group-hover:text-blue-700">Official Notification</span>
+                    <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-blue-600" />
+                 </a>
+               )}
+               {exam.syllabus_url && (
+                 <a href={exam.syllabus_url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-3 rounded-xl border border-gray-100 hover:border-blue-200 hover:bg-blue-50 transition-colors group">
+                    <span className="font-semibold text-gray-700 group-hover:text-blue-700">Official Syllabus</span>
+                    <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-blue-600" />
+                 </a>
+               )}
+               {exam.admit_card_url && (
+                 <a href={exam.admit_card_url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-3 rounded-xl border border-gray-100 hover:border-blue-200 hover:bg-blue-50 transition-colors group">
+                    <span className="font-semibold text-gray-700 group-hover:text-blue-700">Download Admit Card</span>
+                    <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-blue-600" />
+                 </a>
+               )}
+               {exam.result_url && (
+                 <a href={exam.result_url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-3 rounded-xl border border-gray-100 hover:border-blue-200 hover:bg-blue-50 transition-colors group">
+                    <span className="font-semibold text-gray-700 group-hover:text-blue-700">Check Results</span>
+                    <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-blue-600" />
+                 </a>
+               )}
+               {!exam.official_website && !exam.official_application_url && !exam.officialNotificationUrl && !exam.syllabus_url && !exam.admit_card_url && !exam.result_url && (
                   <span className="text-gray-500 text-sm">Links currently unavailable.</span>
                )}
              </div>

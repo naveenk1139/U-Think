@@ -16,6 +16,5 @@ const CourseCategorySchema: Schema = new Schema({
   active: { type: Boolean, default: true },
 }, { timestamps: true });
 
-CourseCategorySchema.index({ slug: 1 });
 
 export default mongoose.model<ICourseCategory>('CourseCategory', CourseCategorySchema);

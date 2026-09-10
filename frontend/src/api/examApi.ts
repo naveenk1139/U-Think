@@ -27,6 +27,7 @@ export interface ExamFilterParams {
   education_level?: string;
   stream?: string;
   category?: string;
+  state?: string;
   type?: string;
   ownership?: string;
   page?: number;
@@ -46,8 +47,23 @@ export const getExams = async (params: ExamFilterParams): Promise<ExamPaginatedR
   return data;
 };
 
+export const getExamStates = async (): Promise<string[]> => {
+  const { data } = await api.get('/api/exams/states');
+  return data;
+};
+
+export const getExamCategories = async (): Promise<string[]> => {
+  const { data } = await api.get('/api/exams/categories');
+  return data;
+};
+
 export const getExamRecommendations = async (params: { education_level?: string, stream?: string, category?: string }): Promise<{ items: StructuredExam[] }> => {
   const { data } = await api.get('/api/exams/recommendations', { params });
+  return data;
+};
+
+export const getUpcomingExams = async (): Promise<any[]> => {
+  const { data } = await api.get('/api/exams/upcoming');
   return data;
 };
 

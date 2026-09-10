@@ -191,9 +191,12 @@ export interface StructuredExam {
     exam_type: string;
     ownership: string;
     conducting_body: string;
+    state?: string;
+    applicable_states?: string[];
     official_website?: string;
     official_application_url?: string;
     official_information_url?: string;
+    officialNotificationUrl?: string;
     description?: string;
     eligibility: string;
     age_min?: number;

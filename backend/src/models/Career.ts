@@ -24,7 +24,6 @@ const CareerSchema: Schema = new Schema({
   active: { type: Boolean, default: true },
 }, { timestamps: true });
 
-CareerSchema.index({ slug: 1 });
 CareerSchema.index({ name: 1 });
 
 export default mongoose.model<ICareer>('Career', CareerSchema);

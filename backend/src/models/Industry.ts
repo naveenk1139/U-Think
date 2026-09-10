@@ -16,6 +16,5 @@ const IndustrySchema: Schema = new Schema({
   active: { type: Boolean, default: true },
 }, { timestamps: true });
 
-IndustrySchema.index({ slug: 1 });
 
 export default mongoose.model<IIndustry>('Industry', IndustrySchema);

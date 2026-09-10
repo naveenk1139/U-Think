@@ -2,8 +2,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Search, BookOpen, GraduationCap, Award, Building, Bookmark, Filter, ChevronDown, CheckCircle2, ChevronRight, HelpCircle, Star, Sparkles, X, Loader2 } from 'lucide-react';
 import { StructuredExam } from '../types';
-import { getExams, getExamRecommendations, saveExam, unsaveExam, getSavedExams } from '../api/examApi';
+import { getExams, getExamRecommendations, saveExam, unsaveExam, getSavedExams, getExamStates, getExamCategories, getUpcomingExams } from '../api/examApi';
 import ExamComparisonModal from './ExamComparisonModal';
+import { format, isPast, isFuture } from 'date-fns';
 
 interface ExamsDirectoryProps {
   initialTab?: 'exams' | 'degrees' | 'specializations' | 'compare' | 'saved';
@@ -30,9 +31,7 @@ const STREAMS = [
   { value: 'ANY_STREAM', label: 'Any Stream' }
 ];
 
-const CATEGORIES = [
-  'All', 'ENGINEERING', 'MEDICAL', 'LAW', 'MANAGEMENT', 'COMMERCE', 'SCIENCE', 'ARTS', 'DEFENCE', 'GOVERNMENT'
-];
+// CATEGORIES and STATES will be fetched dynamically from the API
 
 export default function ExamsDirectory({ initialTab = 'exams' }: ExamsDirectoryProps) {
   const navigate = useNavigate();
@@ -48,6 +47,10 @@ export default function ExamsDirectory({ initialTab = 'exams' }: ExamsDirectoryP
   const [edLevel, setEdLevel] = useState(searchParams.get('level') || 'All');
   const [stream, setStream] = useState(searchParams.get('stream') || 'All');
   const [category, setCategory] = useState(searchParams.get('category') || 'All');
+  const [state, setState] = useState(searchParams.get('state') || 'All');
+  
+  const [availableCategories, setAvailableCategories] = useState<string[]>([]);
+  const [availableStates, setAvailableStates] = useState<string[]>([]);
   
   const [loading, setLoading] = useState(true);
   const [aiRecommendations, setAiRecommendations] = useState<StructuredExam[]>([]);
@@ -55,6 +58,7 @@ export default function ExamsDirectory({ initialTab = 'exams' }: ExamsDirectoryP
   
   const [selectedExams, setSelectedExams] = useState<StructuredExam[]>([]);
   const [isCompareExamModalOpen, setIsCompareExamModalOpen] = useState(false);
+  const [upcomingExams, setUpcomingExams] = useState<any[]>([]);
 
   // Load Saved Exams
   useEffect(() => {
@@ -67,6 +71,11 @@ export default function ExamsDirectory({ initialTab = 'exams' }: ExamsDirectoryP
       }
     };
     fetchSaved();
+    
+    // Fetch filter options
+    getExamCategories().then(cats => setAvailableCategories(['All', ...cats])).catch(console.error);
+    getExamStates().then(states => setAvailableStates(['All', ...states])).catch(console.error);
+    getUpcomingExams().then(setUpcomingExams).catch(console.error);
   }, []);
 
   const fetchData = useCallback(async () => {
@@ -78,6 +87,7 @@ export default function ExamsDirectory({ initialTab = 'exams' }: ExamsDirectoryP
           education_level: edLevel !== 'All' ? edLevel : undefined,
           stream: stream !== 'All' ? stream : undefined,
           category: category !== 'All' ? category : undefined,
+          state: state !== 'All' ? state : undefined,
           page: 1,
           limit: 50
         });
@@ -90,13 +100,14 @@ export default function ExamsDirectory({ initialTab = 'exams' }: ExamsDirectoryP
         if (edLevel !== 'All') params.level = edLevel;
         if (stream !== 'All') params.stream = stream;
         if (category !== 'All') params.category = category;
+        if (state !== 'All') params.state = state;
         setSearchParams(params);
       }
     } catch (err) {
       console.error(err);
     }
     setLoading(false);
-  }, [search, edLevel, stream, category, activeTab, setSearchParams]);
+  }, [search, edLevel, stream, category, state, activeTab, setSearchParams]);
 
   useEffect(() => {
     fetchData();
@@ -160,9 +171,10 @@ export default function ExamsDirectory({ initialTab = 'exams' }: ExamsDirectoryP
     setEdLevel('All');
     setStream('All');
     setCategory('All');
+    setState('All');
   };
 
-  const hasActiveFilters = search || edLevel !== 'All' || stream !== 'All' || category !== 'All';
+  const hasActiveFilters = search || edLevel !== 'All' || stream !== 'All' || category !== 'All' || state !== 'All';
 
   const renderExamCard = (exam: StructuredExam) => {
     const isSelected = selectedExams.some(e => e._id === exam._id);
@@ -219,9 +231,11 @@ export default function ExamsDirectory({ initialTab = 'exams' }: ExamsDirectoryP
            <button onClick={() => navigate(`/exams/${exam.canonical_slug}`)} className="flex-1 bg-[#2B3B94] hover:bg-blue-800 text-white py-2.5 rounded-xl text-sm font-bold transition-colors">
              View Details
            </button>
-           <button onClick={() => window.open(exam.official_website, '_blank')} className="flex-1 bg-gray-50 hover:bg-gray-100 text-gray-700 py-2.5 rounded-xl text-sm font-bold border border-gray-200 transition-colors">
-             Official Site
-           </button>
+           {exam.official_website && (
+             <button onClick={() => window.open(exam.official_website, '_blank')} className="flex-1 bg-gray-50 hover:bg-gray-100 text-gray-700 py-2.5 rounded-xl text-sm font-bold border border-gray-200 transition-colors">
+               Official Website ↗
+             </button>
+           )}
         </div>
       </div>
     );
@@ -240,10 +254,10 @@ export default function ExamsDirectory({ initialTab = 'exams' }: ExamsDirectoryP
               <Sparkles className="w-3.5 h-3.5 text-yellow-400" /> Real, Verified Data Only
             </div>
             <h1 className="text-4xl md:text-[46px] font-black mb-4 leading-[1.1] tracking-tight">
-              Explore Entrance & <br/>Competitive Exams
+              Indian Exams Explorer
             </h1>
             <p className="text-blue-100/90 mb-10 max-w-xl text-[15px] leading-relaxed pr-8 font-medium">
-              Discover verified exams based on your education level, stream, category, and career goal.
+              Explore entrance, admission, scholarship, recruitment and competitive examinations across India.
             </p>
             
             <div className="relative mb-4 max-w-[500px]">
@@ -279,6 +293,85 @@ export default function ExamsDirectory({ initialTab = 'exams' }: ExamsDirectoryP
                      Select your Education Level and Stream in the filters below to get personalized recommendations.
                   </div>
                 )}
+             </div>
+          </div>
+        </div>
+
+        {/* CATEGORY CARDS */}
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8">
+          {[
+            { label: 'Engineering', value: 'Engineering', icon: '⚙️' },
+            { label: 'Medical', value: 'Medical', icon: '⚕️' },
+            { label: 'Law', value: 'Law', icon: '⚖️' },
+            { label: 'Government', value: 'Government Jobs', icon: '🏛️' },
+            { label: 'Management', value: 'Management', icon: '📊' },
+            { label: 'Defense', value: 'Defense', icon: '🛡️' }
+          ].map(c => (
+            <button 
+              key={c.value} 
+              onClick={() => setCategory(c.value)}
+              className={`p-4 rounded-2xl border flex flex-col items-center justify-center gap-2 transition-all ${category === c.value ? 'bg-blue-50 border-blue-200 text-blue-700 shadow-sm' : 'bg-white border-gray-100 hover:border-blue-100 hover:bg-gray-50 text-gray-700'}`}
+            >
+              <div className="text-2xl">{c.icon}</div>
+              <div className="font-bold text-sm text-center leading-tight">{c.label}</div>
+            </button>
+          ))}
+        </div>
+
+        {/* UPCOMING EXAMS & STATE EXPLORER GRID */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          {/* UPCOMING EXAMS */}
+          <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-200 p-6 shadow-sm flex flex-col">
+             <div className="flex justify-between items-center mb-4 shrink-0">
+               <h2 className="text-lg font-black text-gray-900 flex items-center gap-2">
+                 <Bookmark className="w-5 h-5 text-blue-600" /> Upcoming Deadlines & Exams
+               </h2>
+             </div>
+             <div className="space-y-3 overflow-y-auto pr-2 flex-grow h-[260px] custom-scrollbar">
+               {upcomingExams.length > 0 ? upcomingExams.map(year => (
+                 <div key={year._id} className="flex flex-col sm:flex-row justify-between sm:items-center p-4 bg-gray-50 border border-gray-100 rounded-xl hover:border-blue-100 transition-colors">
+                   <div>
+                      <h4 className="font-bold text-gray-900">{year.exam_id?.short_name || year.exam_id?.exam_name} {year.year}</h4>
+                      <div className="text-xs font-semibold text-gray-500 mt-1 flex gap-3">
+                        <span className={year.registration_end && isFuture(new Date(year.registration_end)) ? 'text-emerald-600 font-bold' : ''}>
+                          Reg Ends: {year.registration_end ? format(new Date(year.registration_end), 'dd MMM yyyy') : 'TBA'}
+                        </span>
+                        <span>
+                          Exam: {year.exam_start ? format(new Date(year.exam_start), 'dd MMM yyyy') : 'TBA'}
+                        </span>
+                      </div>
+                   </div>
+                   <button onClick={() => navigate(`/exams/${year.exam_id?.canonical_slug}`)} className="mt-3 sm:mt-0 px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 text-xs font-bold rounded-lg transition-colors whitespace-nowrap">
+                     View Details
+                   </button>
+                 </div>
+               )) : (
+                 <div className="p-4 text-center text-sm text-gray-500 bg-gray-50 rounded-xl">No upcoming exams found.</div>
+               )}
+             </div>
+          </div>
+
+          {/* STATE EXPLORER */}
+          <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm flex flex-col">
+             <h2 className="text-lg font-black text-gray-900 mb-4 flex items-center gap-2 shrink-0">
+                <BookOpen className="w-5 h-5 text-emerald-600" /> State Explorer
+             </h2>
+             <div className="flex flex-wrap gap-2 overflow-y-auto pr-2 pb-2 content-start flex-grow h-[260px] custom-scrollbar">
+                <button 
+                  onClick={() => setState('All India')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors ${state === 'All India' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'}`}
+                >
+                  National Level
+                </button>
+                {availableStates.filter(s => s !== 'All' && s !== 'All India').map(s => (
+                  <button 
+                    key={s} 
+                    onClick={() => setState(s)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors ${state === s ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'}`}
+                  >
+                    {s}
+                  </button>
+                ))}
              </div>
           </div>
         </div>
@@ -325,7 +418,21 @@ export default function ExamsDirectory({ initialTab = 'exams' }: ExamsDirectoryP
                 onChange={e => setCategory(e.target.value)}
                 className="appearance-none bg-gray-50 border border-gray-200 text-gray-800 text-sm font-semibold rounded-xl pl-4 pr-10 py-2.5 outline-none focus:ring-2 focus:ring-[#2B3B94] cursor-pointer min-w-[160px]"
               >
-                {CATEGORIES.map(c => <option key={c} value={c}>{c === 'All' ? 'All Categories' : c}</option>)}
+                {availableCategories.length === 0 ? <option value="All">Loading...</option> : availableCategories.map(c => <option key={c} value={c}>{c === 'All' ? 'All Categories' : c}</option>)}
+              </select>
+              <ChevronDown className="w-4 h-4 text-gray-500 absolute right-3 top-3 pointer-events-none" />
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider pl-1">State</span>
+            <div className="relative group">
+              <select 
+                value={state} 
+                onChange={e => setState(e.target.value)}
+                className="appearance-none bg-gray-50 border border-gray-200 text-gray-800 text-sm font-semibold rounded-xl pl-4 pr-10 py-2.5 outline-none focus:ring-2 focus:ring-[#2B3B94] cursor-pointer min-w-[160px]"
+              >
+                {availableStates.length === 0 ? <option value="All">Loading...</option> : availableStates.map(s => <option key={s} value={s}>{s === 'All' ? 'All India / National' : s}</option>)}
               </select>
               <ChevronDown className="w-4 h-4 text-gray-500 absolute right-3 top-3 pointer-events-none" />
             </div>
@@ -358,6 +465,12 @@ export default function ExamsDirectory({ initialTab = 'exams' }: ExamsDirectoryP
               <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 text-xs font-bold rounded-lg border border-blue-100">
                 Category: {category}
                 <button onClick={() => setCategory('All')} className="hover:text-red-500"><X className="w-3.5 h-3.5" /></button>
+              </span>
+            )}
+            {state !== 'All' && (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 text-xs font-bold rounded-lg border border-blue-100">
+                State: {state}
+                <button onClick={() => setState('All')} className="hover:text-red-500"><X className="w-3.5 h-3.5" /></button>
               </span>
             )}
             <button 

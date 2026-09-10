@@ -18,7 +18,6 @@ const EducationLevelSchema: Schema = new Schema({
   active: { type: Boolean, default: true },
 }, { timestamps: true });
 
-EducationLevelSchema.index({ slug: 1 });
 EducationLevelSchema.index({ order: 1 });
 
 export default mongoose.model<IEducationLevel>('EducationLevel', EducationLevelSchema);

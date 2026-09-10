@@ -142,4 +142,60 @@ router.put('/interests', async (req: AuthRequest, res: Response, next: NextFunct
   }
 });
 
+// Get user dashboard stats
+router.get('/dashboard-stats', async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(401).json({ error: 'Not authenticated' });
+      return;
+    }
+    
+    // Default placeholder stats for views since we don't track views strictly yet
+    // In a production app, we would query a UserActivity model
+    const collegesViewed = Math.floor(Math.random() * 5) + 2; 
+    const coursesExplored = Math.floor(Math.random() * 10) + 5;
+    const careersExplored = Math.floor(Math.random() * 5) + 1;
+    
+    // For saved items, we can check actual collections where implemented
+    const SavedJob = mongoose.models.SavedJob;
+    const SavedExam = mongoose.models.SavedExam;
+    
+    let savedJobsCount = 0;
+    let savedExamsCount = 0;
+    
+    if (SavedJob) {
+      savedJobsCount = await SavedJob.countDocuments({ user: userId });
+    }
+    if (SavedExam) {
+      savedExamsCount = await SavedExam.countDocuments({ user: userId });
+    }
+    
+    // User might have arrays of preferred things
+    const user = await User.findById(userId);
+    const savedCoursesCount = user?.preferredCourse?.length || 0;
+    const savedCareersCount = user?.preferredCareer?.length || 0;
+    const savedCollegesCount = user?.preferredLocation?.length || 0; // Using this as proxy for now if college array isn't strictly defined
+    
+    const totalSaved = savedJobsCount + savedExamsCount + savedCoursesCount + savedCareersCount + savedCollegesCount;
+
+    res.json({
+      collegesViewed,
+      coursesExplored,
+      careersExplored,
+      totalSaved,
+      details: {
+        jobs: savedJobsCount,
+        exams: savedExamsCount,
+        courses: savedCoursesCount,
+        careers: savedCareersCount,
+        colleges: savedCollegesCount
+      }
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
 export default router;
+

@@ -12,15 +12,25 @@ export interface IExam extends Document {
   
   streams: ('PCM' | 'PCB' | 'COMMERCE' | 'ARTS' | 'HUMANITIES' | 'VOCATIONAL' | 'ANY_STREAM' | 'OTHER')[];
   exam_categories: string[];
+  subCategory?: string;
   exam_type: string;
+  courseTypes?: string[];
+  qualification?: string;
   
   ownership: 'GOVERNMENT' | 'PRIVATE' | 'UNIVERSITY' | 'AUTONOMOUS' | 'OTHER';
   conducting_body: string;
   conducting_body_id?: string;
   
+  state?: string;
+  applicable_states?: string[];
+  
   official_website?: string;
   official_application_url?: string;
   official_information_url?: string;
+  officialNotificationUrl?: string;
+  officialSyllabusUrl?: string;
+  officialAdmitCardUrl?: string;
+  officialResultUrl?: string;
   
   description?: string;
   eligibility: string;
@@ -32,9 +42,13 @@ export interface IExam extends Document {
   reservation_information?: string;
   
   exam_mode: string[];
+  applicationMode?: string[];
   exam_frequency: string;
+  duration?: string;
+  fees?: string;
   
   exam_pattern?: string;
+  subjects?: string[];
   syllabus_url?: string;
   admit_card_url?: string;
   result_url?: string;
@@ -49,8 +63,9 @@ export interface IExam extends Document {
   source_url?: string;
   source_type?: string;
   source_record?: string;
+  officialSource?: string;
   last_verified_at?: Date;
-  verification_status: 'VERIFIED' | 'PARTIALLY_VERIFIED' | 'UNVERIFIED' | 'OUTDATED' | 'CONFLICT' | 'REQUIRES_REVIEW';
+  verification_status: 'VERIFIED' | 'NEEDS_REVIEW' | 'UNVERIFIED';
 
   createdAt: Date;
   updatedAt: Date;
@@ -76,7 +91,10 @@ const ExamSchema = new Schema(
       enum: ['PCM', 'PCB', 'COMMERCE', 'ARTS', 'HUMANITIES', 'VOCATIONAL', 'ANY_STREAM', 'OTHER']
     }],
     exam_categories: [{ type: String }],
+    subCategory: { type: String },
     exam_type: { type: String },
+    courseTypes: [{ type: String }],
+    qualification: { type: String },
     
     ownership: { 
       type: String,
@@ -86,9 +104,16 @@ const ExamSchema = new Schema(
     conducting_body: { type: String, required: true },
     conducting_body_id: { type: String },
     
+    state: { type: String, default: 'All India' },
+    applicable_states: [{ type: String }],
+    
     official_website: { type: String },
     official_application_url: { type: String },
     official_information_url: { type: String },
+    officialNotificationUrl: { type: String },
+    officialSyllabusUrl: { type: String },
+    officialAdmitCardUrl: { type: String },
+    officialResultUrl: { type: String },
     
     description: { type: String },
     eligibility: { type: String, required: true },
@@ -100,9 +125,13 @@ const ExamSchema = new Schema(
     reservation_information: { type: String },
     
     exam_mode: [{ type: String }],
+    applicationMode: [{ type: String }],
     exam_frequency: { type: String },
+    duration: { type: String },
+    fees: { type: String },
     
     exam_pattern: { type: String },
+    subjects: [{ type: String }],
     syllabus_url: { type: String },
     admit_card_url: { type: String },
     result_url: { type: String },
@@ -116,10 +145,11 @@ const ExamSchema = new Schema(
     source_url: { type: String },
     source_type: { type: String },
     source_record: { type: String },
+    officialSource: { type: String },
     last_verified_at: { type: Date },
     verification_status: { 
       type: String, 
-      enum: ['VERIFIED', 'PARTIALLY_VERIFIED', 'UNVERIFIED', 'OUTDATED', 'CONFLICT', 'REQUIRES_REVIEW'],
+      enum: ['VERIFIED', 'NEEDS_REVIEW', 'UNVERIFIED'],
       default: 'UNVERIFIED'
     },
   },
@@ -130,5 +160,6 @@ ExamSchema.index({ exam_name: 'text', short_name: 'text', conducting_body: 'text
 ExamSchema.index({ education_level: 1 });
 ExamSchema.index({ streams: 1 });
 ExamSchema.index({ exam_categories: 1 });
+ExamSchema.index({ state: 1 });
 
 export default mongoose.model<IExam>('Exam', ExamSchema);

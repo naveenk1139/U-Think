@@ -22,7 +22,8 @@ export default function StudentDashboard() {
   const firstName = userName.split(' ')[0];
   const educationLevel = currentUser?.educationLevel || 'Class 12th';
   const streamPreference = currentUser?.streamPreference || 'Science (PCM)';
-  const interests = currentUser?.interests || ['Technology', 'AI'];
+  const rawInterests = currentUser?.interests;
+  const interests = Array.isArray(rawInterests) ? rawInterests : (typeof rawInterests === 'string' ? (rawInterests as string).split(',') : ['Technology', 'AI']);
   
   const { percentage: profilePercentage } = calculateProfileCompletion(currentUser);
   const journeySteps = getEducationJourney(currentUser);
@@ -31,7 +32,13 @@ export default function StudentDashboard() {
   const [activeTab, setActiveTab] = useState('All');
   const [colleges, setColleges] = useState<College[]>([]);
   const [upcomingExams, setUpcomingExams] = useState<StructuredExam[]>([]);
-  const [savedCounts, setSavedCounts] = useState({ colleges: 3, courses: 5, careers: 2, exams: 1, jobs: 4 }); // Mock counts until APIs fully wired
+  const [dashboardStats, setDashboardStats] = useState<any>({
+    collegesViewed: 0,
+    coursesExplored: 0,
+    careersExplored: 0,
+    totalSaved: 0,
+    details: {}
+  });
   
   useEffect(() => {
     // Fetch some basic recommendations/deadlines
@@ -45,7 +52,18 @@ export default function StudentDashboard() {
       setUpcomingExams(items.slice(0, 3));
     }).catch(console.error);
     
-    // In a real scenario, fetch exact saved counts here
+    // Fetch actual saved counts and stats
+    const token = localStorage.getItem('token');
+    if (token) {
+      fetch('http://localhost:5000/api/profile/dashboard-stats', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (!data.error) setDashboardStats(data);
+      })
+      .catch(console.error);
+    }
   }, []);
 
   return (
@@ -85,7 +103,7 @@ export default function StudentDashboard() {
                      <div className="flex items-center gap-1.5 text-[10px] font-bold text-gray-500 uppercase mb-1">
                        <Heart className="w-3.5 h-3.5 text-rose-500" /> Interests
                      </div>
-                     <div className="text-sm font-bold text-gray-900">{interests.join(', ')}</div>
+                     <div className="text-sm font-bold text-gray-900">{interests.length > 0 ? interests.join(', ') : 'Not selected'}</div>
                    </div>
                    <div>
                      <div className="flex items-center gap-1.5 text-[10px] font-bold text-gray-500 uppercase mb-1">
@@ -127,12 +145,12 @@ export default function StudentDashboard() {
           {/* USER ACTIVITY STATS */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
              {[
-               { label: 'Colleges Viewed', value: '12', subtext: 'In last 30 days', icon: Building2, color: 'text-blue-600', bg: 'bg-blue-50' },
-               { label: 'Courses Explored', value: '28', subtext: 'In last 30 days', icon: BookOpen, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-               { label: 'Careers Explored', value: '8', subtext: 'In last 30 days', icon: Briefcase, color: 'text-purple-600', bg: 'bg-purple-50' },
-               { label: 'Items Saved', value: '15', subtext: 'Across all sections', icon: Bookmark, color: 'text-orange-500', bg: 'bg-orange-50' }
+               { label: 'Colleges Viewed', value: dashboardStats.collegesViewed || 0, subtext: 'In last 30 days', icon: Building2, color: 'text-blue-600', bg: 'bg-blue-50' },
+               { label: 'Courses Explored', value: dashboardStats.coursesExplored || 0, subtext: 'In last 30 days', icon: BookOpen, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+               { label: 'Careers Explored', value: dashboardStats.careersExplored || 0, subtext: 'In last 30 days', icon: Briefcase, color: 'text-purple-600', bg: 'bg-purple-50' },
+               { label: 'Items Saved', value: dashboardStats.totalSaved || 0, subtext: 'Across all sections', icon: Bookmark, color: 'text-orange-500', bg: 'bg-orange-50' }
              ].map((stat, i) => (
-               <div key={i} className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm flex flex-col justify-center hover:-translate-y-0.5 transition-transform">
+               <div key={i} className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm flex flex-col justify-center hover:-translate-y-0.5 transition-transform cursor-pointer" onClick={() => navigate(stat.label.includes('Saved') ? '/saved-jobs' : (stat.label.includes('Colleges') ? '/colleges' : '/pathways/after-10th'))}>
                  <div className="flex items-center gap-3 mb-2">
                    <div className={`w-10 h-10 rounded-xl ${stat.bg} ${stat.color} flex items-center justify-center shrink-0`}><stat.icon className="w-4 h-4"/></div>
                    <div className="text-2xl font-black text-gray-900 leading-none">{stat.value}</div>
@@ -174,15 +192,15 @@ export default function StudentDashboard() {
 
                  {/* Upcoming Steps */}
                  {[
-                   { id: 3, label: 'Select your preferred pathway' },
-                   { id: 4, label: 'Explore suitable courses' },
-                   { id: 5, label: 'Shortlist colleges' },
-                   { id: 6, label: 'Check upcoming exams' }
+                   { id: 3, label: 'Select your preferred pathway', path: '/pathways/after-10th' },
+                   { id: 4, label: 'Explore suitable courses', path: '/courses' },
+                   { id: 5, label: 'Shortlist colleges', path: '/colleges' },
+                   { id: 6, label: 'Check upcoming exams', path: '/exams' }
                  ].map(step => (
-                   <div key={step.id} className="flex gap-3 relative">
-                     <div className="absolute left-3 top-0 bottom-0 w-0.5 bg-gray-100 -z-10"></div>
-                     <div className="w-6 h-6 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center shrink-0 border-2 border-white"><span className="text-[10px] font-bold">{step.id}</span></div>
-                     <div className="text-xs font-bold text-gray-600 mt-1">{step.label}</div>
+                   <div key={step.id} className="flex gap-3 relative cursor-pointer hover:bg-gray-50 p-1 -ml-1 rounded transition-colors group" onClick={() => navigate(step.path)}>
+                     <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-100 -z-10"></div>
+                     <div className="w-6 h-6 rounded-full bg-gray-100 text-gray-500 group-hover:bg-blue-50 group-hover:text-blue-600 flex items-center justify-center shrink-0 border-2 border-white transition-colors"><span className="text-[10px] font-bold">{step.id}</span></div>
+                     <div className="text-xs font-bold text-gray-600 mt-1 group-hover:text-blue-700 transition-colors">{step.label}</div>
                    </div>
                  ))}
 
@@ -218,7 +236,7 @@ export default function StudentDashboard() {
                     <h3 className="font-bold text-sm text-gray-900 leading-tight mb-1">Engineering & Technology</h3>
                     <div className="text-xs font-bold text-emerald-600 mb-3">Match: 92%</div>
                     <div className="text-[10px] font-medium text-gray-500 leading-snug mb-auto">Based on your Science stream, maths interest and aptitude results.</div>
-                    <button className="mt-4 w-full text-center border border-gray-200 hover:border-blue-600 hover:text-blue-600 text-[10px] font-bold py-2 rounded-lg transition-colors text-gray-700">View Pathway →</button>
+                    <button onClick={() => navigate('/pathways/after-10th/diploma')} className="mt-4 w-full text-center border border-gray-200 hover:border-blue-600 hover:bg-blue-50 hover:text-blue-600 text-[10px] font-bold py-2 rounded-lg transition-colors text-gray-700">View Pathway →</button>
                  </div>
                  )}
 
@@ -236,7 +254,7 @@ export default function StudentDashboard() {
                       <li className="flex items-start gap-1"><span className="text-emerald-500 font-bold">•</span> High career opportunities</li>
                       <li className="flex items-start gap-1"><span className="text-emerald-500 font-bold">•</span> Matches your interests</li>
                     </ul>
-                    <button className="mt-4 w-full text-center border border-gray-200 hover:border-emerald-600 hover:text-emerald-600 text-[10px] font-bold py-2 rounded-lg transition-colors text-gray-700">View Course →</button>
+                    <button onClick={() => navigate('/courses')} className="mt-4 w-full text-center border border-gray-200 hover:border-emerald-600 hover:bg-emerald-50 hover:text-emerald-600 text-[10px] font-bold py-2 rounded-lg transition-colors text-gray-700">View Course →</button>
                  </div>
                  )}
 
@@ -254,7 +272,7 @@ export default function StudentDashboard() {
                       <li className="flex items-start gap-1"><span className="text-emerald-500 font-bold">•</span> Good salary potential</li>
                       <li className="flex items-start gap-1"><span className="text-emerald-500 font-bold">•</span> Matches your aptitude</li>
                     </ul>
-                    <button className="mt-4 w-full text-center border border-gray-200 hover:border-purple-600 hover:text-purple-600 text-[10px] font-bold py-2 rounded-lg transition-colors text-gray-700">Explore Career →</button>
+                    <button onClick={() => navigate('/jobs')} className="mt-4 w-full text-center border border-gray-200 hover:border-purple-600 hover:bg-purple-50 hover:text-purple-600 text-[10px] font-bold py-2 rounded-lg transition-colors text-gray-700">Explore Career →</button>
                  </div>
                  )}
 
@@ -345,11 +363,11 @@ export default function StudentDashboard() {
                </div>
                <div className="grid grid-cols-3 gap-3">
                  {[
-                   { label: 'Colleges', count: savedCounts.colleges, icon: Building2, color: 'text-orange-500', bg: 'bg-orange-50' },
-                   { label: 'Courses', count: savedCounts.courses, icon: BookOpen, color: 'text-emerald-500', bg: 'bg-emerald-50' },
-                   { label: 'Careers', count: savedCounts.careers, icon: Briefcase, color: 'text-purple-500', bg: 'bg-purple-50' },
-                   { label: 'Exam', count: savedCounts.exams, icon: ShieldAlert, color: 'text-blue-500', bg: 'bg-blue-50' },
-                   { label: 'Jobs', count: savedCounts.jobs, icon: Target, color: 'text-emerald-600', bg: 'bg-emerald-50' }
+                   { label: 'Colleges', count: dashboardStats.details?.colleges || 0, icon: Building2, color: 'text-orange-500', bg: 'bg-orange-50' },
+                   { label: 'Courses', count: dashboardStats.details?.courses || 0, icon: BookOpen, color: 'text-emerald-500', bg: 'bg-emerald-50' },
+                   { label: 'Careers', count: dashboardStats.details?.careers || 0, icon: Briefcase, color: 'text-purple-500', bg: 'bg-purple-50' },
+                   { label: 'Exam', count: dashboardStats.details?.exams || 0, icon: ShieldAlert, color: 'text-blue-500', bg: 'bg-blue-50' },
+                   { label: 'Jobs', count: dashboardStats.details?.jobs || 0, icon: Target, color: 'text-emerald-600', bg: 'bg-emerald-50' }
                  ].map((item, idx) => (
                    <div key={idx} className="flex flex-col items-center justify-center p-3 rounded-xl border border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors text-center">
                      <div className={`w-8 h-8 rounded-lg ${item.bg} ${item.color} flex items-center justify-center mb-1`}><item.icon className="w-4 h-4"/></div>

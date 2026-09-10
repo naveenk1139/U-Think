@@ -16,6 +16,5 @@ const SkillSchema: Schema = new Schema({
   active: { type: Boolean, default: true },
 }, { timestamps: true });
 
-SkillSchema.index({ slug: 1 });
 
 export default mongoose.model<ISkill>('Skill', SkillSchema);
