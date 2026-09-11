@@ -12,6 +12,7 @@ import { StructuredExam } from '../types';
 import { fetchColleges, College } from '../api/collegeApi';
 import { getSavedJobs } from '../api/savedJobs';
 import { getSavedPathways } from '../api/pathwayApi';
+import api from '../api/axios';
 
 export default function StudentDashboard() {
   const { currentUser } = useAuth();
@@ -56,22 +57,16 @@ export default function StudentDashboard() {
     // Fetch actual saved counts and stats
     const token = localStorage.getItem('uthink_token');
     if (token) {
-      fetch('http://localhost:5000/api/profile/dashboard-stats', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (!data.error) setDashboardStats(data);
+      api.get('/api/profile/dashboard-stats')
+      .then(res => {
+        if (!res.data.error) setDashboardStats(res.data);
       })
       .catch(console.error);
 
       // Fetch user documents
-      fetch('http://localhost:5000/api/documents', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data)) setDocuments(data);
+      api.get('/api/documents')
+      .then(res => {
+        if (Array.isArray(res.data)) setDocuments(res.data);
       })
       .catch(console.error);
     }

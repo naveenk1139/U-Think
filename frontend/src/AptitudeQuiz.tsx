@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from './api/axios';
 import { AICareerQuestion, AssessmentResult } from './types';
 
 // Icons
@@ -62,7 +62,7 @@ export default function CareerAssessment() {
   const startAssessment = async () => {
     setIsSubmitting(true);
     try {
-      const res = await axios.post('http://localhost:5000/api/assessment/start', {
+      const res = await api.post('/api/assessment/start', {
         userId,
         educationLevel
       });
@@ -81,7 +81,7 @@ export default function CareerAssessment() {
     if (!currentQuestion) return;
     setIsSubmitting(true);
     try {
-      const res = await axios.post('http://localhost:5000/api/assessment/answer', {
+      const res = await api.post('/api/assessment/answer', {
         attemptId,
         questionId: currentQuestion._id,
         choiceText
@@ -90,7 +90,7 @@ export default function CareerAssessment() {
       if (res.data.isComplete) {
         setStep('ANALYZING');
         // Fetch result
-        const resultRes = await axios.get(`http://localhost:5000/api/assessment/result/${res.data.resultId}`);
+        const resultRes = await api.get(`/api/assessment/result/${res.data.resultId}`);
         setTimeout(() => {
           setResult(resultRes.data);
           setStep('RESULT');

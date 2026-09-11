@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { UploadCloud, FileText, CheckCircle, AlertTriangle, File, X, Loader2, ArrowRight } from 'lucide-react';
-import axios from 'axios';
+import api from '../api/axios';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface IExtractedSubjectMark {
@@ -81,11 +81,9 @@ export default function DocumentAnalysis() {
       const formData = new FormData();
       formData.append('document', file);
       
-      const token = localStorage.getItem('uthink_token');
-      const res = await axios.post('http://localhost:5000/api/documents/upload', formData, {
+      const res = await api.post('/api/documents/upload', formData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'multipart/form-data'
         }
       });
       
@@ -117,12 +115,7 @@ export default function DocumentAnalysis() {
     setIsConfirming(true);
     setError(null);
     try {
-      const token = localStorage.getItem('uthink_token');
-      await axios.post(`http://localhost:5000/api/documents/${editedAnalysis.documentId}/confirm`, editedAnalysis, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      await api.post(`/api/documents/${editedAnalysis.documentId}/confirm`, editedAnalysis);
       setSuccess(true);
       setAnalysis(null);
       setEditedAnalysis(null);

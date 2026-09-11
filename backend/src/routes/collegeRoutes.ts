@@ -112,7 +112,7 @@ router.get('/district-stats', async (req: Request, res: Response) => {
           _id: '$district',
           institutionCount: { $sum: 1 }
       }},
-      { $match: { _id: { $ne: null, $ne: '' } } },
+      { $match: { _id: { $nin: [null, ''] } } },
       { $sort: { institutionCount: -1 } },
       { $limit: 10 }
     ]);

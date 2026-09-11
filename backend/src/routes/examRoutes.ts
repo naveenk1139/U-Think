@@ -173,7 +173,7 @@ router.get('/recommendations', async (req: Request, res: Response, next: NextFun
 
       // 2. Stream Match
       if (stream && stream !== 'All') {
-         if (exam.streams?.includes(stream as string)) {
+         if (exam.streams?.includes(stream as any)) {
             score += 8;
             reasons.push(`Aligns with your chosen stream (${stream})`);
          }

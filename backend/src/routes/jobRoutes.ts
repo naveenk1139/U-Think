@@ -2,6 +2,8 @@ import express from 'express';
 import { jobService } from '../services/JobService';
 import { jobMatchService } from '../services/JobMatchService';
 import { protect } from '../middleware/authMiddleware';
+import User from '../models/User';
+import SavedJob from '../models/SavedJob';
 import JobAlert from '../models/JobAlert';
 import Job from '../models/Job';
 import { IUser } from '../models/User';

@@ -284,7 +284,7 @@ export const searchPathways = async (req: Request, res: Response, next: NextFunc
       Career.find({ name: searchRegex, active: true }).select('name').limit(5).lean()
     ]);
 
-    const results = [];
+    const results: any[] = [];
     
     pathways.forEach(p => results.push({ type: 'Pathway', name: p.name, slug: p.slug }));
     streams.forEach(s => results.push({ type: 'Stream', name: s.name, slug: s.slug }));

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
+import api from '../api/axios';
 import { StructuredMentor, ChatMessage } from '../types';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -44,7 +44,7 @@ export default function MentorshipProgram() {
       if (selectedEdu !== 'All') params.append('educationLevel', selectedEdu);
       if (searchQuery) params.append('search', searchQuery);
 
-      const res = await axios.get(`http://localhost:5000/api/mentors?${params.toString()}`);
+      const res = await api.get(`/api/mentors?${params.toString()}`);
       setMentors(res.data);
     } catch (err) {
       console.error(err);
@@ -89,7 +89,7 @@ export default function MentorshipProgram() {
     setIsTyping(true);
 
     try {
-      const res = await axios.post('http://localhost:5000/api/mentors/chat', {
+      const res = await api.post('/api/mentors/chat', {
         mentorId: selectedMentor.mentorId,
         message: userMsg.text,
         history: chats[mentorId],

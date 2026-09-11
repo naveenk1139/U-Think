@@ -4,6 +4,7 @@ import { ArrowLeft, GraduationCap, Briefcase, ChevronRight, BookOpen, Clock, Ale
 import { StructuredDegree } from '../types';
 
 import RoadmapVisualizer from './RoadmapVisualizer';
+import api from '../api/axios';
 
 export default function DegreeDetail() {
   const { degreeId: slug } = useParams();
@@ -19,22 +20,21 @@ export default function DegreeDetail() {
 
   const fetchDegree = async () => {
     try {
-      const res = await fetch(`http://localhost:5000/api/degrees/${slug}`);
-      if (res.ok) {
-        const data = await res.json();
+      const res = await api.get(`/api/degrees/${slug}`);
+      if (res.data) {
+        const data = res.data;
         setDegree(data);
         
         // Fetch exams
-        const examRes = await fetch(`http://localhost:5000/api/degrees/${slug}/exams`);
-        if (examRes.ok) {
-           setMappedExams(await examRes.json());
+        const examRes = await api.get(`/api/degrees/${slug}/exams`);
+        if (examRes.data) {
+          setMappedExams(examRes.data);
         }
 
         // Fetch roadmap
-        const roadmapRes = await fetch(`http://localhost:5000/api/roadmaps/${data._id}`);
-        if (roadmapRes.ok) {
-           const roadmapData = await roadmapRes.json();
-           setRoadmapSteps(roadmapData.roadmap || []);
+        const roadmapRes = await api.get(`/api/roadmaps/${data._id}`);
+        if (roadmapRes.data) {
+          setRoadmapSteps(roadmapRes.data.roadmap || []);
         }
       }
     } catch (err) {

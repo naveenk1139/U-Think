@@ -63,8 +63,8 @@ router.post('/answer', async (req: Request, res: Response, next: NextFunction) =
     }
 
     // Accumulate scores
-    const currentScoresMap = attempt.currentScores as Map<string, number>;
-    const weightsMap = selectedOption.dimensionWeights as Map<string, number>;
+    const currentScoresMap = attempt.currentScores as any as Map<string, number>;
+    const weightsMap = selectedOption.dimensionWeights as any as Map<string, number>;
     
     weightsMap.forEach((val, key) => {
       const existing = currentScoresMap.get(key) || 0;
@@ -73,7 +73,7 @@ router.post('/answer', async (req: Request, res: Response, next: NextFunction) =
 
     // Add answer
     attempt.answers.push({
-      questionId: question._id as string,
+      questionId: question._id as any as string,
       questionText: question.questionText,
       choiceText,
       dimensionWeights: Object.fromEntries(weightsMap.entries())
@@ -101,7 +101,7 @@ router.post('/answer', async (req: Request, res: Response, next: NextFunction) =
     await attempt.save();
 
     // Calculate Results
-    const currentScores = Object.fromEntries(attempt.currentScores.entries());
+    const currentScores = attempt.currentScores ? Object.fromEntries((attempt.currentScores as any).entries()) : {};
     const profiles = await CareerProfile.find({
       targetEducationLevels: attempt.educationLevel
     });
@@ -138,7 +138,7 @@ router.post('/answer', async (req: Request, res: Response, next: NextFunction) =
       if(matchScore < 40) matchScore = 40 + Math.floor(Math.random() * 20); 
 
       return {
-        careerId: profile._id as string,
+        careerId: profile._id as any as string,
         careerName: profile.careerName,
         matchScore,
         matchRationale: rationaleArr.join('. ') || 'Good baseline fit based on your preferences.'

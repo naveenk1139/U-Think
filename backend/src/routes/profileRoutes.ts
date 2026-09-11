@@ -1,6 +1,7 @@
 import { Router, Response, NextFunction } from 'express';
 import { protect, AuthRequest } from '../middleware/authMiddleware';
 import User from '../models/User';
+import mongoose from 'mongoose';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';

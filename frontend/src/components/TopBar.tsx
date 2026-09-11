@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Search, Bell, ChevronDown, LogOut, Loader2, ArrowRight, Moon } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api/axios';
 
 interface SearchResult {
   type: string;
@@ -41,7 +41,7 @@ export default function TopBar() {
       if (searchQuery.trim().length > 1) {
         setIsSearching(true);
         try {
-          const res = await axios.get(`http://localhost:5000/api/pathways/search?q=${searchQuery}`);
+          const res = await api.get(`/api/pathways/search?q=${searchQuery}`);
           setSearchResults(res.data);
           setShowSearchResults(true);
         } catch (error) {
