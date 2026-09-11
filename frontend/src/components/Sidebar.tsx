@@ -2,7 +2,7 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { 
   Home, Compass, Building2, BookOpen, Search, Target, LayoutDashboard,
-  Users, Award, Settings, Bell, Heart, CheckCircle, GraduationCap, Briefcase, Bookmark, ArrowRight, User
+  Users, Award, Brain, Settings, Bell, Heart, CheckCircle, GraduationCap, Briefcase, Bookmark, ArrowRight, User, FileText
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -15,7 +15,7 @@ export default function Sidebar() {
     { icon: Compass, label: 'Pathways & Streams', path: '/streams' },
     { icon: Building2, label: 'Colleges', path: '/colleges' },
     { icon: GraduationCap, label: 'Exams & Degrees', path: '/exams' },
-    { icon: Award, label: 'Aptitude Assessment', path: '/quiz' },
+    { icon: Brain, label: 'Aptitude Assessment', path: '/quiz' },
     { icon: Briefcase, label: 'Job Explorer', path: '/jobs' },
     { icon: Users, label: 'Industry Mentors', path: '/mentorship' },
     { icon: BookOpen, label: 'Professional Courses', path: '/professional-courses' },
@@ -23,6 +23,7 @@ export default function Sidebar() {
 
   const yourSpaceItems = [
     { icon: Target, label: 'Aptitude Test', path: '/quiz' },
+    { icon: FileText, label: 'Academic Documents', path: '/documents/analyze' },
     { icon: Bookmark, label: 'Saved Jobs', path: '/saved-jobs' },
     { icon: Bell, label: 'Reminders', path: '/reminders' },
     { icon: Heart, label: 'Interests', path: '/interests' },

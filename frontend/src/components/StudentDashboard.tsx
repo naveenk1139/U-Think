@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Building2, BookOpen, Map, Award, ArrowRight, User, Bell, ChevronRight, 
   CheckCircle, Briefcase, Star, Clock, GraduationCap, Compass, MapPin, 
-  Heart, Bookmark, CalendarDays, Zap, ShieldAlert, Target, PlayCircle
+  Heart, Bookmark, CalendarDays, Zap, ShieldAlert, Target, PlayCircle, FileText
 } from 'lucide-react';
 import { calculateProfileCompletion, calculateMatchScore, getEducationJourney } from '../lib/dashboardUtils';
 import { getExams } from '../api/examApi';
@@ -32,6 +32,7 @@ export default function StudentDashboard() {
   const [activeTab, setActiveTab] = useState('All');
   const [colleges, setColleges] = useState<College[]>([]);
   const [upcomingExams, setUpcomingExams] = useState<StructuredExam[]>([]);
+  const [documents, setDocuments] = useState<any[]>([]);
   const [dashboardStats, setDashboardStats] = useState<any>({
     collegesViewed: 0,
     coursesExplored: 0,
@@ -53,7 +54,7 @@ export default function StudentDashboard() {
     }).catch(console.error);
     
     // Fetch actual saved counts and stats
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('uthink_token');
     if (token) {
       fetch('http://localhost:5000/api/profile/dashboard-stats', {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -61,6 +62,16 @@ export default function StudentDashboard() {
       .then(res => res.json())
       .then(data => {
         if (!data.error) setDashboardStats(data);
+      })
+      .catch(console.error);
+
+      // Fetch user documents
+      fetch('http://localhost:5000/api/documents', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) setDocuments(data);
       })
       .catch(console.error);
     }
@@ -352,8 +363,8 @@ export default function StudentDashboard() {
              </div>
           </div>
 
-          {/* BOTTOM ROW: Saved Items, Recent Activity, Aptitude CTA */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* BOTTOM ROW: Saved Items, Recent Activity, Aptitude CTA, Academic Documents */}
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
             
             {/* Your Saved Items (1 col) */}
             <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
@@ -423,6 +434,72 @@ export default function StudentDashboard() {
                </button>
             </div>
 
+            {/* Academic Documents (1 col) */}
+            <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm flex flex-col relative overflow-hidden">
+               <div className="flex items-start justify-between mb-3">
+                 <div className="flex items-center gap-2">
+                   <FileText className="w-5 h-5 text-emerald-600" />
+                   <h3 className="text-sm font-black text-gray-900">Academic Documents</h3>
+                 </div>
+               </div>
+               
+               {documents.length === 0 ? (
+                 <div className="flex flex-col h-full justify-between">
+                   <p className="text-[11px] font-medium text-gray-600 leading-relaxed mb-4">
+                     Upload your marksheet to automatically build your academic profile.
+                   </p>
+                   <button onClick={() => navigate('/documents/analyze')} className="w-full bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 text-[11px] font-bold py-2.5 rounded-lg transition-colors shadow-sm">
+                     Upload Document
+                   </button>
+                 </div>
+               ) : (
+                 <div className="flex flex-col h-full justify-between">
+                   <div className="space-y-3 mb-4">
+                     {documents.slice(0, 2).map((item, idx) => {
+                       const doc = item.document;
+                       const analysis = item.analysis;
+                       const isConfirmed = analysis?.analysisStatus === 'CONFIRMED';
+                       const hasAnalysis = !!analysis;
+                       
+                       return (
+                         <div key={idx} className="bg-gray-50 border border-gray-100 rounded-lg p-3">
+                           <div className="flex justify-between items-start mb-1">
+                             <div className="font-bold text-xs text-gray-900 truncate pr-2">
+                               {analysis?.documentType ? analysis.documentType.replace('_', ' ') : doc.fileName}
+                             </div>
+                             {isConfirmed && analysis.percentage && (
+                               <div className="text-xs font-black text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">
+                                 {analysis.percentage}%
+                               </div>
+                             )}
+                           </div>
+                           
+                           <div className="flex items-center gap-1 text-[10px] font-bold">
+                             {isConfirmed ? (
+                               <span className="text-emerald-600 flex items-center gap-1"><CheckCircle className="w-3 h-3"/> Academic profile updated</span>
+                             ) : hasAnalysis ? (
+                               <span className="text-orange-600 flex items-center gap-1"><CheckCircle className="w-3 h-3"/> Document analyzed - Review pending</span>
+                             ) : (
+                               <span className="text-blue-600 flex items-center gap-1"><Clock className="w-3 h-3"/> Analysis pending</span>
+                             )}
+                           </div>
+                         </div>
+                       );
+                     })}
+                   </div>
+                   
+                   <div className="flex gap-2">
+                     <button onClick={() => navigate('/documents/analyze')} className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold py-2 rounded-lg transition-colors shadow-sm text-center">
+                       View Analysis
+                     </button>
+                     <button onClick={() => navigate('/documents/analyze')} className="flex-1 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 text-[10px] font-bold py-2 rounded-lg transition-colors shadow-sm text-center">
+                       Upload Another
+                     </button>
+                   </div>
+                 </div>
+               )}
+            </div>
+
           </div>
 
         </div>
@@ -444,6 +521,7 @@ export default function StudentDashboard() {
                  { title: 'Compare Colleges', desc: 'Compare shortlisted colleges', icon: Zap, color: 'text-purple-600', bg: 'bg-purple-50', path: '/colleges' },
                  { title: 'Eligibility Checker', desc: 'Check your eligibility', icon: ShieldAlert, color: 'text-orange-600', bg: 'bg-orange-50', path: '/exams' },
                  { title: 'Career Explorer', desc: 'Explore careers for you', icon: Briefcase, color: 'text-indigo-600', bg: 'bg-indigo-50', path: '/jobs' },
+                 { title: 'Academic Documents', desc: 'Upload & analyze marksheets', icon: FileText, color: 'text-emerald-600', bg: 'bg-emerald-50', path: '/documents/analyze' },
                  { title: 'Aptitude Test', desc: 'Discover your strengths', icon: Target, color: 'text-rose-600', bg: 'bg-rose-50', path: '/quiz' },
                  { title: 'Download Report', desc: 'Get your personalized report', icon: BookOpen, color: 'text-blue-600', bg: 'bg-blue-50', path: '/settings' }
                ].map((action, idx) => (

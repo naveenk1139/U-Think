@@ -21,6 +21,7 @@ import CollegesDirectory from './components/CollegesDirectory';
 import CollegeDetail from './components/CollegeDetail';
 import StudentDashboard from './components/StudentDashboard';
 import SpecializationDetailView from './components/SpecializationDetailView';
+import DocumentAnalysis from './components/DocumentAnalysis';
 import { Login } from './components/Login';
 import { ForgotPassword } from './components/ForgotPassword';
 import { EmployerDashboard, AdminDashboard, CollegeDashboard } from './components/Dashboards';
@@ -133,9 +134,9 @@ function AppShell() {
               </span>
               <p className="text-slate-200">
                 {location.pathname === '/dashboard' ? (
-                  <>Welcome to <strong>U-THINK</strong>. Your personalized education and career dashboard is ready.</>
+                  <>Welcome to <strong>6 ASTRA</strong>. Your personalized education and career dashboard is ready.</>
                 ) : (
-                  <>Welcome to <strong>U-THINK</strong>. Explore and map 12th/Intermediate, Diploma, ITI, Paramedical, and Vocational tracks.</>
+                  <>Welcome to <strong>6 ASTRA</strong>. Explore and map 12th/Intermediate, Diploma, ITI, Paramedical, and Vocational tracks.</>
                 )}
               </p>
             </div>
@@ -187,6 +188,7 @@ function AppShell() {
               }
             />
             <Route path="/quiz" element={<AptitudeQuiz />} />
+            <Route path="/documents/analyze" element={<DocumentAnalysis />} />
             <Route path="/jobs" element={<JobFinder initialRole={selectedJobRole} />} />
             <Route path="/saved-jobs" element={<SavedJobs />} />
             <Route path="/pathways" element={<Navigate to="/pathways/after-10th" replace />} />
@@ -224,12 +226,12 @@ function AppShell() {
             <div className="bg-primary text-white p-1 rounded">
               <Compass className="w-4 h-4" />
             </div>
-            <span className="font-extrabold text-primary">U-THINK</span>
-            <span className="hidden sm:inline">Explore - Learn - Grow</span>
+            <span className="font-extrabold text-primary">6 ASTRA</span>
+            <span className="hidden sm:inline">AI-Powered Education & Career Guidance</span>
           </div>
           
           <div className="hidden lg:block text-text-secondary tracking-widest uppercase text-[10px]">
-            Explore · Learn · Decide · Achieve
+            AI-Powered Education & Career Guidance
           </div>
 
           <div className="flex items-center gap-6">
@@ -261,13 +263,13 @@ function AppShell() {
         {legalModal.type === 'terms' ? (
           <div className="space-y-4">
             <h3 className="font-bold text-lg">1. Introduction</h3>
-            <p>Welcome to U THINK. By accessing or using our platform, you agree to be bound by these Terms of Guidance.</p>
+            <p>Welcome to 6 ASTRA. By accessing or using our platform, you agree to be bound by these Terms of Guidance.</p>
             <h3 className="font-bold text-lg">2. Purpose of Guidance</h3>
-            <p>U THINK provides information, tools, and assessments to support career exploration. Our content is for educational and guidance purposes only.</p>
+            <p>6 ASTRA provides information, tools, and assessments to support career exploration. Our content is for educational and guidance purposes only.</p>
             <h3 className="font-bold text-lg">3. User Obligations</h3>
             <p>You agree to provide accurate information when using our assessment tools and are responsible for maintaining the confidentiality of your account information.</p>
             <h3 className="font-bold text-lg">4. Limitation of Liability</h3>
-            <p>U THINK shall not be held liable for any direct, indirect, incidental, or consequential damages resulting from your use of the platform.</p>
+            <p>6 ASTRA shall not be held liable for any direct, indirect, incidental, or consequential damages resulting from your use of the platform.</p>
             <h3 className="font-bold text-lg">5. Modification of Terms</h3>
             <p>We reserve the right to modify these terms at any time. Continued use constitutes acceptance of the new terms.</p>
           </div>

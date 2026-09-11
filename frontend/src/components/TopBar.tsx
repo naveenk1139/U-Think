@@ -105,20 +105,20 @@ export default function TopBar() {
         <div className="flex items-center gap-3 cursor-pointer shrink-0" onClick={() => navigate('/')}>
           <img 
             src="/logo.png" 
-            alt="U THINK Logo" 
+            alt="6 ASTRA Logo" 
             className="h-10 w-auto object-contain"
             onError={(e) => {
               const target = e.target as HTMLImageElement;
               target.onerror = null;
-              target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%232563eb' rx='20'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='24' font-weight='bold' fill='white'%3EUT%3C/text%3E%3C/svg%3E";
+              target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%232563eb' rx='20'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='24' font-weight='bold' fill='white'%3E6A%3C/text%3E%3C/svg%3E";
             }}
           />
           <div className="flex flex-col hidden sm:flex">
             <span className="text-lg font-black font-sans tracking-tight leading-none">
-              U-THINK
+              6 ASTRA
             </span>
             <span className="text-[10px] text-gray-400 font-medium">
-              Explore · Learn · Grow
+              AI-Powered Education & Career Guidance
             </span>
           </div>
         </div>
@@ -237,12 +237,6 @@ export default function TopBar() {
               </button>
             </div>
           )}
-        </div>
-
-        {/* Cursive Tagline */}
-        <div className="hidden xl:flex flex-col ml-6 -rotate-2">
-          <span className="font-serif italic text-white leading-tight text-lg shadow-sm">Your Future</span>
-          <span className="font-serif italic text-white leading-tight text-lg shadow-sm">Our Guidance</span>
         </div>
       </div>
     </div>

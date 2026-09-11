@@ -39,7 +39,7 @@ const EDUCATION_LEVELS = [
 
 export default function CareerAssessment() {
   const navigate = useNavigate();
-  const [step, setStep] = useState<'INTRO' | 'EDUCATION' | 'QUIZ' | 'ANALYZING' | 'RESULT'>('INTRO');
+  const [step, setStep] = useState<'EDUCATION' | 'INTRO' | 'QUIZ' | 'ANALYZING' | 'RESULT'>('EDUCATION');
   
   const [educationLevel, setEducationLevel] = useState<string>('');
   const [attemptId, setAttemptId] = useState<string>('');
@@ -53,13 +53,18 @@ export default function CareerAssessment() {
   // Hardcoded for demo, normally from auth context
   const userId = 'user-123'; 
 
-  const startAssessment = async (level: string) => {
-    setEducationLevel(level);
+  const handleContinueToAssessment = () => {
+    if (educationLevel) {
+      setStep('INTRO');
+    }
+  };
+
+  const startAssessment = async () => {
     setIsSubmitting(true);
     try {
       const res = await axios.post('http://localhost:5000/api/assessment/start', {
         userId,
-        educationLevel: level
+        educationLevel
       });
       setAttemptId(res.data.attemptId);
       setCurrentQuestion(res.data.nextQuestion);
@@ -102,10 +107,63 @@ export default function CareerAssessment() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white pt-20">
-      <div className="max-w-6xl mx-auto px-4 py-12">
+    <div className="w-full min-h-[calc(100vh-10rem)] bg-[#050A15] text-white rounded-3xl overflow-hidden shadow-2xl border border-gray-800">
+      <div className="max-w-6xl mx-auto px-6 py-12 md:py-16">
         <AnimatePresence mode="wait">
           
+          {step === 'EDUCATION' && (
+            <motion.div
+              key="education"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="max-w-5xl mx-auto"
+            >
+              <div className="text-center mb-12">
+                <h1 className="text-3xl md:text-4xl font-bold mb-4 text-white tracking-tight">What is your current education level?</h1>
+                <p className="text-gray-400 text-sm md:text-base">This helps 6 ASTRA personalize your aptitude assessment to your educational context.</p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5 mb-12">
+                {EDUCATION_LEVELS.map((level) => {
+                  const isSelected = educationLevel === level.id;
+                  return (
+                    <button
+                      key={level.id}
+                      onClick={() => setEducationLevel(level.id)}
+                      className={`
+                        p-6 rounded-2xl transition-all duration-200 text-left flex flex-col items-start gap-4 border outline-none group
+                        ${isSelected 
+                          ? 'bg-blue-600/10 border-blue-500 shadow-[0_0_15px_rgba(37,99,235,0.15)] scale-[1.02]' 
+                          : 'bg-[#0E1525] border-[#1E293B] hover:border-blue-500/50 hover:bg-[#111A2C]'}
+                      `}
+                    >
+                      <GraduationCap className={`h-7 w-7 transition-transform group-hover:scale-110 ${isSelected ? 'text-blue-400' : 'text-blue-500/70'}`} />
+                      <span className={`font-semibold text-sm ${isSelected ? 'text-white' : 'text-gray-300'}`}>
+                        {level.label}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="flex justify-center">
+                <button
+                  onClick={handleContinueToAssessment}
+                  disabled={!educationLevel}
+                  className={`
+                    flex items-center gap-2 px-8 py-3.5 rounded-full font-bold text-sm transition-all
+                    ${educationLevel 
+                      ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg cursor-pointer' 
+                      : 'bg-[#1E293B] text-gray-500 cursor-not-allowed opacity-70'}
+                  `}
+                >
+                  Continue to Assessment <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            </motion.div>
+          )}
+
           {step === 'INTRO' && (
             <motion.div
               key="intro"
@@ -123,49 +181,21 @@ export default function CareerAssessment() {
                 Discover Your Perfect Career Path
               </h1>
               
-              <p className="text-xl text-text-muted mb-12 leading-relaxed">
+              <p className="text-xl text-gray-400 mb-12 leading-relaxed">
                 Stop guessing your future. Our advanced AI analyzes your 18-dimension cognitive and psychological profile to map you to the exact degree, college, and career where you'll thrive.
               </p>
 
               <button
-                onClick={() => setStep('EDUCATION')}
-                className="group relative inline-flex items-center justify-center px-8 py-4 bg-card text-text-primary font-bold text-lg rounded-full overflow-hidden transition-transform hover:scale-105"
+                onClick={startAssessment}
+                disabled={isSubmitting}
+                className="group relative inline-flex items-center justify-center px-8 py-4 bg-white text-black font-bold text-lg rounded-full overflow-hidden transition-transform hover:scale-105 disabled:opacity-70"
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-400 via-purple-400 to-blue-400 opacity-0 group-hover:opacity-20 transition-opacity"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-200 via-purple-200 to-blue-200 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 <span className="relative flex items-center space-x-2">
                   <span>Start Free Assessment</span>
-                  <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                  {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />}
                 </span>
               </button>
-            </motion.div>
-          )}
-
-          {step === 'EDUCATION' && (
-            <motion.div
-              key="education"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="max-w-4xl mx-auto"
-            >
-              <div className="text-center mb-12">
-                <h2 className="text-3xl font-bold mb-4">What is your current education level?</h2>
-                <p className="text-text-muted">This helps our AI adapt the questions to your exact context.</p>
-              </div>
-
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {EDUCATION_LEVELS.map((level) => (
-                  <button
-                    key={level.id}
-                    onClick={() => startAssessment(level.id)}
-                    disabled={isSubmitting}
-                    className="p-6 bg-card/5 border border-white/10 rounded-2xl hover:bg-card/10 hover:border-blue-500/50 transition-all text-left group flex flex-col h-full"
-                  >
-                    <GraduationCap className="h-8 w-8 text-blue-400 mb-4 group-hover:scale-110 transition-transform" />
-                    <span className="font-semibold">{level.label}</span>
-                  </button>
-                ))}
-              </div>
             </motion.div>
           )}
 

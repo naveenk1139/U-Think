@@ -6,6 +6,18 @@ import { getExams, getExamRecommendations, saveExam, unsaveExam, getSavedExams, 
 import ExamComparisonModal from './ExamComparisonModal';
 import { format, isPast, isFuture } from 'date-fns';
 
+const isValidUrl = (url: string | undefined): boolean => {
+  if (!url) return false;
+  const lowerUrl = url.toLowerCase();
+  if (lowerUrl.includes('localhost') || lowerUrl.includes('example.com') || lowerUrl.includes('google.com/search') || lowerUrl.includes('wikipedia.org')) return false;
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+  } catch {
+    return false;
+  }
+};
+
 interface ExamsDirectoryProps {
   initialTab?: 'exams' | 'degrees' | 'specializations' | 'compare' | 'saved';
 }
@@ -227,16 +239,20 @@ export default function ExamsDirectory({ initialTab = 'exams' }: ExamsDirectoryP
            </div>
         </div>
 
-        <div className="mt-auto pt-4 border-t border-gray-100 flex gap-2">
+         <div className="mt-auto pt-4 border-t border-gray-100 flex gap-2">
            <button onClick={() => navigate(`/exams/${exam.canonical_slug}`)} className="flex-1 bg-[#2B3B94] hover:bg-blue-800 text-white py-2.5 rounded-xl text-sm font-bold transition-colors">
              View Details
            </button>
-           {exam.official_website && (
-             <button onClick={() => window.open(exam.official_website, '_blank')} className="flex-1 bg-gray-50 hover:bg-gray-100 text-gray-700 py-2.5 rounded-xl text-sm font-bold border border-gray-200 transition-colors">
+           {isValidUrl(exam.official_website) ? (
+             <a href={exam.official_website} target="_blank" rel="noopener noreferrer" className="flex-1 bg-gray-50 hover:bg-gray-100 text-gray-700 py-2.5 rounded-xl text-sm font-bold border border-gray-200 transition-colors text-center inline-block">
                Official Website ↗
+             </a>
+           ) : (
+             <button disabled className="flex-1 bg-gray-50 text-gray-400 py-2.5 rounded-xl text-sm font-bold border border-gray-200 cursor-not-allowed">
+               Website Unavailable
              </button>
            )}
-        </div>
+         </div>
       </div>
     );
   };

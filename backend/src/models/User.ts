@@ -1,6 +1,22 @@
 import mongoose, { Document, Schema } from 'mongoose';
 import bcrypt from 'bcryptjs';
 
+export interface IAcademicSubject {
+  subjectName: string;
+  marksObtained: number | null;
+  maximumMarks: number | null;
+  grade: string | null;
+}
+
+export interface IAcademicProfile {
+  tenthPercentage?: number;
+  twelfthPercentage?: number;
+  diplomaPercentage?: number;
+  subjects?: IAcademicSubject[];
+  lastUpdated?: Date;
+  source?: string;
+}
+
 export interface IUser extends Document {
   _id: mongoose.Types.ObjectId;
   name: string;
@@ -35,6 +51,7 @@ export interface IUser extends Document {
   preferredCourse?: string[];
   preferredLocation?: string[];
   profileCompletion?: number;
+  academicProfile?: IAcademicProfile;
 
   matchPassword(enteredPassword: string): Promise<boolean>;
   isLocked(): boolean;
@@ -111,6 +128,19 @@ const UserSchema = new Schema<IUser>(
     preferredCourse: [{ type: String }],
     preferredLocation: [{ type: String }],
     profileCompletion: { type: Number, default: 0 },
+    academicProfile: {
+      tenthPercentage: { type: Number },
+      twelfthPercentage: { type: Number },
+      diplomaPercentage: { type: Number },
+      subjects: [{
+        subjectName: { type: String },
+        marksObtained: { type: Number },
+        maximumMarks: { type: Number },
+        grade: { type: String }
+      }],
+      lastUpdated: { type: Date },
+      source: { type: String, default: 'MANUAL' }
+    }
   },
   {
     timestamps: true,

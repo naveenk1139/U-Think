@@ -4,8 +4,21 @@ import { Calendar, ArrowLeft, ExternalLink, ShieldCheck, Clock, AlertCircle, Fil
 import { StructuredExam, ExamYear } from '../types';
 import { getExamBySlug, saveExam, unsaveExam, getSavedExams, trackExam } from '../api/examApi';
 
+const isValidUrl = (url: string | undefined): boolean => {
+  if (!url) return false;
+  const lowerUrl = url.toLowerCase();
+  if (lowerUrl.includes('localhost') || lowerUrl.includes('example.com') || lowerUrl.includes('google.com/search') || lowerUrl.includes('wikipedia.org')) return false;
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+  } catch {
+    return false;
+  }
+};
+
 export default function ExamDetail() {
-  const { slug } = useParams<{ slug: string }>();
+  const { slug, examId } = useParams<{ slug?: string, examId?: string }>();
+  const currentSlug = slug || examId;
   const navigate = useNavigate();
   const [exam, setExam] = useState<StructuredExam | null>(null);
   const [loading, setLoading] = useState(true);
@@ -16,8 +29,8 @@ export default function ExamDetail() {
     const fetchExam = async () => {
       setLoading(true);
       try {
-        if (!slug) return;
-        const data = await getExamBySlug(slug);
+        if (!currentSlug) return;
+        const data = await getExamBySlug(currentSlug);
         setExam(data);
 
         // check if saved
@@ -34,7 +47,7 @@ export default function ExamDetail() {
       }
     };
     fetchExam();
-  }, [slug]);
+  }, [currentSlug]);
 
   const toggleSave = async () => {
     if (!exam) return;
@@ -321,11 +334,15 @@ export default function ExamDetail() {
           <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
              <h2 className="text-xl font-bold text-gray-900 mb-4">Official Links</h2>
              <div className="space-y-3">
-               {exam.official_website && (
+               {isValidUrl(exam.official_website) ? (
                  <a href={exam.official_website} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-3 rounded-xl border border-gray-100 hover:border-blue-200 hover:bg-blue-50 transition-colors group">
                     <span className="font-semibold text-gray-700 group-hover:text-blue-700">Official Website</span>
                     <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-blue-600" />
                  </a>
+               ) : (
+                 <div className="flex items-center justify-between p-3 rounded-xl border border-gray-100 bg-gray-50 cursor-not-allowed">
+                    <span className="font-semibold text-gray-400">Official Website Unavailable</span>
+                 </div>
                )}
                {exam.official_application_url && (
                  <a href={exam.official_application_url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-3 rounded-xl border border-gray-100 hover:border-blue-200 hover:bg-blue-50 transition-colors group">
