@@ -198,5 +198,27 @@ router.get('/dashboard-stats', async (req: AuthRequest, res: Response, next: Nex
   }
 });
 
-export default router;
+// Delete user account
+router.delete('/me', async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(401).json({ error: 'Not authenticated' });
+      return;
+    }
 
+    const user = await User.findById(userId);
+    if (!user) {
+      res.status(404).json({ error: 'User not found' });
+      return;
+    }
+
+    await User.findByIdAndDelete(userId);
+    
+    res.json({ message: 'Account deleted successfully' });
+  } catch (err) {
+    next(err);
+  }
+});
+
+export default router;

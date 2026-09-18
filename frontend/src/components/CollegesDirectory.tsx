@@ -7,11 +7,12 @@ import {
 import { fetchColleges, fetchAiRecommendations, fetchCollegeStats, fetchDistrictStats, fetchFilterOptions, fetchDistricts, College } from '../api/collegeApi';
 import { useJsApiLoader, GoogleMap, Marker, InfoWindow } from '@react-google-maps/api';
 import { useAuth } from '../contexts/AuthContext';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 
 export default function CollegesDirectory() {
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchParams] = useSearchParams();
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
   
   // Filters State
   const [selectedDistrict, setSelectedDistrict] = useState('All Districts');
@@ -175,15 +176,20 @@ export default function CollegesDirectory() {
     }
   };
 
-  const getCount = (arr: any[], name: string) => arr?.find(item => item.name === name)?.count || 0;
-  const getCountByStartsWith = (arr: any[], prefix: string) => arr?.find(item => item.name.startsWith(prefix))?.count || 0;
+  const getCount = (arr: any[], name: string) => arr?.find(item => item.name?.toLowerCase() === name.toLowerCase())?.count || 0;
+  
+  const getCountByExact = (arr: any[], names: string[]) => {
+    if (!arr) return 0;
+    const lowerNames = names.map(n => n.toLowerCase());
+    return arr.filter(item => lowerNames.includes(item.name?.toLowerCase())).reduce((sum, item) => sum + item.count, 0);
+  };
 
   const educationLevels = [
-    { label: 'After 10th (PUC, Diploma, ITI)', value: 'After 10th', count: getCountByStartsWith(filterOptionsData?.educationLevels, 'After 10th') },
-    { label: 'After 12th (UG)', value: 'After 12th', count: getCountByStartsWith(filterOptionsData?.educationLevels, 'After 12th') },
-    { label: 'Postgraduate (PG)', value: 'Postgraduate', count: getCountByStartsWith(filterOptionsData?.educationLevels, 'Postgraduate') },
-    { label: 'Professional (Medical, Law etc.)', value: 'Professional', count: getCountByStartsWith(filterOptionsData?.educationLevels, 'Professional') },
-    { label: 'Research (PhD)', value: 'Research', count: getCountByStartsWith(filterOptionsData?.educationLevels, 'Research') }
+    { label: 'After 10th (PUC, Diploma, ITI)', value: 'AFTER_10TH,PUC,DIPLOMA,ITI', count: getCountByExact(filterOptionsData?.educationLevels, ['AFTER_10TH', 'PUC', 'DIPLOMA', 'ITI']) },
+    { label: 'After 12th (UG)', value: 'UNDERGRADUATE', count: getCountByExact(filterOptionsData?.educationLevels, ['UNDERGRADUATE']) },
+    { label: 'Postgraduate (PG)', value: 'POSTGRADUATE', count: getCountByExact(filterOptionsData?.educationLevels, ['POSTGRADUATE']) },
+    { label: 'Professional (Medical, Law etc.)', value: 'PROFESSIONAL', count: getCountByExact(filterOptionsData?.educationLevels, ['PROFESSIONAL']) },
+    { label: 'Research (PhD)', value: 'RESEARCH', count: getCountByExact(filterOptionsData?.educationLevels, ['RESEARCH']) }
   ];
 
   const institutionTypes = [
@@ -205,6 +211,43 @@ export default function CollegesDirectory() {
     name: d.district,
     count: d.institutionCount
   }));
+
+  const handlePillClick = (tab: string) => {
+    if (tab === 'All') {
+      setSelectedEducationLevels([]);
+      if (['Diploma', 'ITI', 'Degree'].includes(searchQuery)) {
+        setSearchQuery('');
+      }
+    } else if (tab === 'After 10th') {
+      setSelectedEducationLevels(['AFTER_10TH,PUC,DIPLOMA,ITI']);
+      setSearchQuery('');
+    } else if (tab === 'After 12th') {
+      setSelectedEducationLevels(['UNDERGRADUATE']);
+      setSearchQuery('');
+    } else if (tab === 'Postgraduate') {
+      setSelectedEducationLevels(['POSTGRADUATE']);
+      setSearchQuery('');
+    } else if (tab === 'Professional') {
+      setSelectedEducationLevels(['PROFESSIONAL']);
+      setSearchQuery('');
+    } else if (tab === 'Research') {
+      setSelectedEducationLevels(['RESEARCH']);
+      setSearchQuery('');
+    } else {
+      setSearchQuery(tab);
+      setSelectedEducationLevels([]);
+    }
+  };
+
+  const isPillActive = (tab: string) => {
+    if (tab === 'After 10th' && selectedEducationLevels.includes('AFTER_10TH,PUC,DIPLOMA,ITI')) return true;
+    if (tab === 'After 12th' && selectedEducationLevels.includes('UNDERGRADUATE')) return true;
+    if (tab === 'Postgraduate' && selectedEducationLevels.includes('POSTGRADUATE')) return true;
+    if (tab === 'Professional' && selectedEducationLevels.includes('PROFESSIONAL')) return true;
+    if (tab === 'Research' && selectedEducationLevels.includes('RESEARCH')) return true;
+    if (searchQuery === tab) return true;
+    return false;
+  };
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-sans pb-10">
@@ -228,9 +271,9 @@ export default function CollegesDirectory() {
               
               {/* Pill Tabs */}
               <div className="flex flex-wrap gap-2 mb-4">
-                <button className="px-5 py-1.5 bg-blue-600 text-white text-sm font-bold rounded-full">All</button>
+                <button onClick={() => handlePillClick('All')} className={`px-5 py-1.5 text-sm font-bold rounded-full transition-colors ${selectedEducationLevels.length === 0 && !['Diploma', 'ITI', 'Degree'].includes(searchQuery) ? 'bg-blue-600 text-white' : 'bg-white text-slate-700 hover:bg-slate-100'}`}>All</button>
                 {['After 10th', 'After 12th', 'Diploma', 'ITI', 'Degree', 'Postgraduate', 'Professional', 'Research'].map(tab => (
-                  <button key={tab} className="px-5 py-1.5 bg-white text-slate-700 hover:bg-slate-100 text-sm font-bold rounded-full transition-colors">
+                  <button key={tab} onClick={() => handlePillClick(tab)} className={`px-5 py-1.5 text-sm font-bold rounded-full transition-colors ${isPillActive(tab) ? 'bg-blue-600 text-white' : 'bg-white text-slate-700 hover:bg-slate-100'}`}>
                     {tab}
                   </button>
                 ))}
@@ -256,7 +299,7 @@ export default function CollegesDirectory() {
               {/* Tags */}
               <div className="flex flex-wrap gap-2 mt-4">
                 {['Engineering in Bengaluru', 'Nursing colleges', 'Diploma in Mysuru', 'BCA in Mangaluru', 'Medical colleges', 'ITI in Hubballi'].map(tag => (
-                  <button key={tag} className="px-3 py-1 bg-slate-800/60 backdrop-blur-sm border border-slate-700 text-slate-300 text-xs font-semibold rounded-full hover:bg-slate-700 transition-colors">
+                  <button key={tag} onClick={() => setSearchQuery(tag)} className="px-3 py-1 bg-slate-800/60 backdrop-blur-sm border border-slate-700 text-slate-300 text-xs font-semibold rounded-full hover:bg-slate-700 transition-colors">
                     {tag}
                   </button>
                 ))}
@@ -686,12 +729,12 @@ export default function CollegesDirectory() {
                         </div>
                         
                         <div className="flex items-center gap-2 pt-2">
-                          <button 
-                            onClick={() => navigate(`/colleges/${college.slug || college.sourceId}`)}
-                            className="flex-1 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-lg transition-colors shadow-sm"
+                          <Link 
+                            to={`/colleges/${college.slug || college.sourceId}`}
+                            className="flex-1 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-lg transition-colors shadow-sm flex items-center justify-center"
                           >
                             View Details
-                          </button>
+                          </Link>
                           <button 
                             onClick={(e) => toggleCompare(college._id, e)}
                             className={`px-3 py-2 border rounded-lg text-sm font-bold transition-colors flex items-center gap-1 ${compareList.includes(college._id) ? 'bg-slate-100 border-slate-300 text-slate-800' : 'bg-white border-slate-300 text-slate-600 hover:bg-slate-50'}`}

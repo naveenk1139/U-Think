@@ -301,9 +301,9 @@ router.get('/', async (req: Request, res: Response) => {
       ];
     }
     
-    if (category && category !== 'All') filter.categories = { $in: [String(category)] };
-    if (type && type !== 'All') filter.type = { $regex: String(type), $options: 'i' };
-    if (req.query.education_level) filter.educationLevels = { $in: [String(req.query.education_level)] };
+    if (category && category !== 'All') filter.categories = { $in: String(category).split(',').map(c => c.trim()) };
+    if (type && type !== 'All') filter.type = { $in: String(type).split(',').map(t => new RegExp(t.trim(), 'i')) };
+    if (req.query.education_level) filter.educationLevels = { $in: String(req.query.education_level).split(',').map(e => e.trim()) };
     if (ownership) filter.ownership = String(ownership);
     
     // Support string matching for legacy/unmigrated data OR strict ObjectId refs if passed

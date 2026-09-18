@@ -52,6 +52,23 @@ export interface IUser extends Document {
   preferredLocation?: string[];
   profileCompletion?: number;
   academicProfile?: IAcademicProfile;
+  
+  settings?: {
+    notifications?: {
+      examReminders?: boolean;
+      scholarshipAlerts?: boolean;
+      careerUpdates?: boolean;
+      aiRecommendations?: boolean;
+    };
+    aiCounselor?: {
+      enableGuidance?: boolean;
+      personalization?: boolean;
+    };
+    privacy?: {
+      publicProfile?: boolean;
+      showActiveStatus?: boolean;
+    };
+  };
 
   matchPassword(enteredPassword: string): Promise<boolean>;
   isLocked(): boolean;
@@ -140,6 +157,22 @@ const UserSchema = new Schema<IUser>(
       }],
       lastUpdated: { type: Date },
       source: { type: String, default: 'MANUAL' }
+    },
+    settings: {
+      notifications: {
+        examReminders: { type: Boolean, default: true },
+        scholarshipAlerts: { type: Boolean, default: true },
+        careerUpdates: { type: Boolean, default: true },
+        aiRecommendations: { type: Boolean, default: true },
+      },
+      aiCounselor: {
+        enableGuidance: { type: Boolean, default: true },
+        personalization: { type: Boolean, default: true },
+      },
+      privacy: {
+        publicProfile: { type: Boolean, default: false },
+        showActiveStatus: { type: Boolean, default: true },
+      }
     }
   },
   {

@@ -416,3 +416,47 @@ export const resetPassword = async (req: Request, res: Response, next: NextFunct
     next(error);
   }
 };
+
+/**
+ * @desc    Change Password (Authenticated)
+ * @route   POST /api/auth/change-password
+ * @access  Private
+ */
+export const changePassword = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    
+    if (!currentPassword || !newPassword) {
+      res.status(400).json({ error: 'Current password and new password are required.' });
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      res.status(400).json({ error: 'New password must be at least 6 characters long.' });
+      return;
+    }
+
+    const userId = req.user?.id;
+    const user = await User.findById(userId);
+    
+    if (!user) {
+      res.status(404).json({ error: 'User not found.' });
+      return;
+    }
+
+    const isMatch = await user.matchPassword(currentPassword);
+    if (!isMatch) {
+      res.status(401).json({ error: 'Invalid current password.' });
+      return;
+    }
+
+    // Hash and update password
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(newPassword, salt);
+    await user.save();
+
+    res.status(200).json({ message: 'Password has been successfully changed.' });
+  } catch (error) {
+    next(error);
+  }
+};

@@ -79,10 +79,10 @@ export default function Home({ onNavigate, onOpenCounselor }: any) {
                 {[
                   { label: 'Colleges', icon: Building2, color: 'text-purple-600', path: '/colleges' },
                   { label: 'Exams', icon: ShieldAlert, color: 'text-emerald-600', path: '/exams' },
-                  { label: 'Courses', icon: BookOpen, color: 'text-teal-600', path: '/colleges' },
+                  { label: 'Courses', icon: BookOpen, color: 'text-teal-600', path: '/professional-courses' },
                   { label: 'Careers', icon: Briefcase, color: 'text-orange-600', path: '/jobs' },
-                  { label: 'After 10th', icon: GraduationCap, color: 'text-blue-600', path: '/streams' },
-                  { label: 'After 12th', icon: Target, color: 'text-rose-600', path: '/streams' }
+                  { label: 'After 10th', icon: GraduationCap, color: 'text-blue-600', path: '/pathways/after-10th' },
+                  { label: 'After 12th', icon: Target, color: 'text-rose-600', path: '/pathways/after-12th' }
                 ].map((tag, idx) => (
                   <button key={idx} onClick={() => navigate(tag.path)} className="flex items-center gap-1.5 bg-white border border-blue-100 hover:border-blue-300 px-3 py-1.5 rounded-lg text-xs font-bold text-gray-700 hover:text-blue-600 transition-colors shadow-sm">
                     <tag.icon className={`w-3.5 h-3.5 ${tag.color}`} /> {tag.label}

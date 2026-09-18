@@ -8,6 +8,7 @@ import {
   getMe,
   forgotPassword,
   resetPassword,
+  changePassword,
 } from '../controllers/authController.js';
 import { protect } from '../middleware/authMiddleware.js';
 
@@ -52,5 +53,8 @@ router.post('/test-email', async (req, res) => {
 // ── Protected ─────────────────────────────────────────────────────
 // @route   GET /api/auth/me
 router.get('/me', protect, getMe);
+
+// @route   POST /api/auth/change-password
+router.post('/change-password', protect, changePassword);
 
 export default router;

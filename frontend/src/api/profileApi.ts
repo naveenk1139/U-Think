@@ -22,3 +22,6 @@ export const getInterests = (): Promise<string[]> =>
 
 export const updateInterests = (interests: string[]): Promise<string[]> =>
   api.put<string[]>('/api/profile/interests', { interests }).then((r) => r.data);
+
+export const deleteAccount = (): Promise<{ message: string }> =>
+  api.delete<{ message: string }>('/api/profile/me').then((r) => r.data);

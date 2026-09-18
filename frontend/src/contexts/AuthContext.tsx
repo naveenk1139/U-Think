@@ -30,6 +30,22 @@ export interface User {
   preferredLocation?: string[];
   profileCompletion?: number;
   isEmailVerified?: boolean;
+  settings?: {
+    notifications?: {
+      examReminders?: boolean;
+      scholarshipAlerts?: boolean;
+      careerUpdates?: boolean;
+      aiRecommendations?: boolean;
+    };
+    aiCounselor?: {
+      enableGuidance?: boolean;
+      personalization?: boolean;
+    };
+    privacy?: {
+      publicProfile?: boolean;
+      showActiveStatus?: boolean;
+    };
+  };
 }
 
 export interface RegisterPayload {
