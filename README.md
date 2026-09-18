@@ -9,6 +9,7 @@ U-THINK is an exhaustive, comprehensive, and highly detailed educational navigat
 *   **Verified Institution Ecosystem:** A robust directory of 3,500+ verified colleges, institutes, and universities across all 31 districts of Karnataka.
 *   **Live Exam & Degree Directory:** A real-time engine tracking major entrance exams (JEE, NEET, KCET, CA, UPSC, etc.) with dynamic countdowns, eligibility checkers, and automated status calculations.
 *   **AI-Powered Recommendations:** Built-in AI integration (Gemini 2.5 Pro) that scores and recommends personalized pathways and colleges based on the user's aptitude, budget, and career goals.
+*   **Comprehensive User Settings:** Fully functional account management allowing students to personalize notifications, update academic profiles, configure AI counselor preferences, and manage security settings.
 *   **Data Provenance:** Strict verification markers for all data sources (AISHE, NTA, KEA, official portals) ensuring zero fake data.
 
 ## 🛠️ Technology Stack
