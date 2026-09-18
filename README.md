@@ -110,3 +110,14 @@ npx tsx src/scripts/seedMegaExams.ts
 
 ## 🤝 Contribution Guidelines
 This project enforces a strict "Real Data Only" mandate. No placeholder data, fake dates, or unverified fees should be committed to the database layer. Always cite your data source (e.g., `source_url`, `last_verified_at`) when updating institutional or exam information.
+
+## 📊 Official Data Sources
+
+The ecosystem relies on the following verified and official data sources for its databases:
+
+*   **AISHE (All India Survey on Higher Education):** [https://aishe.gov.in](https://aishe.gov.in)
+*   **UGC (University Grants Commission):** [https://www.ugc.gov.in](https://www.ugc.gov.in)
+*   **KEA (Karnataka Examination Authority):** [https://kea.kar.nic.in](https://kea.kar.nic.in)
+*   **NTA (National Testing Agency):** [https://nta.ac.in](https://nta.ac.in)
+*   **AICTE (All India Council for Technical Education):** [https://www.aicte-india.org](https://www.aicte-india.org)
+*   **Karnataka State Higher Education Council:** [https://kshec.karnataka.gov.in](https://kshec.karnataka.gov.in)
