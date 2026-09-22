@@ -7,6 +7,7 @@ const ExamSchema = new mongoose.Schema({
   category: String,
   level: String,
   description: String,
+  canonical_slug: String,
 });
 
 const Exam = mongoose.models.Exam || mongoose.model('Exam', ExamSchema);
@@ -18,6 +19,7 @@ const sampleExams = [
     category: 'Medical',
     level: 'National',
     description: 'National Eligibility cum Entrance Test for Undergraduate medical courses across India.',
+    canonical_slug: 'neet-ug',
   },
   {
     examId: 'jee-main',
@@ -25,6 +27,7 @@ const sampleExams = [
     category: 'Engineering',
     level: 'National',
     description: 'Joint Entrance Examination Main for admission to NITs, IIITs and CFTIs.',
+    canonical_slug: 'jee-main',
   },
   {
     examId: 'clat-ug',
@@ -32,6 +35,7 @@ const sampleExams = [
     category: 'Law',
     level: 'National',
     description: 'Common Law Admission Test for undergraduate law programs at 22 NLUs.',
+    canonical_slug: 'clat-ug',
   },
   {
     examId: 'cuet-ug',
@@ -39,6 +43,7 @@ const sampleExams = [
     category: 'General',
     level: 'National',
     description: 'Common University Entrance Test for admission to Central Universities across India.',
+    canonical_slug: 'cuet-ug',
   },
 ];
 
