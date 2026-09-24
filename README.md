@@ -139,18 +139,26 @@ U-Think/
 
 ## 🌱 Database Seeding (Crucial)
 
-To power the core graphs and features, you **must** populate the database with the structural nodes and relationships. Run the following scripts from the `backend/` directory in order:
+Because U-Think relies on a highly interconnected Knowledge Graph, an empty database will cause most of the AI intelligence features and graphs to return blank. 
+
+To power the core ecosystem, you **must** populate the database with the structural nodes and relationships. Run the following scripts from the `backend/` directory in this specific order:
 
 ```bash
 cd backend
 
-# 1. Seed the core Educational Pathways (Degrees, Streams, Courses)
+# 1. Core Educational Pathways
+# Seeds all high school streams (PCMB, CEBA), undergraduate degrees (B.Tech, B.Com), 
+# and master's specializations into the database.
 npx tsx src/scripts/seedMegaPathways.ts
 
-# 2. Seed the Entrance Exams directory
+# 2. Entrance Exams Directory
+# Seeds the state and national entrance exams (KCET, NEET, JEE) along with 
+# their current status (Upcoming, Registration Open, etc.).
 npx tsx src/scripts/seedMegaExams.ts
 
-# 3. Seed the Graph Relationships (Required for the Dependency Engine to work!)
+# 3. Graph Relationships Mapping
+# (CRITICAL for the Dependency Engine & Impact Simulator)
+# Creates the complex prerequisite relationships mapping which subjects unlock which degrees.
 npx tsx src/scripts/seedGraphRelations.ts
 ```
 
