@@ -96,9 +96,9 @@ U-Think/
 ## 🚀 Getting Started
 
 ### Prerequisites
-*   Node.js (v18+)
-*   MongoDB (Local or Atlas)
-*   Google Gemini API Key (for AI recommendations)
+*   **Node.js** (v18 or higher)
+*   **MongoDB** (Local instance or Atlas cluster)
+*   **Google Gemini API Key** (Required for the AI Intelligence Features to function. If you hit the free-tier rate limit (429), the app will automatically gracefully degrade to mock data).
 
 ### Installation
 
@@ -113,8 +113,8 @@ U-Think/
     npm install
     ```
 
-3.  **Environment Variables:**
-    *   Create `backend/.env` and add:
+3.  **Configure Environment Variables:**
+    *   Create `backend/.env` and add your configurations:
         ```env
         PORT=5000
         MONGO_URI=mongodb://127.0.0.1:27017/u-think
@@ -127,7 +127,7 @@ U-Think/
         ```
 
 4.  **Run Development Servers:**
-    Open two terminals to run both frontend and backend concurrently, or use the workspace script:
+    Open two terminals to run both frontend and backend concurrently, or use the workspace script if configured:
     ```bash
     # Terminal 1 (Backend)
     npm run dev:backend
@@ -137,15 +137,21 @@ U-Think/
     ```
     The frontend will run on `http://localhost:3000` (or `3001` if 3000 is occupied) and the backend will run on `http://localhost:5000`.
 
-## 🌱 Data Seeding
+## 🌱 Database Seeding (Crucial)
 
-To populate the database with the verified Karnataka educational dataset and major entrance exams, run the following scripts from the `backend/` directory:
+To power the core graphs and features, you **must** populate the database with the structural nodes and relationships. Run the following scripts from the `backend/` directory in order:
 
 ```bash
 cd backend
+
+# 1. Seed the core Educational Pathways (Degrees, Streams, Courses)
 npx tsx src/scripts/seedMegaPathways.ts
+
+# 2. Seed the Entrance Exams directory
 npx tsx src/scripts/seedMegaExams.ts
-# Additional seeders available in src/scripts/
+
+# 3. Seed the Graph Relationships (Required for the Dependency Engine to work!)
+npx tsx src/scripts/seedGraphRelations.ts
 ```
 
 ## 🤝 Contribution Guidelines
