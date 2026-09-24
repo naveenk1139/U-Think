@@ -25,8 +25,8 @@ export default function Sidebar() {
     { icon: Target, label: 'Aptitude Test', path: '/quiz' },
     { icon: FileText, label: 'Academic Documents', path: '/documents/analyze' },
     { icon: Bookmark, label: 'Saved Jobs', path: '/saved-jobs' },
-    { icon: Bell, label: 'Reminders', path: '/reminders' },
-    { icon: Heart, label: 'Interests', path: '/interests' },
+    { icon: Bell, label: 'Reminders', path: '/settings?tab=notifications' },
+    { icon: Heart, label: 'Interests', path: '/settings?tab=education' },
     { icon: Settings, label: 'Settings', path: '/settings' },
   ];
 
@@ -116,7 +116,10 @@ export default function Sidebar() {
               Complete your profile to get better recommendations.
             </p>
             
-            <button className="text-blue-600 hover:text-blue-700 text-[10px] font-bold transition-colors flex items-center gap-1">
+            <button 
+              onClick={() => window.location.href = '/settings?tab=account'}
+              className="text-blue-600 hover:text-blue-700 text-[10px] font-bold transition-colors flex items-center gap-1"
+            >
               Continue Profile <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
             </button>
          </div>

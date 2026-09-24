@@ -444,7 +444,7 @@ Return ONLY a valid JSON array of objects, with each object containing:
         }
       });
 
-      const aiResponseText = response.text();
+      const aiResponseText = response?.text;
       
       try {
         recommendations = JSON.parse(aiResponseText);

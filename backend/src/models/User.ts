@@ -68,6 +68,13 @@ export interface IUser extends Document {
       publicProfile?: boolean;
       showActiveStatus?: boolean;
     };
+    careerDNA?: {
+      coreStrengths?: string[];
+      learningStyle?: string;
+      recommendedSectors?: string[];
+      personalityArchetype?: string;
+      summary?: string;
+    };
   };
 
   matchPassword(enteredPassword: string): Promise<boolean>;
@@ -172,6 +179,13 @@ const UserSchema = new Schema<IUser>(
       privacy: {
         publicProfile: { type: Boolean, default: false },
         showActiveStatus: { type: Boolean, default: true },
+      },
+      careerDNA: {
+        coreStrengths: [{ type: String }],
+        learningStyle: { type: String },
+        recommendedSectors: [{ type: String }],
+        personalityArchetype: { type: String },
+        summary: { type: String }
       }
     }
   },

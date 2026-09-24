@@ -55,6 +55,23 @@ export const calculateMatchScore = (itemTags: string[], user: any) => {
     }
   }
 
+  // Career DNA / AI Match Engine + (up to 20% bonus)
+  if (user.settings?.careerDNA) {
+    const dna = user.settings.careerDNA;
+    // Check if the college/pathway tags match recommended sectors or strengths
+    const matchedSectors = itemTags.filter(tag => 
+      dna.recommendedSectors?.some((sector: string) => tag.toLowerCase().includes(sector.toLowerCase()))
+    );
+    if (matchedSectors.length > 0) {
+      score += 15; // Bonus for AI sector match
+    }
+    
+    // Check archetype alignment loosely (e.g., tech -> analyst)
+    if (dna.personalityArchetype?.toLowerCase().includes('analyst') && itemTags.some(t => t.toLowerCase().includes('science'))) {
+      score += 5;
+    }
+  }
+
   return Math.min(99, score);
 };
 

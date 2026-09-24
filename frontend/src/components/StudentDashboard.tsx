@@ -13,10 +13,17 @@ import { fetchColleges, College } from '../api/collegeApi';
 import { getSavedJobs } from '../api/savedJobs';
 import { getSavedPathways } from '../api/pathwayApi';
 import api from '../api/axios';
+import { getCareerDNA } from '../api/profileApi';
 
 export default function StudentDashboard() {
-  const { currentUser } = useAuth();
+  const { currentUser, updateProfile, loading } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!loading && !currentUser) {
+      navigate('/login');
+    }
+  }, [currentUser, loading, navigate]);
 
   // Profile Data
   const userName = currentUser?.displayName || currentUser?.name || 'Student';
@@ -41,6 +48,9 @@ export default function StudentDashboard() {
     totalSaved: 0,
     details: {}
   });
+  
+  const [careerDNA, setCareerDNA] = useState<any>(currentUser?.settings?.careerDNA || null);
+  const [generatingDNA, setGeneratingDNA] = useState(false);
   
   useEffect(() => {
     // Fetch some basic recommendations/deadlines
@@ -408,25 +418,54 @@ export default function StudentDashboard() {
                </div>
             </div>
 
-            {/* Aptitude Assessment (1 col) */}
+            {/* Career DNA Card (1 col) */}
             <div className="bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-200 rounded-2xl p-6 shadow-sm flex flex-col relative overflow-hidden">
                <div className="absolute top-0 right-0 w-32 h-32 bg-purple-200/40 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2"></div>
                
                <div className="flex items-start gap-3 mb-3 relative z-10">
                  <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm shrink-0"><Target className="w-5 h-5 text-purple-600"/></div>
                  <div>
-                   <div className="text-[10px] font-black text-purple-600 uppercase tracking-wider mb-0.5">Aptitude Assessment</div>
-                   <h3 className="text-sm font-black text-gray-900 leading-tight">Discover Your Strengths</h3>
+                   <div className="text-[10px] font-black text-purple-600 uppercase tracking-wider mb-0.5">AI Analysis</div>
+                   <h3 className="text-sm font-black text-gray-900 leading-tight">Your Career DNA</h3>
                  </div>
                </div>
                
-               <p className="text-[10px] font-medium text-gray-600 leading-relaxed mb-auto relative z-10">
-                 You haven't taken the aptitude assessment yet. Understand your interests, skills and career preferences.
-               </p>
+               {careerDNA && careerDNA.personalityArchetype ? (
+                 <div className="relative z-10 text-xs text-gray-800 space-y-3 mb-auto">
+                   <div><span className="font-bold text-purple-700">Archetype:</span> {careerDNA.personalityArchetype}</div>
+                   <div><span className="font-bold text-purple-700">Strengths:</span> {careerDNA.coreStrengths?.join(', ')}</div>
+                   <div><span className="font-bold text-purple-700">Learning Style:</span> {careerDNA.learningStyle}</div>
+                   <div><span className="font-bold text-purple-700">Sectors:</span> {careerDNA.recommendedSectors?.join(', ')}</div>
+                 </div>
+               ) : (
+                 <p className="text-[10px] font-medium text-gray-600 leading-relaxed mb-auto relative z-10">
+                   Generate your AI-powered Career DNA based on your profile to get personalized sector recommendations and insights.
+                 </p>
+               )}
                
-               <button onClick={() => navigate('/quiz')} className="mt-4 w-full bg-purple-600 hover:bg-purple-700 text-white text-[11px] font-bold py-2.5 rounded-lg transition-colors shadow-sm relative z-10 flex justify-center items-center gap-1.5">
-                 Take Aptitude Test <ArrowRight className="w-3.5 h-3.5"/>
-               </button>
+               {!(careerDNA && careerDNA.personalityArchetype) && (
+                 <button 
+                   onClick={async () => {
+                     setGeneratingDNA(true);
+                     try {
+                       const dna = await getCareerDNA();
+                       setCareerDNA(dna);
+                       if (updateProfile) {
+                         updateProfile({ settings: { ...currentUser?.settings, careerDNA: dna } });
+                       }
+                     } catch(err) {
+                       console.error(err);
+                       alert('Failed to generate Career DNA: ' + (err instanceof Error ? err.message : String(err)));
+                     } finally {
+                       setGeneratingDNA(false);
+                     }
+                   }}
+                   disabled={generatingDNA}
+                   className="mt-4 w-full bg-purple-600 hover:bg-purple-700 text-white text-[11px] font-bold py-2.5 rounded-lg transition-colors shadow-sm relative z-10 flex justify-center items-center gap-1.5 disabled:opacity-50"
+                 >
+                   {generatingDNA ? 'Analyzing Profile...' : 'Generate Career DNA'} <ArrowRight className="w-3.5 h-3.5"/>
+                 </button>
+               )}
             </div>
 
             {/* Academic Documents (1 col) */}

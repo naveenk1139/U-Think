@@ -190,12 +190,18 @@ export default function TopBar() {
         </div>
 
         {/* Theme Toggle */}
-        <button className="p-2 text-gray-300 hover:text-white transition-colors cursor-pointer hidden sm:block">
+        <button 
+          onClick={() => navigate('/settings?tab=appearance')}
+          className="p-2 text-gray-300 hover:text-white transition-colors cursor-pointer hidden sm:block"
+        >
           <Moon className="w-5 h-5" />
         </button>
 
         {/* Notifications */}
-        <button className="relative p-2 text-gray-300 hover:text-white transition-colors cursor-pointer">
+        <button 
+          onClick={() => navigate('/settings?tab=notifications')}
+          className="relative p-2 text-gray-300 hover:text-white transition-colors cursor-pointer"
+        >
           <Bell className="w-5 h-5" />
           <span className="absolute top-1.5 right-2 w-2 h-2 bg-red-500 rounded-full"></span>
         </button>
@@ -224,6 +230,15 @@ export default function TopBar() {
                 <p className="text-sm font-bold text-gray-900 truncate">{currentUser?.displayName || currentUser?.name || 'User'}</p>
                 <p className="text-xs text-gray-500 truncate">{currentUser?.email || 'user@example.com'}</p>
               </div>
+              <button
+                onClick={() => {
+                  setDropdownOpen(false);
+                  navigate('/settings');
+                }}
+                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+              >
+                Settings
+              </button>
               <button
                 onClick={() => {
                   setDropdownOpen(false);

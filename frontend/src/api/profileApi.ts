@@ -25,3 +25,6 @@ export const updateInterests = (interests: string[]): Promise<string[]> =>
 
 export const deleteAccount = (): Promise<{ message: string }> =>
   api.delete<{ message: string }>('/api/profile/me').then((r) => r.data);
+
+export const getCareerDNA = (): Promise<any> =>
+  api.get<any>('/api/profile/career-dna').then((r) => r.data);

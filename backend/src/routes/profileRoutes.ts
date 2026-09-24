@@ -5,6 +5,7 @@ import mongoose from 'mongoose';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
+import { generateCareerDNA } from '../services/studentTwinService.js';
 
 const router = Router();
 
@@ -216,6 +217,43 @@ router.delete('/me', async (req: AuthRequest, res: Response, next: NextFunction)
     await User.findByIdAndDelete(userId);
     
     res.json({ message: 'Account deleted successfully' });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Generate Career DNA via AI
+router.get('/career-dna', async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    console.log("==> HIT /api/profile/career-dna route");
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(401).json({ error: 'Not authenticated' });
+      return;
+    }
+    
+    const user = await User.findById(userId);
+    if (!user) {
+      res.status(404).json({ error: 'User not found' });
+      return;
+    }
+    
+    // Return cached DNA if available
+    if (user.settings?.careerDNA && user.settings.careerDNA.personalityArchetype) {
+      res.json(user.settings.careerDNA);
+      return;
+    }
+
+    const dna = await generateCareerDNA(userId);
+    
+    // Save to user
+    if (!user.settings) {
+      user.settings = {};
+    }
+    user.settings.careerDNA = dna;
+    await user.save();
+    
+    res.json(dna);
   } catch (err) {
     next(err);
   }

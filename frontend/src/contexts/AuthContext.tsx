@@ -45,6 +45,7 @@ export interface User {
       publicProfile?: boolean;
       showActiveStatus?: boolean;
     };
+    careerDNA?: any;
   };
 }
 

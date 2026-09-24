@@ -61,7 +61,7 @@ const DocumentAnalysisSchema = new Schema<IDocumentAnalysis>(
     percentage: { type: Number, default: null },
     resultStatus: { type: String, default: null },
     confidence: { type: Number, default: 1.0 },
-    aiModel: { type: String, default: 'gemini-2.5-flash' },
+    aiModel: { type: String, default: 'gemini-3.6-flash' },
     createdAt: { type: Date, default: Date.now },
     reviewedAt: { type: Date, default: null },
     confirmedAt: { type: Date, default: null },
