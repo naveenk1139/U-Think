@@ -2,7 +2,7 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { 
   Home, Compass, Building2, BookOpen, Search, Target, LayoutDashboard,
-  Users, Award, Brain, Settings, Bell, Heart, CheckCircle, GraduationCap, Briefcase, Bookmark, ArrowRight, User, FileText
+  Users, Award, Brain, Settings, Bell, Heart, CheckCircle, GraduationCap, Briefcase, Bookmark, ArrowRight, User, FileText, Network, Split, ShieldAlert, BadgeCheck
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -22,6 +22,11 @@ export default function Sidebar() {
   ];
 
   const yourSpaceItems = [
+    { icon: Compass, label: 'Career GPS', path: '/career-gps' },
+    { icon: Network, label: 'Skill Evidence Graph', path: '/skill-graph' },
+    { icon: Split, label: 'Career Fork Simulator', path: '/career-fork' },
+    { icon: ShieldAlert, label: 'Stability Engine', path: '/stability-engine' },
+    { icon: BadgeCheck, label: 'Career Passport', path: '/career-passport' },
     { icon: Target, label: 'Aptitude Test', path: '/quiz' },
     { icon: FileText, label: 'Academic Documents', path: '/documents/analyze' },
     { icon: Bookmark, label: 'Saved Jobs', path: '/saved-jobs' },

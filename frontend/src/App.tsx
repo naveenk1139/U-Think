@@ -40,6 +40,11 @@ import { AuthReminderModal } from './components/AuthReminderModal';
 import Settings from './components/Settings';
 import { useAuth } from './contexts/AuthContext';
 import { Compass, Sparkles, Target } from 'lucide-react';
+import CareerGPS from './pages/CareerGPS/CareerGPS';
+import SkillEvidenceGraph from './pages/SkillEvidence/SkillEvidenceGraph';
+import CareerForkSimulator from './pages/CareerFork/CareerForkSimulator';
+import StabilityEngine from './pages/StabilityEngine/StabilityEngine';
+import CareerPassport from './pages/CareerPassport/CareerPassport';
 
 // ─── Route-aware layout shell ────────────────────────────────────
 function AppShell() {
@@ -204,6 +209,11 @@ function AppShell() {
             <Route path="/pathways/:levelSlug/:pathwaySlug/:streamSlug/course/:courseSlug" element={<DiplomaCourseDetail />} />
             <Route path="/courses/:courseSlug" element={<CourseDetail />} />
             <Route path="/professional-courses" element={<ProfessionalCourses />} />
+            <Route path="/career-gps" element={<CareerGPS />} />
+            <Route path="/skill-graph" element={<SkillEvidenceGraph />} />
+            <Route path="/career-fork" element={<CareerForkSimulator />} />
+            <Route path="/stability-engine" element={<StabilityEngine />} />
+            <Route path="/career-passport" element={<CareerPassport />} />
             <Route path="/applications" element={<ApplicationTracker />} />
             <Route path="/admin/jobs" element={<AdminJobPanel />} />
             <Route path="/mentorship" element={<MentorshipProgram />} />

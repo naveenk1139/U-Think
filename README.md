@@ -2,8 +2,13 @@
 
 U-THINK is an exhaustive, comprehensive, and highly detailed educational navigation ecosystem built specifically for Karnataka students. It guides students from post-10th grade all the way to Research level (PhD), covering every single educational pathway, stream, course combination, branch, specialization, exam, career path, and institution available in the state.
 
-## 🌟 Key Features
+## 🚀 Key Features
 
+*   **Career GPS Engine:** Turn-by-turn academic navigation mapping out the exact steps, exams, and skills required to reach a specific target career.
+*   **Skill Evidence Graph:** Visual node-based graph mapping user skills to verifiable academic documents and projects.
+*   **Career Fork Simulator:** AI-driven opportunity cost simulator that directly compares two career paths across Time Investment, Financial Cost, Job Growth, and Earning Potential.
+*   **Recommendation Stability Engine:** "Devil's Advocate" AI that critically evaluates career choices against a student's profile to expose hidden risks, mismatched traits, and provide alternative suggestions.
+*   **Career Passport:** A shareable, aggregated snapshot of the student's verified skills, stability scores, and active roadmap.
 *   **Comprehensive Pathway Discovery:** Interactive mapping of ALL possible educational pathways after 10th (PUC, Diploma, ITI, Paramedical, etc.).
 *   **In-Depth Stream Exploration:** Detailed insights into every stream and course combination (e.g., PCMB, PCMSc, HEPS, CEBA).
 *   **Verified Institution Ecosystem:** A robust directory of 3,500+ verified colleges, institutes, and universities across all 31 districts of Karnataka.
