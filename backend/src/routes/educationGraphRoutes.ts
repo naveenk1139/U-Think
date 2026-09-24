@@ -237,4 +237,56 @@ router.post('/eligibility-chain', requireAuth, async (req: Request, res: Respons
   }
 });
 
+// Route: /api/education-paths/route-switch
+// Method: POST
+// Description: Feature 4 - Education Route Switch Engine
+router.post('/route-switch', requireAuth, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { currentPath, desiredPath } = req.body;
+    
+    if (!currentPath || !desiredPath) {
+      return res.status(400).json({ error: 'Please provide both your current path and desired path.' });
+    }
+
+    const prompt = `
+      You are the "Education Route Switch Engine" for the U-Think Education System in India.
+      A student is currently enrolled in: "${currentPath}"
+      But they want to switch their track/career to: "${desiredPath}"
+      
+      Analyze the "lateral" movement between these two. Is there a direct lateral entry? (e.g. Diploma to B.Tech 2nd year).
+      Do they have to start over? What bridge courses or specific entrance exams (like LEET) are required?
+
+      Return ONLY a valid JSON object matching this schema:
+      {
+        "isPossible": boolean,
+        "difficulty": "string (e.g., Easy, Moderate, Hard, Impossible)",
+        "switchStrategy": [
+          {
+            "step": "string (The action to take)",
+            "details": "string (Explanation of why this is required)"
+          }
+        ],
+        "timeImpact": "string (e.g., Saves 1 year, Adds 2 extra years)",
+        "aiVerdict": "string (A direct, honest assessment of whether this switch is worth the effort)"
+      }
+    `;
+
+    const geminiResponse = await generateGeminiResponse(prompt);
+    
+    let parsedData;
+    try {
+      const cleanResponse = geminiResponse.replace(/```json/g, '').replace(/```/g, '').trim();
+      parsedData = JSON.parse(cleanResponse);
+    } catch (parseError) {
+      console.error("Failed to parse Route Switch response:", geminiResponse);
+      return res.status(500).json({ error: 'Failed to analyze route switch. AI returned invalid format.' });
+    }
+
+    res.json({ success: true, switchData: parsedData });
+  } catch (err) {
+    console.error('Route Switch Error:', err);
+    next(err);
+  }
+});
+
 export default router;
