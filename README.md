@@ -60,31 +60,35 @@ This is a modern **MERN** stack application built with a focus on performance, s
 
 ```text
 U-Think/
-├── backend/                  # Express API Server
+├── backend/                  # Express API Server (Node.js/Express)
 │   ├── src/
-│   │   ├── config/           # Database and API configurations (MongoDB, Gemini)
-│   │   ├── controllers/      # Route handlers and business logic
-│   │   ├── middleware/       # Express middlewares (Auth, Error Handling)
+│   │   ├── config/           # Environment, Database, and API settings
+│   │   ├── controllers/      # Route handlers (pathwayController, etc.)
+│   │   ├── middleware/       # Custom middlewares (requireAuth, Error Handler)
 │   │   ├── models/           # Mongoose schemas (Exam, College, Pathway, etc.)
-│   │   ├── routes/           # API route definitions (educationGraphRoutes, etc.)
-│   │   ├── scripts/          # Seeder scripts for data ingestion (seedMegaExams, seedGraphRelations, etc.)
-│   │   ├── services/         # External service integrations (SMS, Email, Gemini Service)
+│   │   ├── routes/           # API endpoints (educationGraphRoutes.ts, etc.)
+│   │   ├── scripts/          # Data ingestion (seedMegaExams, seedGraphRelations)
+│   │   ├── services/         # Integrations (geminiService.ts, Email, SMS)
 │   │   └── index.ts          # Application entry point
 │   ├── package.json
 │   └── tsconfig.json
-├── frontend/                 # React Vite Application
+├── frontend/                 # React Vite Application (Client)
 │   ├── src/
 │   │   ├── api/              # Axios API clients for backend communication
 │   │   ├── assets/           # Static assets, images, and global CSS
-│   │   ├── components/       # Reusable UI components (ExamDetail, Sidebar, etc.)
+│   │   ├── components/       # Reusable UI components (Sidebar, Loaders)
 │   │   ├── contexts/         # React Context providers (AuthContext)
-│   │   ├── pages/            # AI Intelligence Feature Pages (DependencyEngine, ImpactSimulator, etc.)
+│   │   ├── pages/            # Feature Page Components
+│   │   │   ├── DependencyEngine/   # Path Graph Explorer
+│   │   │   ├── ImpactSimulator/    # Subject Combination Tool
+│   │   │   ├── EligibilityChain/   # Target Career Reverse-Engineering
+│   │   │   ├── RouteSwitch/        # Lateral Entry & Switch Strategy Tool
+│   │   │   └── AcademicRecovery/   # AI Backup Planner for Setbacks
 │   │   ├── App.tsx           # Main application routing
 │   │   └── main.tsx          # React DOM entry point
 │   ├── package.json
 │   ├── tailwind.config.js
 │   └── vite.config.ts
-├── .gitignore
 ├── package.json              # Workspace root package manager
 └── README.md                 # Project documentation
 ```
