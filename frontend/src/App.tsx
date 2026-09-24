@@ -45,6 +45,7 @@ import SkillEvidenceGraph from './pages/SkillEvidence/SkillEvidenceGraph';
 import CareerForkSimulator from './pages/CareerFork/CareerForkSimulator';
 import StabilityEngine from './pages/StabilityEngine/StabilityEngine';
 import CareerPassport from './pages/CareerPassport/CareerPassport';
+import DependencyEngine from './pages/DependencyEngine/DependencyEngine';
 
 // ─── Route-aware layout shell ────────────────────────────────────
 function AppShell() {
@@ -214,6 +215,7 @@ function AppShell() {
             <Route path="/career-fork" element={<CareerForkSimulator />} />
             <Route path="/stability-engine" element={<StabilityEngine />} />
             <Route path="/career-passport" element={<CareerPassport />} />
+            <Route path="/dependency-engine" element={<DependencyEngine />} />
             <Route path="/applications" element={<ApplicationTracker />} />
             <Route path="/admin/jobs" element={<AdminJobPanel />} />
             <Route path="/mentorship" element={<MentorshipProgram />} />
