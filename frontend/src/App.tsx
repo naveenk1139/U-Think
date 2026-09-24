@@ -49,6 +49,7 @@ import DependencyEngine from './pages/DependencyEngine/DependencyEngine';
 import ImpactSimulator from './pages/ImpactSimulator/ImpactSimulator';
 import EligibilityChain from './pages/EligibilityChain/EligibilityChain';
 import RouteSwitchEngine from './pages/RouteSwitch/RouteSwitchEngine';
+import RecoveryPlanner from './pages/RecoveryPlanner/RecoveryPlanner';
 
 // ─── Route-aware layout shell ────────────────────────────────────
 function AppShell() {
@@ -219,9 +220,11 @@ function AppShell() {
             <Route path="/stability-engine" element={<StabilityEngine />} />
             <Route path="/career-passport" element={<CareerPassport />} />
             <Route path="/dependency-engine" element={<DependencyEngine />} />
+            <Route path="/dependency-engine" element={<DependencyEngine />} />
             <Route path="/impact-simulator" element={<ImpactSimulator />} />
             <Route path="/eligibility-chain" element={<EligibilityChain />} />
             <Route path="/route-switch" element={<RouteSwitchEngine />} />
+            <Route path="/recovery-planner" element={<RecoveryPlanner />} />
             <Route path="/applications" element={<ApplicationTracker />} />
             <Route path="/admin/jobs" element={<AdminJobPanel />} />
             <Route path="/mentorship" element={<MentorshipProgram />} />

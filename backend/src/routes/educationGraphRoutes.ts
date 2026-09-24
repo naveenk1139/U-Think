@@ -289,4 +289,56 @@ router.post('/route-switch', requireAuth, async (req: Request, res: Response, ne
   }
 });
 
+// Route: /api/education-paths/academic-recovery
+// Method: POST
+// Description: Feature 5 - Academic Recovery Path Planner
+router.post('/academic-recovery', requireAuth, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { failureContext, ultimateGoal } = req.body;
+    
+    if (!failureContext || !ultimateGoal) {
+      return res.status(400).json({ error: 'Please provide both your current situation and ultimate goal.' });
+    }
+
+    const prompt = `
+      You are the "Academic Recovery Path Planner" for the U-Think Education System in India.
+      A student is facing a setback: "${failureContext}"
+      But they still want to achieve: "${ultimateGoal}"
+      
+      Analyze the Indian education system (NIOS, IGNOU, Diploma routes, lateral entries, reappearing for exams, etc.) to find a recovery path.
+      Be extremely compassionate but highly practical and factual. DO NOT give false hope if the goal is legally impossible (e.g., becoming a doctor without science), but DO provide the closest alternative.
+
+      Return ONLY a valid JSON object matching this schema:
+      {
+        "isRecoverable": boolean,
+        "compassionateMessage": "string (A highly encouraging, empathetic opening message)",
+        "recoverySteps": [
+          {
+            "step": "string (Actionable step, e.g., Register for NIOS On-Demand Exams)",
+            "timeline": "string (e.g., 3-6 months)",
+            "difficulty": "string (Easy/Moderate/Hard)"
+          }
+        ],
+        "alternativeGoal": "string (If original is impossible, suggest the closest viable alternative, else null)"
+      }
+    `;
+
+    const geminiResponse = await generateGeminiResponse(prompt);
+    
+    let parsedData;
+    try {
+      const cleanResponse = geminiResponse.replace(/```json/g, '').replace(/```/g, '').trim();
+      parsedData = JSON.parse(cleanResponse);
+    } catch (parseError) {
+      console.error("Failed to parse Recovery response:", geminiResponse);
+      return res.status(500).json({ error: 'Failed to analyze recovery path. AI returned invalid format.' });
+    }
+
+    res.json({ success: true, recoveryData: parsedData });
+  } catch (err) {
+    console.error('Recovery Path Error:', err);
+    next(err);
+  }
+});
+
 export default router;

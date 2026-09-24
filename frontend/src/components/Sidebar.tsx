@@ -2,7 +2,7 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { 
   Home, Compass, Building2, BookOpen, Search, Target, LayoutDashboard,
-  Users, Award, Brain, Settings, Bell, Heart, CheckCircle, GraduationCap, Briefcase, Bookmark, ArrowRight, User, FileText, Network, Split, ShieldAlert, BadgeCheck, GitMerge, Beaker, Link as LinkIcon, Shuffle
+  Users, Award, Brain, Settings, Bell, Heart, CheckCircle, GraduationCap, Briefcase, Bookmark, ArrowRight, User, FileText, Network, Split, ShieldAlert, BadgeCheck, GitMerge, Beaker, Link as LinkIcon, Shuffle, HeartPulse
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -26,6 +26,7 @@ export default function Sidebar() {
     { icon: Beaker, label: 'Subject Simulator', path: '/impact-simulator' },
     { icon: LinkIcon, label: 'Eligibility Chain', path: '/eligibility-chain' },
     { icon: Shuffle, label: 'Route Switch Engine', path: '/route-switch' },
+    { icon: HeartPulse, label: 'Recovery Planner', path: '/recovery-planner' },
     { icon: Compass, label: 'Career GPS', path: '/career-gps' },
     { icon: Network, label: 'Skill Evidence Graph', path: '/skill-graph' },
     { icon: Split, label: 'Career Fork Simulator', path: '/career-fork' },
