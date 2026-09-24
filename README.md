@@ -29,12 +29,32 @@ U-THINK is an exhaustive, comprehensive, and highly detailed educational navigat
 
 ## 🛠️ Technology Stack
 
-This is a modern **MERN** stack application built with a focus on performance, scalability, and type safety.
+This is a modern **MERN** stack application built with a focus on performance, scalability, type safety, and seamless Artificial Intelligence integration.
 
-*   **Frontend:** React 18, Vite, TypeScript, Tailwind CSS, Lucide Icons, React Router DOM.
-*   **Backend:** Node.js, Express.js, TypeScript, Mongoose.
-*   **Database:** MongoDB.
-*   **AI Integration:** Google Gemini SDK (`@google/genai`).
+### 🎨 Frontend (Client-Side)
+*   **Core Framework:** React 19, TypeScript
+*   **Build Tool & Bundler:** Vite 6
+*   **Styling & UI:** Tailwind CSS 4, Lucide React (for iconography)
+*   **Routing:** React Router v7
+*   **Animations:** Motion (Framer Motion)
+*   **Maps & Geospatial:** Google Maps API (`@react-google-maps/api`)
+*   **HTTP Client:** Axios
+*   **Data Parsing:** React Markdown
+
+### ⚙️ Backend (Server-Side)
+*   **Runtime & Framework:** Node.js, Express.js (v4.21), TypeScript
+*   **Database & ODM:** MongoDB, Mongoose 8 (with Polymorphic Graph Schemas)
+*   **Authentication & Security:** JWT (JSON Web Tokens), bcryptjs, CORS
+*   **File Handling:** Multer (for document uploads)
+*   **Data Ingestion & Scraping:** Puppeteer, Cheerio
+*   **Communications:** Nodemailer (Email), Twilio (SMS)
+*   **Development Tools:** TSX (TypeScript Execute), Dotenv
+
+### 🧠 Artificial Intelligence & Graph
+*   **Provider:** Google Gemini SDK (`@google/genai` v2.4.0)
+*   **Models Applied:** Gemini 2.5 Pro / 3.6 Flash (Complex Reasoning, Recommendations, Simulation)
+*   **Vision AI:** Gemini Vision API (for extracting structured data from 10th/12th Marksheets)
+*   **Resilience Engineering:** Built-in automated fallback mechanisms and mock data simulators to elegantly handle `429 RESOURCE_EXHAUSTED` rate limits.
 
 ## 📁 Repository Structure
 
