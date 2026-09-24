@@ -128,19 +128,61 @@ router.get('/node/:type/:id', requireAuth, async (req: Request, res: Response, n
   }
 });
 
-// Route: /api/education-paths/simulate
+// Route: /api/education-paths/simulate-combo
 // Method: POST
-// Description: Simulates outcomes based on temporary subject combinations or path choices
-router.post('/simulate', requireAuth, async (req: Request, res: Response, next: NextFunction) => {
+// Description: Feature 2 - Subject Combination Impact Simulator
+import { generateGeminiResponse } from '../services/geminiService.js';
+router.post('/simulate-combo', requireAuth, async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { currentType, currentId } = req.body;
+    const { subjects } = req.body; // e.g. ['Physics', 'Chemistry', 'Biology']
     
-    // This will traverse the graph and use Gemini for Explanation Layer (Rule Engine -> AI)
-    // For now, we will perform a deep tree search up to depth 3
-    const edges = await EducationPathRelation.find({ sourceId: currentId, sourceType: currentType }).lean();
+    if (!subjects || !Array.isArray(subjects) || subjects.length === 0) {
+      return res.status(400).json({ error: 'Please provide an array of subject names.' });
+    }
+
+    // Attempt to resolve this to a known SubjectCombination in DB
+    const combos = await SubjectCombination.find({ name: { $regex: subjects[0].substring(0, 3), $options: 'i' } }); // Fuzzy match for now
     
-    res.json({ success: true, directImpacts: edges.length, simulationAvailable: true, message: "Engine connected." });
+    // We'll lean on the Gemini AI to evaluate the impact of this specific combination against general rules
+    const prompt = `
+      You are the "Subject Combination Impact Simulator" for the U-Think Education System.
+      A student in India is considering choosing the following subjects at the 12th/PUC level:
+      Subjects: ${subjects.join(', ')}
+
+      Analyze this exact combination and determine what higher education degrees and career paths are enabled by it, and critically, what they are PERMANENTLY LOCKED OUT OF by dropping other core subjects (like Math, Biology, Commerce).
+
+      Return ONLY a valid JSON object matching this schema:
+      {
+        "enabledPaths": [
+          {
+            "degree": "string (e.g. MBBS, B.Sc Biotechnology)",
+            "description": "string (Why this is a good fit)"
+          }
+        ],
+        "lockedPaths": [
+          {
+            "degree": "string (e.g. B.Tech Engineering)",
+            "reason": "string (e.g. Requires Mathematics)"
+          }
+        ],
+        "aiSummary": "string (A 2-sentence brutal but encouraging summary of the impact of their choice)"
+      }
+    `;
+
+    const geminiResponse = await generateGeminiResponse(prompt);
+    
+    let parsedData;
+    try {
+      const cleanResponse = geminiResponse.replace(/```json/g, '').replace(/```/g, '').trim();
+      parsedData = JSON.parse(cleanResponse);
+    } catch (parseError) {
+      console.error("Failed to parse Combo Simulator response:", geminiResponse);
+      return res.status(500).json({ error: 'Failed to simulate combination. AI returned invalid format.' });
+    }
+
+    res.json({ success: true, simulation: parsedData });
   } catch (err) {
+    console.error('Simulator Combo Error:', err);
     next(err);
   }
 });
