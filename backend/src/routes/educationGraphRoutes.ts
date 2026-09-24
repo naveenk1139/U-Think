@@ -139,9 +139,6 @@ router.post('/simulate-combo', requireAuth, async (req: Request, res: Response, 
     if (!subjects || !Array.isArray(subjects) || subjects.length === 0) {
       return res.status(400).json({ error: 'Please provide an array of subject names.' });
     }
-
-    // Attempt to resolve this to a known SubjectCombination in DB
-    const combos = await SubjectCombination.find({ name: { $regex: subjects[0].substring(0, 3), $options: 'i' } }); // Fuzzy match for now
     
     // We'll lean on the Gemini AI to evaluate the impact of this specific combination against general rules
     const prompt = `
@@ -183,6 +180,59 @@ router.post('/simulate-combo', requireAuth, async (req: Request, res: Response, 
     res.json({ success: true, simulation: parsedData });
   } catch (err) {
     console.error('Simulator Combo Error:', err);
+    next(err);
+  }
+});
+
+// Route: /api/education-paths/eligibility-chain
+// Method: POST
+// Description: Feature 3 - Eligibility Chain Analyzer
+router.post('/eligibility-chain', requireAuth, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { targetGoal } = req.body; // e.g., 'Neurosurgeon', 'Data Scientist', 'MBBS'
+    
+    if (!targetGoal) {
+      return res.status(400).json({ error: 'Please provide a target goal (Career or Degree).' });
+    }
+
+    const prompt = `
+      You are the "Eligibility Chain Analyzer" for the U-Think Education System in India.
+      A student's dream goal is: "${targetGoal}"
+      
+      Perform a REVERSE graph traversal. What exactly do they need to do starting from 10th grade to achieve this?
+      Identify the mandatory stream, specific subject combinations, entrance exams, and degrees required.
+      If there are multiple routes, pick the most common standard route.
+
+      Return ONLY a valid JSON object matching this schema:
+      {
+        "target": "${targetGoal}",
+        "chain": [
+          {
+            "stepNumber": number,
+            "level": "string (e.g., 10th Grade, 12th/PUC, Entrance Exam, Undergrad, Postgrad)",
+            "requirement": "string (e.g., Minimum 60% in Science, Must take PCMB, Must crack NEET-UG)",
+            "isStrictlyMandatory": boolean,
+            "consequenceOfFailure": "string (e.g., Cannot apply for Medical Colleges)"
+          }
+        ],
+        "aiAnalysis": "string (A brief summary of how rigid or flexible this path is)"
+      }
+    `;
+
+    const geminiResponse = await generateGeminiResponse(prompt);
+    
+    let parsedData;
+    try {
+      const cleanResponse = geminiResponse.replace(/```json/g, '').replace(/```/g, '').trim();
+      parsedData = JSON.parse(cleanResponse);
+    } catch (parseError) {
+      console.error("Failed to parse Eligibility Chain response:", geminiResponse);
+      return res.status(500).json({ error: 'Failed to analyze eligibility chain. AI returned invalid format.' });
+    }
+
+    res.json({ success: true, chainData: parsedData });
+  } catch (err) {
+    console.error('Eligibility Chain Error:', err);
     next(err);
   }
 });
