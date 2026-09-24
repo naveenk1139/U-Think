@@ -26,7 +26,7 @@ const getPopulatedNode = async (type: string, id: any) => {
 // Route: /api/education-paths/graph
 // Method: GET
 // Description: Fetches the holistic education knowledge graph
-router.get('/graph', requireAuth, async (req: Request, res: Response, next: NextFunction) => {
+router.get('/graph', async (req: Request, res: Response, next: NextFunction) => {
   try {
     // Fetch all relations
     const relations = await EducationPathRelation.find()
@@ -85,7 +85,7 @@ router.get('/graph', requireAuth, async (req: Request, res: Response, next: Next
 // Route: /api/education-paths/node/:type/:id
 // Method: GET
 // Description: Get dependencies (parents) and downstream options (children) for a single node
-router.get('/node/:type/:id', requireAuth, async (req: Request, res: Response, next: NextFunction) => {
+router.get('/node/:type/:id', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { type, id } = req.params;
 
@@ -132,7 +132,7 @@ router.get('/node/:type/:id', requireAuth, async (req: Request, res: Response, n
 // Method: POST
 // Description: Feature 2 - Subject Combination Impact Simulator
 import { generateGeminiResponse } from '../services/geminiService.js';
-router.post('/simulate-combo', requireAuth, async (req: Request, res: Response, next: NextFunction) => {
+router.post('/simulate-combo', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { subjects } = req.body; // e.g. ['Physics', 'Chemistry', 'Biology']
     
@@ -187,7 +187,7 @@ router.post('/simulate-combo', requireAuth, async (req: Request, res: Response, 
 // Route: /api/education-paths/eligibility-chain
 // Method: POST
 // Description: Feature 3 - Eligibility Chain Analyzer
-router.post('/eligibility-chain', requireAuth, async (req: Request, res: Response, next: NextFunction) => {
+router.post('/eligibility-chain', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { targetGoal } = req.body; // e.g., 'Neurosurgeon', 'Data Scientist', 'MBBS'
     
@@ -240,7 +240,7 @@ router.post('/eligibility-chain', requireAuth, async (req: Request, res: Respons
 // Route: /api/education-paths/route-switch
 // Method: POST
 // Description: Feature 4 - Education Route Switch Engine
-router.post('/route-switch', requireAuth, async (req: Request, res: Response, next: NextFunction) => {
+router.post('/route-switch', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { currentPath, desiredPath } = req.body;
     
@@ -292,7 +292,7 @@ router.post('/route-switch', requireAuth, async (req: Request, res: Response, ne
 // Route: /api/education-paths/academic-recovery
 // Method: POST
 // Description: Feature 5 - Academic Recovery Path Planner
-router.post('/academic-recovery', requireAuth, async (req: Request, res: Response, next: NextFunction) => {
+router.post('/academic-recovery', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { failureContext, ultimateGoal } = req.body;
     

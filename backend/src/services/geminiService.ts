@@ -101,6 +101,57 @@ export const generateGeminiResponse = async (prompt: string): Promise<string> =>
           blockchainId: "0xMockBlockchainId123456789"
         });
       }
+      if (prompt.includes('enabledPaths') && prompt.includes('lockedPaths')) {
+        return JSON.stringify({
+          enabledPaths: [
+            { degree: "B.Tech Computer Science", description: "Directly enabled by Mathematics and Physics." },
+            { degree: "B.Sc Physics", description: "Excellent foundation for research and teaching." }
+          ],
+          lockedPaths: [
+            { degree: "MBBS (Medicine)", reason: "Requires Biology as a core subject." },
+            { degree: "B.Com (Honors)", reason: "Often requires Accountancy or Economics." }
+          ],
+          aiSummary: "Your combination is incredibly strong for engineering and tech, but firmly closes the door on medical and pure commerce fields. Commit to the tech track!"
+        });
+      }
+
+      if (prompt.includes('chain') && prompt.includes('aiAnalysis')) {
+        return JSON.stringify({
+          target: "Mock Target Goal",
+          chain: [
+            { stepNumber: 1, level: "10th Grade", requirement: "Score 75%+ in Science and Math", isStrictlyMandatory: true, consequenceOfFailure: "May not get Science stream in 11th" },
+            { stepNumber: 2, level: "12th/PUC", requirement: "Take PCMB or PCMC", isStrictlyMandatory: true, consequenceOfFailure: "Ineligible for technical entrance exams" },
+            { stepNumber: 3, level: "Entrance Exam", requirement: "Clear National Level Entrance Exam (e.g. JEE/NEET)", isStrictlyMandatory: true, consequenceOfFailure: "Cannot enter premier institutes" },
+            { stepNumber: 4, level: "Undergrad", requirement: "Complete Bachelor's Degree with minimum 6.5 CGPA", isStrictlyMandatory: false }
+          ],
+          aiAnalysis: "This path is highly structured and competitive. Missing early prerequisites makes it exponentially harder to recover."
+        });
+      }
+
+      if (prompt.includes('switchStrategy') && prompt.includes('timeImpact')) {
+        return JSON.stringify({
+          isPossible: true,
+          difficulty: "Moderate",
+          switchStrategy: [
+            { step: "Bridge Course", details: "Complete a 6-month foundational course in the new discipline." },
+            { step: "Lateral Entry Exam", details: "Clear the state lateral entry test for direct 2nd-year admission." }
+          ],
+          timeImpact: "Adds 1 extra year",
+          aiVerdict: "It's entirely possible and surprisingly common. The extra year is a small price for long-term career satisfaction."
+        });
+      }
+
+      if (prompt.includes('compassionateMessage') && prompt.includes('recoverySteps')) {
+        return JSON.stringify({
+          isRecoverable: true,
+          compassionateMessage: "Setbacks happen to the best of us. You have not lost your future, just taken a detour. Let's get you back on track.",
+          recoverySteps: [
+            { step: "Apply for NIOS On-Demand Exams", timeline: "1-2 months", difficulty: "Moderate" },
+            { step: "Enroll in a Diploma/Polytechnic equivalent", timeline: "3 years", difficulty: "Easy" }
+          ],
+          alternativeGoal: "If the primary goal is too time-consuming, consider an allied vocational field like Paramedical or ITI."
+        });
+      }
     }
     throw error;
   }

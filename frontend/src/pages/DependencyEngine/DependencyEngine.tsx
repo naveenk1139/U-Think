@@ -35,10 +35,14 @@ export default function DependencyEngine() {
       try {
         // Just fetch the catalog to get the 10th Grade ID
         const res = await api.get('/api/education-catalog');
-        if (res.data.success && res.data.data.length > 0) {
-          const firstPathway = res.data.data[0];
-          setCurrentNodeId(firstPathway._id);
-          setCurrentNodeType('Pathway');
+        if (Array.isArray(res.data) && res.data.length > 0) {
+          // Response is an array of EducationLevels, each with a pathways array
+          const firstLevel = res.data[0];
+          if (firstLevel.pathways && firstLevel.pathways.length > 0) {
+            const firstPathway = firstLevel.pathways[0];
+            setCurrentNodeId(firstPathway._id);
+            setCurrentNodeType('Pathway');
+          }
         }
       } catch (err) {
         console.error(err);
@@ -121,7 +125,7 @@ export default function DependencyEngine() {
         </div>
 
         {/* Current Node (Center) */}
-        <div className="lg:col-span-1 flex flex-col items-center justify-center">
+        <div className="lg:col-span-1 flex flex-col items-center justify-center min-h-[200px]">
            {isLoading ? (
              <Loader2 className="w-10 h-10 animate-spin text-indigo-600" />
            ) : nodeDetails ? (
@@ -134,7 +138,12 @@ export default function DependencyEngine() {
                 <span className="text-xs font-black uppercase tracking-wider text-indigo-200 block mb-1">Current Node: {nodeDetails.nodeType}</span>
                 <h2 className="text-2xl font-black text-white">{nodeDetails.node.name}</h2>
              </div>
-           ) : null}
+           ) : (
+             <div className="text-center p-6 border-2 border-dashed border-slate-300 rounded-3xl bg-slate-50 w-full">
+               <p className="text-slate-500 font-bold">No path data available.</p>
+               <p className="text-xs text-slate-400 mt-2">The graph database might be empty.</p>
+             </div>
+           )}
         </div>
 
         {/* Downstream (Looking Forward) */}

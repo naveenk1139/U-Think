@@ -2,6 +2,14 @@
 
 U-THINK is an exhaustive, comprehensive, and highly detailed educational navigation ecosystem built specifically for Karnataka students. It guides students from post-10th grade all the way to Research level (PhD), covering every single educational pathway, stream, course combination, branch, specialization, exam, career path, and institution available in the state.
 
+## 🚀 5 New Educational Intelligence Features
+
+*   **Education Path Dependency Engine:** Interactive graph explorer showing prerequisites and downstream pathways for any stream, course, or degree.
+*   **Subject Combination Impact Simulator:** AI tool to pick 3-5 subjects and instantly see what career paths are unlocked and permanently locked.
+*   **Eligibility Chain Analyzer:** Reverse-engineers the exact academic steps (exams, degrees, combinations) required to reach a target career starting from 10th grade.
+*   **Education Route Switch Engine:** Analyzes lateral entry options, bridge courses, and shortcuts for switching between entirely different academic tracks.
+*   **Academic Recovery Path Planner:** Compassionate AI that finds alternative routes (like NIOS or Diplomas) if a student faces an academic setback or failure.
+
 ## 🚀 Key Features
 
 *   **Career GPS Engine:** Turn-by-turn academic navigation mapping out the exact steps, exams, and skills required to reach a specific target career.
@@ -38,9 +46,9 @@ U-Think/
 │   │   ├── controllers/      # Route handlers and business logic
 │   │   ├── middleware/       # Express middlewares (Auth, Error Handling)
 │   │   ├── models/           # Mongoose schemas (Exam, College, Pathway, etc.)
-│   │   ├── routes/           # API route definitions
-│   │   ├── scripts/          # Seeder scripts for data ingestion (seedMegaExams, etc.)
-│   │   ├── services/         # External service integrations (SMS, Email)
+│   │   ├── routes/           # API route definitions (educationGraphRoutes, etc.)
+│   │   ├── scripts/          # Seeder scripts for data ingestion (seedMegaExams, seedGraphRelations, etc.)
+│   │   ├── services/         # External service integrations (SMS, Email, Gemini Service)
 │   │   └── index.ts          # Application entry point
 │   ├── package.json
 │   └── tsconfig.json
@@ -48,8 +56,9 @@ U-Think/
 │   ├── src/
 │   │   ├── api/              # Axios API clients for backend communication
 │   │   ├── assets/           # Static assets, images, and global CSS
-│   │   ├── components/       # Reusable UI components (ExamDetail, CollegesDirectory)
+│   │   ├── components/       # Reusable UI components (ExamDetail, Sidebar, etc.)
 │   │   ├── contexts/         # React Context providers (AuthContext)
+│   │   ├── pages/            # AI Intelligence Feature Pages (DependencyEngine, ImpactSimulator, etc.)
 │   │   ├── App.tsx           # Main application routing
 │   │   └── main.tsx          # React DOM entry point
 │   ├── package.json
