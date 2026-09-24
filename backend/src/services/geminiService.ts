@@ -8,7 +8,7 @@ export const generateGeminiResponse = async (prompt: string): Promise<string> =>
   }
   
   const response = await generateWithRetry(model, {
-    model: 'gemini-2.5-flash',
+    model: 'gemini-3.6-flash',
     contents: prompt,
   });
   
@@ -58,8 +58,19 @@ Return valid JSON exactly matching this schema:
     config: { mimeType }
   });
 
+  // Poll for file state to become ACTIVE (required for PDFs)
+  let fileState = await ai.files.get({ name: uploadResult.name });
+  while (fileState.state === 'PROCESSING') {
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    fileState = await ai.files.get({ name: uploadResult.name });
+  }
+
+  if (fileState.state === 'FAILED') {
+    throw new Error('File processing failed on Gemini servers.');
+  }
+
   const response = await generateWithRetry(model, {
-    model: 'gemini-2.5-flash',
+    model: 'gemini-3.6-flash',
     contents: [
       {
         role: 'user',
