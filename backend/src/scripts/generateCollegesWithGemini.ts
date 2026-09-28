@@ -41,7 +41,7 @@ Return ONLY the JSON array. Do not include markdown codeblocks or any other text
 
   try {
     const response = await ai.models.generateContent({
-        model: 'gemini-2.5-pro',
+        model: 'gemini-3.1-pro-preview',
         contents: prompt,
         config: {
             temperature: 0.1, // low temp for factual data

@@ -65,7 +65,7 @@ Return ONLY a valid JSON object matching this structure EXACTLY (no markdown wra
     }
 
     const response = await ai.models.generateContent({
-      model: 'gemini-3.6-flash',
+      model: 'gemini-3.8-flash',
       contents: prompt,
       config: {
         temperature: 0.7,

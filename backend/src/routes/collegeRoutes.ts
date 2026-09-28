@@ -437,7 +437,7 @@ Return ONLY a valid JSON array of objects, with each object containing:
     } else {
       const model = ai.models;
       const response = await generateWithRetry(model, {
-        model: 'gemini-2.5-pro',
+        model: 'gemini-3.1-pro-preview',
         contents: prompt,
         config: {
           responseMimeType: 'application/json',
