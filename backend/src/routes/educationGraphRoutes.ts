@@ -1,5 +1,5 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import { protect as requireAuth } from '../middleware/authMiddleware.js';
+import { protect as requireAuth, optionalAuth, AuthRequest } from '../middleware/authMiddleware.js';
 import EducationPathRelation from '../models/EducationPathRelation.js';
 import Pathway from '../models/Pathway.js';
 import Stream from '../models/Stream.js';
@@ -7,6 +7,7 @@ import SubjectCombination from '../models/SubjectCombination.js';
 import Degree from '../models/Degree.js';
 import Exam from '../models/Exam.js';
 import Career from '../models/Career.js';
+import User from '../models/User.js';
 
 const router = Router();
 
@@ -186,8 +187,8 @@ router.post('/simulate-combo', async (req: Request, res: Response, next: NextFun
 
 // Route: /api/education-paths/eligibility-chain
 // Method: POST
-// Description: Feature 3 - Eligibility Chain Analyzer
-router.post('/eligibility-chain', async (req: Request, res: Response, next: NextFunction) => {
+// Description: Feature 3 - Eligibility Chain Analyzer (with EXACT EXPLANATION LAYER)
+router.post('/eligibility-chain', optionalAuth, async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const { targetGoal } = req.body; // e.g., 'Neurosurgeon', 'Data Scientist', 'MBBS'
     
@@ -195,13 +196,39 @@ router.post('/eligibility-chain', async (req: Request, res: Response, next: Next
       return res.status(400).json({ error: 'Please provide a target goal (Career or Degree).' });
     }
 
+    // Fetch user profile if logged in
+    let userProfileText = "No student profile available. The student is browsing as a guest or hasn't filled out their profile.";
+    if (req.user) {
+      const user = await User.findById(req.user.id).select('academicProfile educationLevel classOrYear stream');
+      if (user) {
+        userProfileText = `
+          Student Profile Data:
+          Education Level: ${user.educationLevel || 'Not specified'}
+          Class/Year: ${user.classOrYear || 'Not specified'}
+          Stream: ${user.stream || 'Not specified'}
+          10th %: ${user.academicProfile?.tenthPercentage || 'Not specified'}
+          12th/PUC %: ${user.academicProfile?.twelfthPercentage || 'Not specified'}
+          Diploma %: ${user.academicProfile?.diplomaPercentage || 'Not specified'}
+          Subjects & Marks:
+          ${user.academicProfile?.subjects?.map(s => `- ${s.subjectName}: ${s.marksObtained || 'N/A'}/${s.maximumMarks || 'N/A'}`).join('\n') || 'None recorded'}
+        `;
+      }
+    }
+
     const prompt = `
-      You are the "Eligibility Chain Analyzer" for the U-Think Education System in India.
+      You are the "Eligibility Chain Analyzer & Exact Reason Engine" for the U-Think Education System in India.
       A student's dream goal is: "${targetGoal}"
       
-      Perform a REVERSE graph traversal. What exactly do they need to do starting from 10th grade to achieve this?
-      Identify the mandatory stream, specific subject combinations, entrance exams, and degrees required.
+      Perform a REVERSE graph traversal from 10th grade up to this goal, identifying the mandatory steps (Stream, Subject Combination, Degree, Entrance Exam, etc).
       If there are multiple routes, pick the most common standard route.
+      
+      CRITICAL NEW REQUIREMENT:
+      You must now evaluate EXACTLY whether the student satisfies these requirements based on their profile.
+      
+      ${userProfileText}
+
+      For each step, provide a detailed requirement breakdown comparing the Requirement vs the Student's Value.
+      If the student profile is missing data for a step, mark it as "INFORMATION_REQUIRED" rather than "NOT_ELIGIBLE".
 
       Return ONLY a valid JSON object matching this schema:
       {
@@ -209,13 +236,29 @@ router.post('/eligibility-chain', async (req: Request, res: Response, next: Next
         "chain": [
           {
             "stepNumber": number,
-            "level": "string (e.g., 10th Grade, 12th/PUC, Entrance Exam, Undergrad, Postgrad)",
-            "requirement": "string (e.g., Minimum 60% in Science, Must take PCMB, Must crack NEET-UG)",
-            "isStrictlyMandatory": boolean,
-            "consequenceOfFailure": "string (e.g., Cannot apply for Medical Colleges)"
+            "level": "string (e.g., 10th Grade, 12th/PUC, Entrance Exam, Undergrad)",
+            "nodeName": "string (e.g., PCMB Stream, B.Tech CSE, NEET-UG)",
+            "overallStatus": "ELIGIBLE" | "CONDITIONALLY_ELIGIBLE" | "NOT_ELIGIBLE" | "INFORMATION_REQUIRED" | "UNKNOWN" | "DATA_UNVERIFIED",
+            "overallReason": "string (Summary of why they are or aren't eligible for this step)",
+            "requirements": [
+              {
+                "requirementName": "string (e.g., Qualification, Mathematics, Minimum Marks)",
+                "requiredValue": "string (e.g., Mathematics subject must be present, 60%)",
+                "studentValue": "string (e.g., Mathematics not recorded, 68%, 12th/PUC)",
+                "comparison": "string (e.g., +8 percentage points, Missing subject)",
+                "status": "SATISFIED" | "NOT_SATISFIED" | "INFORMATION_REQUIRED" | "DATA_UNVERIFIED",
+                "reason": "string (Exact textual explanation)",
+                "sourceName": "string (e.g., Official Eligibility Rule, AI Knowledge Base)",
+                "lastVerifiedAt": "string (e.g., Today's Date)"
+              }
+            ],
+            "missingRequirements": ["string (Summarized missing items, if any)"],
+            "satisfiedRequirements": ["string (Summarized satisfied items)"],
+            "warnings": ["string (Any warnings or 'conditional' flags)"],
+            "alternatives": ["string (If blocked, what are alternative lateral routes?)"]
           }
         ],
-        "aiAnalysis": "string (A brief summary of how rigid or flexible this path is)"
+        "aiAnalysis": "string (A brief summary of how rigid or flexible this path is, translating the structured result into student-friendly language.)"
       }
     `;
 

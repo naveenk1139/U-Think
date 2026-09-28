@@ -47,3 +47,28 @@ export async function sendOtpSms(to: string, otp: string, type: 'login' | 'regis
     throw new Error("We couldn't send the verification SMS. Please try again.");
   }
 }
+
+export async function sendDeadlineReminderSms(to: string, message: string): Promise<void> {
+  // ── Dev fallback ────────────────────────────────────────────────
+  if (!isConfigured || !twilioClient) {
+    console.log('\n' + '─'.repeat(50));
+    console.log(`📱 [DEADLINE SMS - DEV MODE]`);
+    console.log(`   To      : ${to}`);
+    console.log(`   Message : ${message}`);
+    console.log('─'.repeat(50) + '\n');
+    return;
+  }
+  // ────────────────────────────────────────────────────────────────
+
+  try {
+    await twilioClient.messages.create({
+      body: message,
+      from: TWILIO_PHONE_NUMBER,
+      to,
+    });
+    console.log(`✅ Deadline SMS sent successfully to ${to}`);
+  } catch (err: any) {
+    console.error('❌ Failed to send Deadline SMS:', err?.message || err);
+    throw new Error("Unable to send deadline reminder SMS.");
+  }
+}

@@ -48,6 +48,7 @@ import profileRoutes from './routes/profileRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
 import collegeRoutes from './routes/collegeRoutes.js';
 import jobRoutes from './routes/jobRoutes.js';
+import deadlineRoutes from './routes/deadlineRoutes.js';
 import savedJobRoutes from './routes/savedJobRoutes.js';
 import assessmentRoutes from './routes/assessmentRoutes.js';
 import mentorRoutes from './routes/mentorRoutes.js';
@@ -57,6 +58,7 @@ import branchRoutes from './routes/branchRoutes.js';
 import geographyRoutes from './routes/geographyRoutes.js';
 import streamRoutes from './routes/streamRoutes.js';
 import subjectCombinationRoutes from './routes/subjectCombinationRoutes.js';
+import scholarshipRoutes from './routes/scholarshipRoutes.js';
 import courseRoutes from './routes/courseRoutes.js';
 import roadmapRoutes from './routes/roadmapRoutes.js';
 import gpsRoutes from './routes/gpsRoutes.js';
@@ -66,7 +68,12 @@ import stabilityRoutes from './routes/stabilityRoutes.js';
 import passportRoutes from './routes/passportRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import after10thRoutes from './routes/after10thRoutes.js';
+import undergradRoutes from './routes/undergradRoutes.js';
+import careerPathwayRoutes from './routes/careerPathwayRoutes.js';
+import studentRoadmapRoutes from './routes/studentRoadmapRoutes.js';
 import educationGraphRoutes from './routes/educationGraphRoutes.js';
+import trustRoutes from './routes/trustRoutes.js';
+import schoolRoutes from './routes/schoolRoutes.js';
 import { getPathwayTree, getPathwayStats, getFilteredPathways } from './controllers/pathwayController.js';
 
 // Middleware
@@ -116,6 +123,7 @@ app.use('/api/colleges', collegeRoutes);
 app.use('/api/quiz', quizRoutes);
 app.use('/api/pathways', pathwayRoutes);
 app.use('/api/exams', examRoutes);
+app.use('/api/deadlines', deadlineRoutes);
 app.use('/api/reminders', reminderRoutes);
 app.use('/api/documents', documentRoutes);
 app.use('/api/profile', profileRoutes);
@@ -136,10 +144,16 @@ app.use('/api/subject-combinations', subjectCombinationRoutes);
   app.use('/api/skill-evidence', skillEvidenceRoutes);
   app.use('/api/simulator', simulatorRoutes);
   app.use('/api/stability', stabilityRoutes);
+  app.use('/api/scholarships', scholarshipRoutes);
   app.use('/api/passport', passportRoutes);
   app.use('/api/admin', adminRoutes);
   app.use('/api/after-10th', after10thRoutes);
+  app.use('/api/undergrad', undergradRoutes);
+  app.use('/api/career-pathway', careerPathwayRoutes);
+  app.use('/api/student-roadmap', studentRoadmapRoutes);
   app.use('/api/education-paths', educationGraphRoutes);
+  app.use('/api/trust', trustRoutes);
+  app.use('/api/school', schoolRoutes);
 
 // Public Catalog API
 app.get('/api/education-catalog', getPathwayTree);
@@ -155,9 +169,15 @@ app.listen(PORT, () => {
   console.log(`   Health Check: http://localhost:${PORT}/api/health\n`);
   
   // Connect to MongoDB asynchronously
-  connectDB().catch((err) => {
-    console.warn('⚠️  MongoDB connection pending — make sure local MongoDB or Atlas is running:', err.message);
-  });
+  connectDB()
+    .then(async () => {
+      // Start the notification/reminder scheduler only after DB connects
+      const { startReminderScheduler } = await import('./services/reminderScheduler.js');
+      startReminderScheduler();
+    })
+    .catch((err) => {
+      console.warn('⚠️  MongoDB connection pending — make sure local MongoDB or Atlas is running:', err.message);
+    });
 });
 
 export default app;

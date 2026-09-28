@@ -8,6 +8,8 @@ import Taluk from '../models/Taluk.js';
 import State from '../models/State.js';
 import Course from '../models/Course.js';
 import { ai, generateWithRetry } from '../config/gemini.js';
+import { protect, optionalAuth, AuthRequest } from '../middleware/authMiddleware.js';
+import User from '../models/User.js';
 
 const router = Router();
 
@@ -470,6 +472,94 @@ Return ONLY a valid JSON array of objects, with each object containing:
   } catch (error) {
     console.error('Error generating college recommendations:', error);
     res.status(500).json({ message: 'Server error while generating recommendations', error: String(error) });
+  }
+});
+
+
+// POST /api/colleges/compare
+// Compares multiple colleges based on requested IDs
+router.post('/compare', async (req: Request, res: Response) => {
+  try {
+    const { collegeIds } = req.body;
+    if (!collegeIds || !Array.isArray(collegeIds)) {
+      return res.status(400).json({ error: 'Provide an array of collegeIds' });
+    }
+    
+    // Fetch colleges with full details
+    const colleges = await College.find({ _id: { $in: collegeIds } })
+      .populate('districtId talukId stateId')
+      .lean();
+      
+    // For each college, fetch its courses and fees
+    for (const col of colleges) {
+      const courses = await CollegeCourse.find({ collegeId: col._id }).populate('courseId').lean();
+      (col as any).courses = courses;
+    }
+    
+    res.json({ success: true, colleges });
+  } catch (error) {
+    res.status(500).json({ error: String(error) });
+  }
+});
+
+// POST /api/colleges/counselling/simulate
+// Simulates admission counselling
+router.post('/counselling/simulate', optionalAuth, async (req: AuthRequest, res: Response) => {
+  try {
+    const { preferredCourse, preferredLocation, budget, collegePreferences, marks } = req.body;
+    
+    let userContext = 'Guest User';
+    if (req.user) {
+      const user = await User.findById(req.user.id);
+      if (user) {
+        userContext = `Student Profile: 
+        Category: ${user.personalDetails?.category || 'General'}
+        Income: ${user.personalDetails?.annualIncome || 'Unknown'}
+        Marks: 10th - ${user.academicProfile?.tenthPercentage || 'N/A'}%, 12th - ${user.academicProfile?.twelfthPercentage || 'N/A'}%`;
+      }
+    }
+
+    const prompt = `
+      You are the "U-Think Admission Counselling Simulator".
+      Input Data:
+      ${userContext}
+      Preferred Course: ${preferredCourse}
+      Preferred Location: ${preferredLocation}
+      Budget: ${budget}
+      Input Marks: ${marks}
+      Target Colleges: ${collegePreferences?.join(', ')}
+
+      Generate a neutral admission counselling simulation.
+      Clearly state this is a SIMULATION and NOT an actual admission result.
+      Output a valid JSON matching this schema:
+      {
+        "disclaimer": "SIMULATION — NOT AN ACTUAL ADMISSION RESULT",
+        "eligibleOptions": [
+          {
+            "collegeName": "string",
+            "course": "string",
+            "chanceOfAdmission": "High" | "Medium" | "Low",
+            "reason": "string"
+          }
+        ],
+        "simulatedAllocation": {
+          "collegeName": "string",
+          "round": "string (e.g. Round 1, Round 2)",
+          "quota": "string (e.g. General Merit, OBC)"
+        },
+        "alternativeOptions": ["string"]
+      }
+    `;
+
+    const model = ai.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const result = await model.generateContent(prompt);
+    const text = result.response.text();
+    const cleanJson = text.replace(/```json/g, '').replace(/```/g, '').trim();
+    const parsed = JSON.parse(cleanJson);
+
+    res.json({ success: true, simulation: parsed });
+  } catch (error) {
+    res.status(500).json({ error: String(error) });
   }
 });
 

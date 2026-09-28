@@ -25,10 +25,10 @@ export interface IEducationPathRelation extends Document {
 }
 
 const EducationPathRelationSchema: Schema = new Schema({
-  sourceType: { type: String, required: true, enum: ['EducationLevel', 'Pathway', 'Stream', 'SubjectCombination', 'Course', 'Degree', 'Branch', 'Exam', 'Career', 'College'] },
+  sourceType: { type: String, required: true, enum: ['EducationLevel', 'Pathway', 'Stream', 'SubjectCombination', 'Course', 'Degree', 'Branch', 'Exam', 'Career', 'College', 'Board', 'AcademicYear', 'SchoolClass', 'Syllabus', 'Unit', 'Chapter', 'Topic', 'Subject'] },
   sourceId: { type: Schema.Types.ObjectId, required: true, refPath: 'sourceType' },
   
-  targetType: { type: String, required: true, enum: ['EducationLevel', 'Pathway', 'Stream', 'SubjectCombination', 'Course', 'Degree', 'Branch', 'Exam', 'Career', 'College'] },
+  targetType: { type: String, required: true, enum: ['EducationLevel', 'Pathway', 'Stream', 'SubjectCombination', 'Course', 'Degree', 'Branch', 'Exam', 'Career', 'College', 'Board', 'AcademicYear', 'SchoolClass', 'Syllabus', 'Unit', 'Chapter', 'Topic', 'Subject'] },
   targetId: { type: Schema.Types.ObjectId, required: true, refPath: 'targetType' },
   
   relationType: { 

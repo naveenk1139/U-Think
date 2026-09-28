@@ -47,5 +47,25 @@ export const protect = async (
   }
 };
 
+/**
+ * Optionally extract user from JWT without rejecting if missing
+ */
+export const optionalAuth = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    try {
+      const token = req.headers.authorization.split(' ')[1];
+      const decoded = jwt.verify(token, JWT_SECRET) as { id: string; email: string; name: string };
+      req.user = decoded;
+    } catch (error) {
+      // Ignore errors for optional auth
+    }
+  }
+  return next();
+};
+
 export const verifyJwtToken = protect;
 export default protect;

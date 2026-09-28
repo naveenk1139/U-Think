@@ -4,6 +4,9 @@ import { protect, AuthRequest } from '../middleware/authMiddleware.js';
 import Exam from '../models/Exam.js';
 import ExamYear from '../models/ExamYear.js';
 import SavedExam from '../models/SavedExam.js';
+import ExamStudyPlan from '../models/ExamStudyPlan.js';
+import SubjectPerformance from '../models/SubjectPerformance.js';
+import { generateGeminiResponse } from '../services/aiService.js';
 
 const router = Router();
 
@@ -326,6 +329,167 @@ router.get('/user/saved', async (req: AuthRequest, res: Response, next: NextFunc
     res.json(formatted);
   } catch (err) {
     next(err);
+  }
+});
+
+// POST /api/exams/:examId/weak-subjects
+// Analyzes weak subjects and generates recommendations using AI
+router.post('/:examId/weak-subjects', protect, async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const { performances } = req.body; // Array of { subjectName, topicName, scorePercentage, evidenceSource }
+    const userId = req.user?.id;
+    const examId = req.params.examId;
+
+    if (!performances || performances.length === 0) {
+      return res.status(400).json({ error: 'Provide performance data' });
+    }
+
+    // Save/update performances in DB
+    const savedPerformances = await Promise.all(
+      performances.map(async (p: any) => {
+        let perf = await SubjectPerformance.findOne({ user: userId, examId, subjectName: p.subjectName, topicName: p.topicName });
+        if (perf) {
+          perf.scorePercentage = p.scorePercentage;
+          perf.evidenceSource = p.evidenceSource;
+          perf.lastEvaluatedAt = new Date();
+        } else {
+          perf = new SubjectPerformance({
+            user: userId,
+            examId,
+            subjectName: p.subjectName,
+            topicName: p.topicName,
+            scorePercentage: p.scorePercentage,
+            evidenceSource: p.evidenceSource
+          });
+        }
+        return perf.save();
+      })
+    );
+
+    const prompt = `
+      You are the "U-Think Weak Subject Analyzer".
+      Analyze these student performances for Exam ${examId}:
+      ${JSON.stringify(performances)}
+
+      Identify weak areas (e.g. consistently low scores).
+      For each weak subject/topic, provide a root cause hypothesis and recommended practice plan.
+      
+      Return ONLY valid JSON matching this schema:
+      {
+        "weakAreas": [
+          {
+            "subjectName": "string",
+            "topicName": "string",
+            "rootCause": "string",
+            "recommendedPractice": "string",
+            "confidenceScore": number (0-100)
+          }
+        ]
+      }
+    `;
+
+    const geminiResponse = await generateGeminiResponse(prompt);
+    let parsedData;
+    try {
+      parsedData = JSON.parse(geminiResponse.replace(/```json/g, '').replace(/```/g, '').trim());
+      
+      // Update DB with AI insights
+      for (const weak of parsedData.weakAreas) {
+        await SubjectPerformance.updateOne(
+          { user: userId, examId, subjectName: weak.subjectName, topicName: weak.topicName },
+          { weaknessIdentified: true, rootCause: weak.rootCause, recommendedPractice: weak.recommendedPractice }
+        );
+      }
+    } catch (e) {
+      return res.status(500).json({ error: 'Failed to parse AI analysis' });
+    }
+
+    res.json({ success: true, analysis: parsedData.weakAreas });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// POST /api/exams/:examId/study-plan
+// Generates a personalized, adaptive study plan
+router.post('/:examId/study-plan', protect, async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const { targetDate, dailyAvailableHours, weakAreas, strongAreas } = req.body;
+    const userId = req.user?.id;
+    const examId = req.params.examId;
+
+    if (!targetDate || !dailyAvailableHours) {
+      return res.status(400).json({ error: 'targetDate and dailyAvailableHours required' });
+    }
+
+    const prompt = `
+      You are the "U-Think AI Study Planner".
+      Exam ID: ${examId}
+      Target Date: ${targetDate}
+      Daily Hours: ${dailyAvailableHours}
+      Weak Areas: ${JSON.stringify(weakAreas)}
+      Strong Areas: ${JSON.stringify(strongAreas)}
+
+      Create a 7-day adaptive study plan that focuses more on weak areas but still revises strong areas.
+      Distribute the daily hours properly.
+
+      Return ONLY valid JSON:
+      {
+        "schedule": [
+          {
+            "dayOffset": number (0 to 6),
+            "tasks": [
+              {
+                "durationMinutes": number,
+                "subject": "string",
+                "topic": "string",
+                "taskType": "Study" | "Revision" | "Practice Test"
+              }
+            ]
+          }
+        ]
+      }
+    `;
+
+    const geminiResponse = await generateGeminiResponse(prompt);
+    let parsedData;
+    try {
+      parsedData = JSON.parse(geminiResponse.replace(/```json/g, '').replace(/```/g, '').trim());
+    } catch (e) {
+      return res.status(500).json({ error: 'Failed to generate study plan' });
+    }
+
+    const now = new Date();
+    const mappedSchedule = parsedData.schedule.map((day: any) => {
+      const d = new Date(now);
+      d.setDate(d.getDate() + day.dayOffset);
+      return {
+        date: d,
+        tasks: day.tasks
+      };
+    });
+
+    // Save to DB
+    let plan = await ExamStudyPlan.findOne({ user: userId, examId });
+    if (plan) {
+      plan.targetDate = targetDate;
+      plan.dailyAvailableHours = dailyAvailableHours;
+      plan.schedule = mappedSchedule;
+      plan.generatedAt = new Date();
+    } else {
+      plan = new ExamStudyPlan({
+        user: userId,
+        examId,
+        targetDate,
+        dailyAvailableHours,
+        schedule: mappedSchedule
+      });
+    }
+    await plan.save();
+
+    res.json({ success: true, plan });
+  } catch (error) {
+    next(error);
   }
 });
 

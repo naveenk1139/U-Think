@@ -91,3 +91,63 @@ export async function sendOtpEmail(
     throw new Error('Unable to send verification email. Please check your network or try again later.');
   }
 }
+
+/** Send generic Deadline Reminder email */
+export async function sendDeadlineReminderEmail(
+  to: string,
+  studentName: string,
+  deadlineTitle: string,
+  deadlineDate: Date,
+  timeRemaining: string,
+  category: string,
+  requiredAction: string,
+  sourceUrl?: string
+): Promise<void> {
+  const subject = `Reminder: ${deadlineTitle} Deadline Approaching`;
+
+  const dateString = deadlineDate.toLocaleDateString('en-IN', {
+    weekday: 'short', year: 'numeric', month: 'long', day: 'numeric'
+  });
+
+  const linkHtml = sourceUrl 
+    ? `<p><a href="${sourceUrl}" style="display: inline-block; padding: 10px 20px; background-color: #2563EB; color: #fff; text-decoration: none; border-radius: 5px;">View Deadline / Apply</a></p>`
+    : '';
+
+  const textContent = `Hello ${studentName},\n\nYour education deadline is approaching.\n\nDeadline: ${deadlineTitle}\nDate: ${dateString}\nTime remaining: ${timeRemaining}\nCategory: ${category}\nRequired action: ${requiredAction}\n\n${sourceUrl ? `Link: ${sourceUrl}` : ''}\n\nRegards,\nU-THINK Team`;
+
+  const htmlContent = `
+    <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px;">
+      <h2 style="color: #2563EB; border-bottom: 2px solid #2563EB; padding-bottom: 10px;">U-THINK Deadline Reminder</h2>
+      <p>Hello ${studentName},</p>
+      <p>Your deadline is approaching fast.</p>
+      
+      <div style="background-color: #f3f4f6; padding: 15px; border-radius: 4px; margin: 20px 0;">
+        <h3 style="margin-top: 0; color: #1e3a8a;">${deadlineTitle}</h3>
+        <p><strong>Date:</strong> ${dateString}</p>
+        <p><strong>Time remaining:</strong> ${timeRemaining}</p>
+        <p><strong>Category:</strong> ${category.replace(/_/g, ' ')}</p>
+        <p><strong>Required Action:</strong> ${requiredAction}</p>
+      </div>
+      
+      ${linkHtml}
+      
+      <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
+      <p style="font-size: 12px; color: #888;">Regards,<br/><strong>U-THINK Education Engine</strong></p>
+    </div>
+  `;
+
+  try {
+    await transporter.sendMail({
+      from: `"U-THINK Alerts" <${EMAIL_FROM}>`,
+      to,
+      subject,
+      text: textContent,
+      html: htmlContent,
+    });
+    console.log(`✅ Deadline email delivered successfully to ${to}`);
+  } catch (err: any) {
+    console.error('\n❌ Failed to send Deadline email:');
+    console.error(err?.message || err);
+    throw new Error('Unable to send deadline reminder email.');
+  }
+}

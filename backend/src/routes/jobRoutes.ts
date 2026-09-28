@@ -7,6 +7,7 @@ import SavedJob from '../models/SavedJob';
 import JobAlert from '../models/JobAlert';
 import Job from '../models/Job';
 import { IUser } from '../models/User';
+import { generateGeminiResponse } from '../services/aiService.js';
 
 const router = express.Router();
 
@@ -137,6 +138,78 @@ router.post('/alerts', protect, async (req, res) => {
     res.json({ success: true, data: alert });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to create alert' });
+  }
+});
+
+
+// Career Transition Mapping
+router.post('/transition-map', protect, async (req, res) => {
+  try {
+    const { targetRole, currentSkills, currentRole } = req.body;
+    
+    const prompt = `
+      You are the "U-Think Career Transition Coach".
+      User wants to transition to: ${targetRole}
+      Current Role: ${currentRole || 'Student / Fresher'}
+      Current Skills: ${currentSkills?.join(', ') || 'None'}
+
+      Generate a step-by-step career transition map.
+      Output ONLY a valid JSON object matching this schema:
+      {
+        "transitionDifficulty": "Low" | "Medium" | "High",
+        "estimatedMonths": number,
+        "phases": [
+          {
+            "phaseName": "string",
+            "focusArea": "string",
+            "milestone": "string"
+          }
+        ],
+        "keyObstacles": ["string"]
+      }
+    `;
+
+    const geminiResponse = await generateGeminiResponse(prompt);
+    const parsedData = JSON.parse(geminiResponse.replace(/```json/g, '').replace(/```/g, '').trim());
+    
+    res.json({ success: true, transitionMap: parsedData });
+  } catch (error) {
+    res.status(500).json({ success: false, error: String(error) });
+  }
+});
+
+// Skill Gap Analysis Engine
+router.post('/skill-gap', protect, async (req, res) => {
+  try {
+    const { targetRole, currentSkills } = req.body;
+    
+    const prompt = `
+      You are the "U-Think Skill Gap Analyzer".
+      Target Role: ${targetRole}
+      Current Skills: ${currentSkills?.join(', ') || 'None'}
+
+      Identify the exact missing skills required for this role.
+      Recommend specific types of courses or certifications to acquire them.
+      Output ONLY a valid JSON object matching this schema:
+      {
+        "matchPercentage": number,
+        "missingSkills": [
+          {
+            "skillName": "string",
+            "importance": "Critical" | "High" | "Medium",
+            "recommendedAction": "string (e.g. course topic)"
+          }
+        ],
+        "existingTransferableSkills": ["string"]
+      }
+    `;
+
+    const geminiResponse = await generateGeminiResponse(prompt);
+    const parsedData = JSON.parse(geminiResponse.replace(/```json/g, '').replace(/```/g, '').trim());
+    
+    res.json({ success: true, skillGap: parsedData });
+  } catch (error) {
+    res.status(500).json({ success: false, error: String(error) });
   }
 });
 

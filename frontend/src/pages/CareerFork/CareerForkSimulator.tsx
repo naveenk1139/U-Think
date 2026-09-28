@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Split, GitBranch, Scale, BrainCircuit, Loader2, ArrowRight, TrendingUp, Clock, Wallet, AlertCircle, Activity } from 'lucide-react';
+import { Split, GitBranch, Scale, BrainCircuit, Loader2, ArrowRight, TrendingUp, Clock, Wallet, AlertCircle, Activity, BarChart2 } from 'lucide-react';
+import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip as RechartsTooltip, Legend } from 'recharts';
 import api from '../../api/axios';
 
 interface PathDetails {
@@ -160,11 +161,39 @@ export default function CareerForkSimulator() {
               <h2 className="text-2xl font-black text-purple-600 text-center md:text-left">{simulation.pathB.name}</h2>
             </div>
 
-            <div className="bg-white border border-gray-100 rounded-2xl shadow-sm mb-8">
-              {renderComparisonMetric(<Clock className="w-4 h-4" />, "Time Needed", simulation.pathA.timeInvestment, simulation.pathA.timeInvestmentScore, simulation.pathB.timeInvestment, simulation.pathB.timeInvestmentScore, true)}
-              {renderComparisonMetric(<Wallet className="w-4 h-4" />, "Est. Cost", simulation.pathA.financialCost, simulation.pathA.financialCostScore, simulation.pathB.financialCost, simulation.pathB.financialCostScore, true)}
-              {renderComparisonMetric(<TrendingUp className="w-4 h-4" />, "Earning Pot.", simulation.pathA.earningPotential, simulation.pathA.earningPotentialScore, simulation.pathB.earningPotential, simulation.pathB.earningPotentialScore)}
-              {renderComparisonMetric(<Activity className="w-4 h-4" />, "Job Growth", simulation.pathA.jobGrowth, simulation.pathA.jobGrowthScore, simulation.pathB.jobGrowth, simulation.pathB.jobGrowthScore)}
+            <div className="bg-white border border-gray-100 rounded-2xl shadow-sm mb-8 overflow-hidden">
+              <div className="flex flex-col lg:flex-row border-b border-gray-100">
+                <div className="w-full lg:w-1/2 p-6 border-b lg:border-b-0 lg:border-r border-gray-100 flex flex-col justify-center bg-gray-50/50">
+                  <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2 justify-center">
+                    <BarChart2 className="w-5 h-5 text-indigo-500" />
+                    Comparative Analysis Overlay
+                  </h3>
+                  <div className="h-[350px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <RadarChart cx="50%" cy="50%" outerRadius="70%" data={[
+                        { metric: 'Time Investment', A: simulation.pathA.timeInvestmentScore, B: simulation.pathB.timeInvestmentScore },
+                        { metric: 'Financial Cost', A: simulation.pathA.financialCostScore, B: simulation.pathB.financialCostScore },
+                        { metric: 'Earning Potential', A: simulation.pathA.earningPotentialScore, B: simulation.pathB.earningPotentialScore },
+                        { metric: 'Job Growth', A: simulation.pathA.jobGrowthScore, B: simulation.pathB.jobGrowthScore }
+                      ]}>
+                        <PolarGrid stroke="#e5e7eb" />
+                        <PolarAngleAxis dataKey="metric" tick={{ fill: '#4b5563', fontSize: 11, fontWeight: 600 }} />
+                        <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} />
+                        <Radar name={simulation.pathA.name} dataKey="A" stroke="#4f46e5" fill="#6366f1" fillOpacity={0.4} />
+                        <Radar name={simulation.pathB.name} dataKey="B" stroke="#9333ea" fill="#a855f7" fillOpacity={0.4} />
+                        <Legend wrapperStyle={{ fontSize: '12px', fontWeight: 'bold' }} />
+                        <RechartsTooltip wrapperClassName="rounded-xl shadow-lg border-0" />
+                      </RadarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+                <div className="w-full lg:w-1/2 flex flex-col justify-center">
+                  {renderComparisonMetric(<Clock className="w-4 h-4" />, "Time Needed", simulation.pathA.timeInvestment, simulation.pathA.timeInvestmentScore, simulation.pathB.timeInvestment, simulation.pathB.timeInvestmentScore, true)}
+                  {renderComparisonMetric(<Wallet className="w-4 h-4" />, "Est. Cost", simulation.pathA.financialCost, simulation.pathA.financialCostScore, simulation.pathB.financialCost, simulation.pathB.financialCostScore, true)}
+                  {renderComparisonMetric(<TrendingUp className="w-4 h-4" />, "Earning Pot.", simulation.pathA.earningPotential, simulation.pathA.earningPotentialScore, simulation.pathB.earningPotential, simulation.pathB.earningPotentialScore)}
+                  {renderComparisonMetric(<Activity className="w-4 h-4" />, "Job Growth", simulation.pathA.jobGrowth, simulation.pathA.jobGrowthScore, simulation.pathB.jobGrowth, simulation.pathB.jobGrowthScore)}
+                </div>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">

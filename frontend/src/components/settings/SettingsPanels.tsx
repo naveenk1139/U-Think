@@ -372,20 +372,26 @@ export const NotificationSettings = () => {
     aiRecommendations: currentUser?.settings?.notifications?.aiRecommendations ?? true,
   });
 
+  const [channels, setChannels] = useState({
+    email: currentUser?.settings?.notifications?.channels?.email ?? true,
+    sms: currentUser?.settings?.notifications?.channels?.sms ?? false,
+    inApp: currentUser?.settings?.notifications?.channels?.inApp ?? true,
+  });
+
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
 
-  const handleChange = async (key: keyof typeof settings, val: boolean) => {
-    const newSettings = { ...settings, [key]: val };
-    setSettings(newSettings);
-    
+  const handleSave = async (newSettings: any, newChannels: any) => {
     setLoading(true);
     setSuccessMsg('');
     try {
       const updates = {
         settings: {
           ...currentUser?.settings,
-          notifications: newSettings
+          notifications: {
+            ...newSettings,
+            channels: newChannels
+          }
         }
       };
       await updateProfile(updates);
@@ -399,39 +405,79 @@ export const NotificationSettings = () => {
     }
   };
 
+  const handleChange = (key: keyof typeof settings, val: boolean) => {
+    const newSettings = { ...settings, [key]: val };
+    setSettings(newSettings);
+    handleSave(newSettings, channels);
+  };
+
+  const handleChannelChange = (key: keyof typeof channels, val: boolean) => {
+    const newChannels = { ...channels, [key]: val };
+    setChannels(newChannels);
+    handleSave(settings, newChannels);
+  };
+
   return (
-    <PanelSection title="Email & Push Notifications">
-      <div className="space-y-4">
-        {successMsg && <div className="text-xs font-semibold text-emerald-600 mb-2">{successMsg}</div>}
-        <ToggleSwitch 
-          label="Exam Notifications" 
-          desc="Get alerted about upcoming exam dates and deadlines." 
-          checked={settings.examReminders} 
-          onChange={(val) => handleChange('examReminders', val)} 
-        />
-        <div className="h-px bg-background-secondary" />
-        <ToggleSwitch 
-          label="Scholarship Alerts" 
-          desc="Updates on scholarships and application processes." 
-          checked={settings.scholarshipAlerts} 
-          onChange={(val) => handleChange('scholarshipAlerts', val)} 
-        />
-        <div className="h-px bg-background-secondary" />
-        <ToggleSwitch 
-          label="Career Updates" 
-          desc="Notifications for internships, job opportunities and career recommendations." 
-          checked={settings.careerUpdates} 
-          onChange={(val) => handleChange('careerUpdates', val)} 
-        />
-        <div className="h-px bg-background-secondary" />
-        <ToggleSwitch 
-          label="AI Recommendations" 
-          desc="Updates when your AI counselor has new insights." 
-          checked={settings.aiRecommendations} 
-          onChange={(val) => handleChange('aiRecommendations', val)} 
-        />
-      </div>
-    </PanelSection>
+    <div className="space-y-6">
+      <PanelSection title="Delivery Channels (Deadline Reminders)">
+        <p className="text-xs text-text-muted mb-4">Choose how you want to receive important educational deadline alerts.</p>
+        <div className="space-y-4">
+          <ToggleSwitch 
+            label="Email Alerts" 
+            desc="Receive reminders via your registered email address." 
+            checked={channels.email} 
+            onChange={(val) => handleChannelChange('email', val)} 
+          />
+          <div className="h-px bg-background-secondary" />
+          <ToggleSwitch 
+            label="SMS Text Messages" 
+            desc="Receive text messages for urgent deadline alerts." 
+            checked={channels.sms} 
+            onChange={(val) => handleChannelChange('sms', val)} 
+          />
+          <div className="h-px bg-background-secondary" />
+          <ToggleSwitch 
+            label="In-App Notifications" 
+            desc="See alerts directly in the U-Think dashboard." 
+            checked={channels.inApp} 
+            onChange={(val) => handleChannelChange('inApp', val)} 
+          />
+        </div>
+      </PanelSection>
+
+      <PanelSection title="Notification Categories">
+        <div className="space-y-4">
+          {successMsg && <div className="text-xs font-semibold text-emerald-600 mb-2">{successMsg}</div>}
+          <ToggleSwitch 
+            label="Exam Notifications" 
+            desc="Get alerted about upcoming exam dates and deadlines." 
+            checked={settings.examReminders} 
+            onChange={(val) => handleChange('examReminders', val)} 
+          />
+          <div className="h-px bg-background-secondary" />
+          <ToggleSwitch 
+            label="Scholarship Alerts" 
+            desc="Updates on scholarships and application processes." 
+            checked={settings.scholarshipAlerts} 
+            onChange={(val) => handleChange('scholarshipAlerts', val)} 
+          />
+          <div className="h-px bg-background-secondary" />
+          <ToggleSwitch 
+            label="Career Updates" 
+            desc="Notifications for internships, job opportunities and career recommendations." 
+            checked={settings.careerUpdates} 
+            onChange={(val) => handleChange('careerUpdates', val)} 
+          />
+          <div className="h-px bg-background-secondary" />
+          <ToggleSwitch 
+            label="AI Recommendations" 
+            desc="Updates when your AI counselor has new insights." 
+            checked={settings.aiRecommendations} 
+            onChange={(val) => handleChange('aiRecommendations', val)} 
+          />
+        </div>
+      </PanelSection>
+    </div>
   );
 };
 

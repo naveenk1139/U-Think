@@ -353,4 +353,34 @@ router.post('/chat/stream', async (req: Request, res: Response, next: NextFuncti
   }
 });
 
+
+// Multilingual Content Engine
+router.post('/translate', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { text, targetLanguage } = req.body;
+    
+    if (!text || !targetLanguage) {
+      return res.status(400).json({ error: 'Provide text and targetLanguage' });
+    }
+
+    const prompt = `
+      Translate the following educational/counselling content accurately into ${targetLanguage}.
+      Maintain the original formatting, emojis, and tone.
+      Content to translate:
+      """
+      ${text}
+      """
+      Output ONLY the translated text.
+    `;
+
+    const model = ai.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const result = await model.generateContent(prompt);
+    
+    res.json({ success: true, translation: result.response.text().trim() });
+  } catch (error: any) {
+    console.error('Translation error:', error);
+    res.status(500).json({ success: false, error: String(error) });
+  }
+});
+
 export default router;

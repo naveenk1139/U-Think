@@ -2,23 +2,29 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { 
   Home, Compass, Building2, BookOpen, Search, Target, LayoutDashboard,
-  Users, Award, Brain, Settings, Bell, Heart, CheckCircle, GraduationCap, Briefcase, Bookmark, ArrowRight, User, FileText, Network, Split, ShieldAlert, BadgeCheck, GitMerge, Beaker, Link as LinkIcon, Shuffle, HeartPulse
+  Users, Award, Brain, Settings, Bell, Heart, CheckCircle, GraduationCap, Briefcase, Bookmark, ArrowRight, User, FileText, Network, Split, ShieldAlert, BadgeCheck, GitMerge, Beaker, Link as LinkIcon, Shuffle, HeartPulse, CalendarClock, IndianRupee, Activity, GitBranch, Map
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function Sidebar() {
   const { currentUser } = useAuth();
-  
   const mainMenuItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
     { icon: Home, label: 'Explore Home', path: '/' },
+    { icon: CalendarClock, label: 'Deadline Hub', path: '/deadlines' },
+    { icon: IndianRupee, label: 'Scholarships', path: '/scholarships' },
+    { icon: Target, label: '6 ASTRA Education Tree', path: '/school' },
     { icon: Compass, label: 'Pathways & Streams', path: '/streams' },
     { icon: Building2, label: 'Colleges', path: '/colleges' },
+    { icon: GitMerge, label: 'Admission Simulator', path: '/simulator' },
     { icon: GraduationCap, label: 'Exams & Degrees', path: '/exams' },
+    { icon: BookOpen, label: 'Exam Prep Engine', path: '/exam-prep' },
     { icon: Brain, label: 'Aptitude Assessment', path: '/quiz' },
     { icon: Briefcase, label: 'Job Explorer', path: '/jobs' },
+    { icon: GitBranch, label: 'Career Transition', path: '/career-transition' },
     { icon: Users, label: 'Industry Mentors', path: '/mentorship' },
     { icon: BookOpen, label: 'Professional Courses', path: '/professional-courses' },
+    { icon: Activity, label: 'Scraper Health', path: '/scraper-health' },
   ];
 
     const yourSpaceItems = [
@@ -35,6 +41,7 @@ export default function Sidebar() {
     { icon: Target, label: 'Aptitude Test', path: '/quiz' },
     { icon: FileText, label: 'Academic Documents', path: '/documents/analyze' },
     { icon: Bookmark, label: 'Saved Jobs', path: '/saved-jobs' },
+    { icon: Map, label: 'My Roadmaps', path: '/my-roadmap' },
     { icon: Bell, label: 'Reminders', path: '/settings?tab=notifications' },
     { icon: Heart, label: 'Interests', path: '/settings?tab=education' },
     { icon: Settings, label: 'Settings', path: '/settings' },

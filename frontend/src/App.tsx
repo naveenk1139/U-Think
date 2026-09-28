@@ -38,6 +38,9 @@ import ITPolytechnicDetail from './pages/After10th/ITPolytechnicDetail';
 import DiplomaDetail from './pages/After10th/DiplomaDetail';
 import { AuthReminderModal } from './components/AuthReminderModal';
 import Settings from './components/Settings';
+import Deadlines from './pages/Deadlines';
+import SchoolExplorer from './pages/School/SchoolExplorer';
+import Post10thExplorer from './pages/School/Post10thExplorer';
 import { useAuth } from './contexts/AuthContext';
 import { Compass, Sparkles, Target } from 'lucide-react';
 import CareerGPS from './pages/CareerGPS/CareerGPS';
@@ -50,6 +53,13 @@ import ImpactSimulator from './pages/ImpactSimulator/ImpactSimulator';
 import EligibilityChain from './pages/EligibilityChain/EligibilityChain';
 import RouteSwitchEngine from './pages/RouteSwitch/RouteSwitchEngine';
 import RecoveryPlanner from './pages/RecoveryPlanner/RecoveryPlanner';
+import Scholarships from './pages/Scholarships/Scholarships';
+import ExamPrep from './pages/ExamPrep/ExamPrep';
+import CollegeCounsellingSimulator from './pages/CollegeIntelligence/CollegeCounsellingSimulator';
+import CareerTransition from './pages/CareerIntelligence/CareerTransition';
+import AccessibilityOverlay from './components/AccessibilityOverlay';
+import ScraperHealth from './pages/Admin/ScraperHealth';
+import MyRoadmap from './pages/Roadmap/MyRoadmap';
 
 // ─── Route-aware layout shell ────────────────────────────────────
 function AppShell() {
@@ -122,7 +132,7 @@ function AppShell() {
 
   return (
     <div className="min-h-screen bg-background text-text-primary flex flex-col selection:bg-blue-100 selection:text-blue-800">
-
+      <AccessibilityOverlay />
       {/* Top Navigation Bar */}
       <TopBar />
 
@@ -179,6 +189,14 @@ function AppShell() {
             <Route path="/branches/:slug" element={<BranchDetail />} />
             <Route path="/exams" element={<ExamsDirectory key="exams-tab" initialTab="exams" />} />
             <Route path="/exams/:examId" element={<ExamDetail />} />
+            <Route path="/exam-prep" element={<ExamPrep />} />
+            <Route path="/simulator" element={<CollegeCounsellingSimulator />} />
+            <Route path="/career-transition" element={<CareerTransition />} />
+            <Route path="/scraper-health" element={<ScraperHealth />} />
+            <Route path="/deadlines" element={<Deadlines />} />
+            <Route path="/scholarships" element={<Scholarships />} />
+            <Route path="/school/*" element={<SchoolExplorer />} />
+            <Route path="/post-10th/*" element={<Post10thExplorer />} />
             <Route path="/degrees" element={<ExamsDirectory key="degrees-tab" initialTab="degrees" />} />
             <Route path="/degrees/:degreeId" element={<DegreeDetail />} />
             <Route path="/specializations" element={<ExamsDirectory key="specializations-tab" initialTab="specializations" />} />
@@ -234,6 +252,7 @@ function AppShell() {
             <Route path="/admin-dashboard" element={<AdminDashboard />} />
             <Route path="/admin/data-health" element={<AdminDataHealth />} />
             <Route path="/college-dashboard" element={<CollegeDashboard />} />
+            <Route path="/my-roadmap" element={<MyRoadmap />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>

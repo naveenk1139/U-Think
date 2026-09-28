@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Network, RefreshCw, FileText, CheckCircle, BrainCircuit, Activity } from 'lucide-react';
+import { Network, RefreshCw, FileText, CheckCircle, BrainCircuit, Activity, BarChart2 } from 'lucide-react';
+import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip as RechartsTooltip } from 'recharts';
 import api from '../../api/axios';
 
 interface IEvidenceSource {
@@ -101,7 +102,39 @@ export default function SkillEvidenceGraph() {
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div className="space-y-8">
+          {/* Chart Section */}
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row gap-8 items-center">
+            <div className="w-full md:w-1/2 h-[400px]">
+              <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <BarChart2 className="w-5 h-5 text-indigo-500" />
+                Verified Skill Profile Matrix
+              </h3>
+              <ResponsiveContainer width="100%" height="100%">
+                <RadarChart cx="50%" cy="50%" outerRadius="70%" data={nodes.slice(0, 8)}>
+                  <PolarGrid stroke="#e5e7eb" />
+                  <PolarAngleAxis dataKey="skillName" tick={{ fill: '#4b5563', fontSize: 12, fontWeight: 600 }} />
+                  <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fill: '#9ca3af', fontSize: 10 }} />
+                  <Radar name="Strength Score" dataKey="strengthScore" stroke="#6366f1" fill="#818cf8" fillOpacity={0.5} />
+                  <RechartsTooltip wrapperClassName="rounded-xl shadow-lg border-0" />
+                </RadarChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="w-full md:w-1/2 space-y-4">
+              <h3 className="text-xl font-black text-gray-900 mb-2">AI Assessment Summary</h3>
+              <p className="text-gray-600 leading-relaxed">
+                The chart on the left maps your top skills based on verifiable evidence extracted from your uploaded documents (certificates, transcripts, projects) and self-reported data. 
+              </p>
+              <div className="bg-indigo-50 p-4 rounded-xl border border-indigo-100">
+                <p className="text-indigo-800 text-sm font-medium">
+                  <strong>Tip:</strong> Upload more certificates or link projects in your Profile to boost the "Strength Score" and turn self-reported skills into AI-verified capabilities.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <h3 className="text-xl font-black text-gray-900 pt-4">Detailed Evidence Nodes</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {nodes.map(node => (
             <div key={node._id} className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
               {/* Card Header */}
@@ -150,6 +183,7 @@ export default function SkillEvidenceGraph() {
               </div>
             </div>
           ))}
+          </div>
         </div>
       )}
     </div>

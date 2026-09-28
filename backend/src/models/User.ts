@@ -59,6 +59,11 @@ export interface IUser extends Document {
       scholarshipAlerts?: boolean;
       careerUpdates?: boolean;
       aiRecommendations?: boolean;
+      channels?: {
+        email?: boolean;
+        sms?: boolean;
+        inApp?: boolean;
+      };
     };
     aiCounselor?: {
       enableGuidance?: boolean;
@@ -171,6 +176,11 @@ const UserSchema = new Schema<IUser>(
         scholarshipAlerts: { type: Boolean, default: true },
         careerUpdates: { type: Boolean, default: true },
         aiRecommendations: { type: Boolean, default: true },
+        channels: {
+          email: { type: Boolean, default: true },
+          sms: { type: Boolean, default: false },
+          inApp: { type: Boolean, default: true }
+        }
       },
       aiCounselor: {
         enableGuidance: { type: Boolean, default: true },
