@@ -16,9 +16,15 @@ U-THINK is an exhaustive, comprehensive, and highly detailed educational navigat
 *   **Skill Evidence Graph:** Visual node-based graph mapping user skills to verifiable academic documents and projects.
 *   **Career Fork Simulator:** AI-driven opportunity cost simulator that directly compares two career paths across Time Investment, Financial Cost, Job Growth, and Earning Potential.
 *   **Recommendation Stability Engine:** "Devil's Advocate" AI that critically evaluates career choices against a student's profile to expose hidden risks, mismatched traits, and provide alternative suggestions.
+*   **6 ASTRA Educational Pathway Engine:** The core navigation system mapping the 6 major educational transitions in Karnataka:
+    1. **Post-10th Streams (PUC)**: Science, Commerce, Arts with detailed combinations.
+    2. **ITI (Industrial Training)**: Engineering & Non-Engineering trades.
+    3. **Polytechnic (Diploma)**: 3-year technical courses and lateral entry routes.
+    4. **Paramedical & Allied Health**: Nursing, lab tech, and medical diplomas.
+    5. **Undergraduate (UG)**: B.Tech, B.Com, B.Sc, BA, etc. mapped to pre-requisites.
+    6. **Postgraduate (PG) & Research**: Specializations, Masters, and PhDs.
+*   **Eligibility & Exams Engine:** Hard-linked prerequisites for degrees, automatically rendering mandatory entrance exams (e.g., JEE Main for B.Tech) directly in the pathway explorer.
 *   **Career Passport:** A shareable, aggregated snapshot of the student's verified skills, stability scores, and active roadmap.
-*   **Comprehensive Pathway Discovery:** Interactive mapping of ALL possible educational pathways after 10th (PUC, Diploma, ITI, Paramedical, etc.).
-*   **In-Depth Stream Exploration:** Detailed insights into every stream and course combination (e.g., PCMB, PCMSc, HEPS, CEBA).
 *   **Verified Institution Ecosystem:** A robust directory of 3,500+ verified colleges, institutes, and universities across all 31 districts of Karnataka.
 *   **Live Exam & Degree Directory:** A real-time engine tracking major entrance exams (JEE, NEET, KCET, CA, UPSC, etc.) with dynamic countdowns, eligibility checkers, and automated status calculations.
 *   **AI Document Analysis:** Automatically extracts academic information (grades, subjects, institution) from uploaded 10th, 12th, or Diploma marksheets securely using Gemini Vision capabilities.
@@ -160,6 +166,13 @@ npx tsx src/scripts/seedMegaExams.ts
 # (CRITICAL for the Dependency Engine & Impact Simulator)
 # Creates the complex prerequisite relationships mapping which subjects unlock which degrees.
 npx tsx src/scripts/seedGraphRelations.ts
+
+# 4. Phase-wise Seeders (For Advanced Pathways and Colleges)
+npx tsx src/scripts/seedSchoolPhase3.ts
+npx tsx src/scripts/seedPhase4.ts
+npx tsx src/scripts/seedPhase5.ts
+npx tsx src/scripts/seedPhase6.ts
+npx tsx src/scripts/seedPhase9.ts
 ```
 
 ## 🤝 Contribution Guidelines
