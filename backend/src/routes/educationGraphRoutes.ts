@@ -8,22 +8,11 @@ import Degree from '../models/Degree.js';
 import Exam from '../models/Exam.js';
 import Career from '../models/Career.js';
 import { User } from '../models/User.js';
-import { findRecommendationPath, IGraphNode } from '../services/knowledgeGraphService.js';
+import { findRecommendationPath, IGraphNode, buildNodeContext, getPopulatedNode } from '../services/knowledgeGraphService.js';
 
 const router = Router();
 
-// Helper to populate generic nodes based on type
-const getPopulatedNode = async (type: string, id: any) => {
-  switch (type) {
-    case 'Pathway': return await Pathway.findById(id).select('name slug icon');
-    case 'Stream': return await Stream.findById(id).select('name slug icon');
-    case 'SubjectCombination': return await SubjectCombination.findById(id).select('name slug');
-    case 'Degree': return await Degree.findById(id).select('name slug category');
-    case 'Exam': return await Exam.findById(id).select('name slug examLevel');
-    case 'Career': return await Career.findById(id).select('title slug industry');
-    default: return { _id: id, name: 'Unknown' };
-  }
-};
+// Helper to populate generic nodes based on type is now imported from knowledgeGraphService
 
 // Route: /api/education-paths/graph
 // Method: GET
@@ -91,37 +80,19 @@ router.get('/node/:type/:id', async (req: Request, res: Response, next: NextFunc
   try {
     const { type, id } = req.params;
 
-    // Get the core node
-    const coreNode = await getPopulatedNode(type, id);
+    // Use the robust buildNodeContext to fetch explicit & implicit edges
+    const context = await buildNodeContext(type, id);
 
-    // Get what this node REQUIRES or is BLOCKED_BY (Parents/Prerequisites)
-    const prerequisites = await EducationPathRelation.find({ targetId: id, targetType: type }).lean();
-    
-    // Get what this node ENABLES, LEADS_TO, etc. (Children/Downstream)
-    const downstream = await EducationPathRelation.find({ sourceId: id, sourceType: type }).lean();
-
-    // Populate the names for the UI
-    const resolveEdges = async (edges: any[], isSource: boolean) => {
-      return Promise.all(edges.map(async (edge) => {
-        const targetType = isSource ? edge.targetType : edge.sourceType;
-        const targetId = isSource ? edge.targetId : edge.sourceId;
-        const resolved = await getPopulatedNode(targetType, targetId);
-        return {
-          ...edge,
-          resolvedNode: resolved
-        };
-      }));
-    };
-
-    const populatedPrereqs = await resolveEdges(prerequisites, false);
-    const populatedDownstream = await resolveEdges(downstream, true);
+    if (!context) {
+       return res.status(404).json({ success: false, error: 'Node not found' });
+    }
 
     res.json({
       success: true,
-      node: coreNode,
-      nodeType: type,
-      prerequisites: populatedPrereqs,
-      downstream: populatedDownstream
+      node: context.coreNode,
+      nodeType: context.nodeType,
+      prerequisites: context.prerequisites,
+      downstream: context.downstream
     });
 
   } catch (err) {

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Calendar, ArrowLeft, ExternalLink, ShieldCheck, Clock, AlertCircle, FileText, CheckCircle2, Bookmark, CheckSquare, GraduationCap, Building, ChevronRight } from 'lucide-react';
+import { Calendar, ArrowLeft, ExternalLink, ShieldCheck, Clock, AlertCircle, FileText, CheckCircle2, Bookmark, CheckSquare, GraduationCap, Building, ChevronRight, Network } from 'lucide-react';
 import { StructuredExam, ExamYear } from '../types';
 import { getExamBySlug, saveExam, unsaveExam, getSavedExams, trackExam } from '../api/examApi';
+import KnowledgeGraphView from './KnowledgeGraphView';
 
 const isValidUrl = (url: string | undefined): boolean => {
   if (!url) return false;
@@ -20,6 +21,7 @@ export default function ExamDetail() {
   const { slug, examId } = useParams<{ slug?: string, examId?: string }>();
   const currentSlug = slug || examId;
   const navigate = useNavigate();
+  const [showGraph, setShowGraph] = useState(false);
   const [exam, setExam] = useState<StructuredExam | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -167,6 +169,13 @@ export default function ExamDetail() {
                   <span className="px-3 py-1 bg-white/10 text-blue-100 rounded-full text-[11px] font-bold uppercase tracking-wider border border-white/20">
                     {exam.ownership}
                   </span>
+                  <button 
+                    onClick={() => setShowGraph(true)}
+                    className="bg-white/20 hover:bg-white/30 text-white px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider border border-white/20 flex items-center gap-1 transition-colors"
+                  >
+                    <Network className="w-3 h-3" />
+                    Knowledge Graph
+                  </button>
                 </div>
                 <h1 className="text-3xl md:text-5xl font-black mb-2">{exam.exam_name}</h1>
                 <p className="text-xl text-blue-200 font-semibold">{exam.short_name}</p>
@@ -479,6 +488,14 @@ export default function ExamDetail() {
 
         </div>
       </div>
+      {/* Knowledge Graph Modal */}
+      {showGraph && exam && (
+        <KnowledgeGraphView 
+          targetType="Exam" 
+          targetId={exam._id} 
+          onClose={() => setShowGraph(false)} 
+        />
+      )}
     </div>
   );
 }
