@@ -14,6 +14,7 @@ import { getSavedJobs } from '../api/savedJobs';
 import { getSavedPathways } from '../api/pathwayApi';
 import api from '../api/axios';
 import { getCareerDNA } from '../api/profileApi';
+import AIRecommendationWidget from './AIRecommendationWidget';
 
 export default function StudentDashboard() {
   const { currentUser, updateProfile, loading } = useAuth();
@@ -225,97 +226,7 @@ export default function StudentDashboard() {
 
             {/* Recommended For You (8 cols) */}
             <div className="lg:col-span-8 flex flex-col">
-               <div className="flex flex-wrap items-center justify-between mb-4 gap-2">
-                 <h2 className="text-lg font-black text-gray-900">Recommended For You</h2>
-                 <div className="flex gap-1 bg-white border border-gray-200 rounded-lg p-1 shadow-sm">
-                   {['All', 'Pathways', 'Courses', 'Careers', 'Colleges'].map(tab => (
-                     <button 
-                       key={tab}
-                       onClick={() => setActiveTab(tab)}
-                       className={`px-3 py-1 text-[10px] font-bold rounded-md transition-colors ${activeTab === tab ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900'}`}
-                     >
-                       {tab}
-                     </button>
-                   ))}
-                 </div>
-               </div>
-
-               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 flex-1">
-                 
-                 {/* Recommendation 1: Pathway */}
-                 {(activeTab === 'All' || activeTab === 'Pathways') && (
-                 <div className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm hover:border-blue-300 transition-colors flex flex-col">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center"><Map className="w-5 h-5"/></div>
-                      <span className="text-[9px] font-black uppercase text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-100">Pathway</span>
-                    </div>
-                    <h3 className="font-bold text-sm text-gray-900 leading-tight mb-1">Engineering & Technology</h3>
-                    <div className="text-xs font-bold text-emerald-600 mb-3">Match: 92%</div>
-                    <div className="text-[10px] font-medium text-gray-500 leading-snug mb-auto">Based on your Science stream, maths interest and aptitude results.</div>
-                    <button onClick={() => navigate('/pathways/after-10th/diploma')} className="mt-4 w-full text-center border border-gray-200 hover:border-blue-600 hover:bg-blue-50 hover:text-blue-600 text-[10px] font-bold py-2 rounded-lg transition-colors text-gray-700">View Pathway →</button>
-                 </div>
-                 )}
-
-                 {/* Recommendation 2: Course */}
-                 {(activeTab === 'All' || activeTab === 'Courses') && (
-                 <div className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm hover:border-emerald-300 transition-colors flex flex-col">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center"><BookOpen className="w-5 h-5"/></div>
-                      <span className="text-[9px] font-black uppercase text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">Course</span>
-                    </div>
-                    <h3 className="font-bold text-sm text-gray-900 leading-tight mb-1">B.Tech Computer Science</h3>
-                    <div className="text-xs font-bold text-emerald-600 mb-3">Match: 89%</div>
-                    <ul className="text-[10px] font-medium text-gray-500 leading-snug mb-auto space-y-1 ml-1">
-                      <li className="flex items-start gap-1"><span className="text-emerald-500 font-bold">•</span> Your profile: Eligible</li>
-                      <li className="flex items-start gap-1"><span className="text-emerald-500 font-bold">•</span> High career opportunities</li>
-                      <li className="flex items-start gap-1"><span className="text-emerald-500 font-bold">•</span> Matches your interests</li>
-                    </ul>
-                    <button onClick={() => navigate('/courses')} className="mt-4 w-full text-center border border-gray-200 hover:border-emerald-600 hover:bg-emerald-50 hover:text-emerald-600 text-[10px] font-bold py-2 rounded-lg transition-colors text-gray-700">View Course →</button>
-                 </div>
-                 )}
-
-                 {/* Recommendation 3: Career */}
-                 {(activeTab === 'All' || activeTab === 'Careers') && (
-                 <div className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm hover:border-purple-300 transition-colors flex flex-col">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center"><Briefcase className="w-5 h-5"/></div>
-                      <span className="text-[9px] font-black uppercase text-purple-600 bg-purple-50 px-2 py-0.5 rounded border border-purple-100">Career</span>
-                    </div>
-                    <h3 className="font-bold text-sm text-gray-900 leading-tight mb-1">Software Developer</h3>
-                    <div className="text-xs font-bold text-emerald-600 mb-3">Match: 91%</div>
-                    <ul className="text-[10px] font-medium text-gray-500 leading-snug mb-auto space-y-1 ml-1">
-                      <li className="flex items-start gap-1"><span className="text-emerald-500 font-bold">•</span> High demand</li>
-                      <li className="flex items-start gap-1"><span className="text-emerald-500 font-bold">•</span> Good salary potential</li>
-                      <li className="flex items-start gap-1"><span className="text-emerald-500 font-bold">•</span> Matches your aptitude</li>
-                    </ul>
-                    <button onClick={() => navigate('/jobs')} className="mt-4 w-full text-center border border-gray-200 hover:border-purple-600 hover:bg-purple-50 hover:text-purple-600 text-[10px] font-bold py-2 rounded-lg transition-colors text-gray-700">Explore Career →</button>
-                 </div>
-                 )}
-
-                 {/* Recommendation 4: College (if filtered to Colleges) */}
-                 {(activeTab === 'Colleges') && colleges.slice(0,1).map((college, idx) => (
-                   <div key={idx} className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm hover:border-blue-300 transition-colors flex flex-col">
-                     <div className="h-24 bg-gray-200 w-full overflow-hidden relative">
-                       {college.image ? <img src={college.image} className="w-full h-full object-cover"/> : <div className="w-full h-full bg-blue-100 flex items-center justify-center"><Building2 className="w-8 h-8 text-blue-300"/></div>}
-                       <div className="absolute top-2 left-2 bg-white/90 backdrop-blur text-[9px] font-black uppercase text-blue-600 px-2 py-0.5 rounded shadow-sm">College</div>
-                     </div>
-                     <div className="p-4 flex flex-col flex-1">
-                       <h3 className="font-bold text-sm text-gray-900 leading-tight truncate">{college.name}</h3>
-                       <div className="text-[9px] font-medium text-gray-500 mt-1 flex items-center gap-1 truncate"><MapPin className="w-3 h-3 text-red-500 shrink-0"/> {college.city}, {college.state}</div>
-                       <div className="flex gap-1 mt-2 mb-3">
-                         {college.categories?.[0] && <span className="text-[8px] font-bold bg-purple-50 text-purple-700 px-1.5 py-0.5 rounded border border-purple-100">{college.categories[0]}</span>}
-                         {college.type && <span className="text-[8px] font-bold bg-rose-50 text-rose-700 px-1.5 py-0.5 rounded border border-rose-100">{college.type}</span>}
-                       </div>
-                       <div className="text-xs font-bold text-emerald-600 mb-auto">Match: {calculateMatchScore(college.categories || [], currentUser)}%</div>
-                       <div className="flex gap-2 mt-4">
-                         <button className="flex-1 bg-blue-600 text-white hover:bg-blue-700 text-[10px] font-bold py-2 rounded-lg transition-colors">View Details →</button>
-                         <button className="w-8 h-8 rounded-lg border border-gray-200 flex items-center justify-center text-gray-400 hover:text-rose-500 hover:bg-rose-50 transition-colors"><Heart className="w-4 h-4"/></button>
-                       </div>
-                     </div>
-                   </div>
-                 ))}
-
-               </div>
+               <AIRecommendationWidget />
             </div>
           </div>
 

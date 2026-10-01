@@ -3,7 +3,7 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { getPathwayBySlug, PathwayData } from '../../api/pathwayApi';
 import { 
   ArrowLeft, Clock, GraduationCap, Share2, Heart, Wrench, Building2, 
-  ChevronRight, BookOpen, Settings, Settings2, ShieldCheck, Map,
+  ChevronRight, BookOpen, Settings, Settings2, ShieldCheck, Map as MapIcon,
   ArrowRight, CheckCircle, Target, Search, Palette, Zap, Beaker, Leaf, Monitor, Component, Briefcase,
   FileText, CalendarDays, Lightbulb
 } from 'lucide-react';
@@ -129,6 +129,23 @@ const DiplomaDetail: React.FC = () => {
     stream.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     stream.courses?.some(c => c.name.toLowerCase().includes(searchQuery.toLowerCase()))
   );
+
+  const uniqueCareers = React.useMemo(() => {
+    if (!pathway?.streams) return [];
+    const careersMap = new Map<string, any>();
+    pathway.streams.forEach(stream => {
+      stream.courses?.forEach(course => {
+        course.branches?.forEach(branch => {
+          branch.relatedCareers?.forEach(career => {
+            if (!careersMap.has(career.name)) {
+              careersMap.set(career.name, career);
+            }
+          });
+        });
+      });
+    });
+    return Array.from(careersMap.values());
+  }, [pathway]);
 
   return (
     <div className="w-full bg-[#f8fafc] min-h-screen font-sans pb-16">
@@ -429,8 +446,58 @@ const DiplomaDetail: React.FC = () => {
               </div>
             )}
 
+            {/* Careers Tab Content */}
+            {activeTab === 'careers' && (
+              <div>
+                <div className="flex items-center justify-between mb-5">
+                  <div>
+                    <h2 className="text-xl font-extrabold text-[#0B1F44] tracking-tight">Careers after Diploma</h2>
+                    <p className="text-[13px] font-medium text-gray-600">Explore career opportunities and roles based on diploma streams.</p>
+                  </div>
+                </div>
+                {uniqueCareers.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {uniqueCareers.map((career: any) => (
+                      <div key={career._id} className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm hover:border-blue-300 transition-colors cursor-pointer" onClick={() => navigate(`/jobs/${career.slug || career._id}`)}>
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                            <Briefcase className="w-5 h-5"/>
+                          </div>
+                          <h3 className="text-sm font-black text-gray-900 line-clamp-2 leading-tight">{career.name}</h3>
+                        </div>
+                        
+                        {career.skillRefs && career.skillRefs.length > 0 && (
+                          <div className="mt-3">
+                            <div className="text-[10px] font-bold text-gray-500 mb-1.5 uppercase tracking-wide">Key Skills</div>
+                            <div className="flex flex-wrap gap-1.5">
+                              {career.skillRefs.slice(0, 3).map((skill: any) => (
+                                <span key={skill._id} className="bg-gray-100 text-gray-700 text-[10px] font-bold px-2 py-1 rounded-md">
+                                  {skill.name}
+                                </span>
+                              ))}
+                              {career.skillRefs.length > 3 && (
+                                <span className="bg-gray-50 text-gray-500 text-[10px] font-bold px-2 py-1 rounded-md border border-gray-200">
+                                  +{career.skillRefs.length - 3} more
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="bg-white border border-gray-200 rounded-[16px] p-12 text-center shadow-sm">
+                    <Briefcase className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+                    <h3 className="text-gray-900 font-bold mb-1">No careers found</h3>
+                    <p className="text-gray-500 text-sm font-medium">Careers data will be updated soon.</p>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Other Generic Tab Placeholders */}
-            {activeTab !== 'overview' && activeTab !== 'streams' && activeTab !== 'courses' && (
+            {activeTab !== 'overview' && activeTab !== 'streams' && activeTab !== 'courses' && activeTab !== 'careers' && (
               <div className="bg-white rounded-[16px] p-16 text-center border border-gray-200 shadow-sm">
                  <ShieldCheck className="w-14 h-14 text-gray-300 mx-auto mb-4" />
                  <h2 className="text-xl font-extrabold text-[#0B1F44] mb-2 capitalize">{activeTab} Details</h2>

@@ -10,6 +10,7 @@ export interface IUniversity extends Document {
   officialWebsiteUrl?: string;
   recognition?: string[]; // UGC, AICTE, etc.
   sourceUrl?: string;
+  verificationStatus?: 'VERIFIED' | 'NEEDS_REVIEW' | 'STALE' | 'UNKNOWN';
   lastVerifiedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
@@ -25,6 +26,7 @@ const UniversitySchema = new Schema({
   officialWebsiteUrl: { type: String },
   recognition: [{ type: String }],
   sourceUrl: { type: String },
+  verificationStatus: { type: String, enum: ['VERIFIED', 'NEEDS_REVIEW', 'STALE', 'UNKNOWN'], default: 'UNKNOWN' },
   lastVerifiedAt: { type: Date }
 }, { timestamps: true });
 

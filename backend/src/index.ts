@@ -19,6 +19,7 @@ import './models/Career.js';
 import './models/Exam.js';
 import './models/Trade.js';
 import './models/JobRole.js';
+import './models/CareerProgression.js';
 import './models/Industry.js';
 import './models/Skill.js';
 import './models/Certification.js';
@@ -74,6 +75,8 @@ import studentRoadmapRoutes from './routes/studentRoadmapRoutes.js';
 import educationGraphRoutes from './routes/educationGraphRoutes.js';
 import trustRoutes from './routes/trustRoutes.js';
 import schoolRoutes from './routes/schoolRoutes.js';
+import recommendationRoutes from './routes/recommendationRoutes.js';
+import studentIntelligenceRoutes from './routes/studentIntelligenceRoutes.js';
 import { getPathwayTree, getPathwayStats, getFilteredPathways } from './controllers/pathwayController.js';
 
 // Middleware
@@ -154,6 +157,8 @@ app.use('/api/subject-combinations', subjectCombinationRoutes);
   app.use('/api/education-paths', educationGraphRoutes);
   app.use('/api/trust', trustRoutes);
   app.use('/api/school', schoolRoutes);
+  app.use('/api/recommendations', recommendationRoutes);
+  app.use('/api/student/intelligence', studentIntelligenceRoutes);
 
 // Public Catalog API
 app.get('/api/education-catalog', getPathwayTree);

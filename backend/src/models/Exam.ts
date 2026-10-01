@@ -21,6 +21,10 @@ export interface IExam extends Document {
   conducting_body: string;
   conducting_body_id?: string;
   
+  scopeType?: 'NATIONAL' | 'STATE' | 'UNIVERSITY' | 'INSTITUTION' | 'PROFESSIONAL' | 'OTHER';
+  scopeName?: string;
+  academicYear?: string;
+  
   state?: string;
   applicable_states?: string[];
   
@@ -43,6 +47,8 @@ export interface IExam extends Document {
   
   exam_mode: string[];
   applicationMode?: string[];
+  applicationDates?: string[];
+  examDates?: string[];
   exam_frequency: string;
   duration?: string;
   fees?: string;
@@ -52,7 +58,9 @@ export interface IExam extends Document {
   syllabus_url?: string;
   admit_card_url?: string;
   result_url?: string;
+  resultInformation?: string;
   counselling_url?: string;
+  counselling_process?: string;
   
   target_courses: string[];
   target_degrees: string[];
@@ -107,6 +115,14 @@ const ExamSchema = new Schema(
     state: { type: String, default: 'All India' },
     applicable_states: [{ type: String }],
     
+    scopeType: { 
+      type: String, 
+      enum: ['NATIONAL', 'STATE', 'UNIVERSITY', 'INSTITUTION', 'PROFESSIONAL', 'OTHER'],
+      default: 'NATIONAL'
+    },
+    scopeName: { type: String },
+    academicYear: { type: String },
+    
     official_website: { type: String },
     official_application_url: { type: String },
     official_information_url: { type: String },
@@ -126,6 +142,8 @@ const ExamSchema = new Schema(
     
     exam_mode: [{ type: String }],
     applicationMode: [{ type: String }],
+    applicationDates: [{ type: String }],
+    examDates: [{ type: String }],
     exam_frequency: { type: String },
     duration: { type: String },
     fees: { type: String },
@@ -135,7 +153,9 @@ const ExamSchema = new Schema(
     syllabus_url: { type: String },
     admit_card_url: { type: String },
     result_url: { type: String },
+    resultInformation: { type: String },
     counselling_url: { type: String },
+    counselling_process: { type: String },
     
     target_courses: [{ type: String }],
     target_degrees: [{ type: String }],

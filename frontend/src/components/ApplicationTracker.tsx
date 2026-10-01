@@ -18,7 +18,9 @@ export default function ApplicationTracker() {
           const res = await getSavedJobs();
           setSavedJobs(res.data || []);
         } else {
-          const token = await currentUser?.getIdToken();
+          const token = typeof (currentUser as any)?.getIdToken === 'function' 
+            ? await (currentUser as any)?.getIdToken() 
+            : localStorage.getItem('token');
           const res = await fetch('/api/scholarships/applications', {
             headers: { Authorization: `Bearer ${token}` }
           });

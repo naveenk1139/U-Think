@@ -191,6 +191,11 @@ export interface StructuredExam {
     exam_type: string;
     ownership: string;
     conducting_body: string;
+    
+    scopeType?: 'NATIONAL' | 'STATE' | 'UNIVERSITY' | 'INSTITUTION' | 'PROFESSIONAL' | 'OTHER';
+    scopeName?: string;
+    academicYear?: string;
+    
     state?: string;
     applicable_states?: string[];
     official_website?: string;
@@ -207,10 +212,12 @@ export interface StructuredExam {
     exam_mode: string[];
     exam_frequency: string;
     exam_pattern?: string;
+    subjects?: string[];
     syllabus_url?: string;
     admit_card_url?: string;
     result_url?: string;
     counselling_url?: string;
+    counselling_process?: string;
     target_courses: string[];
     target_degrees: string[];
     target_institutions?: string[];

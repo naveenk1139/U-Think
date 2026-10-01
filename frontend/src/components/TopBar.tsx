@@ -105,7 +105,7 @@ export default function TopBar() {
         <div className="flex items-center gap-3 cursor-pointer shrink-0" onClick={() => navigate('/')}>
           <img 
             src="/logo.png" 
-            alt="6 ASTRA Logo" 
+            alt="U-Think Logo" 
             className="h-10 w-auto object-contain"
             onError={(e) => {
               const target = e.target as HTMLImageElement;
@@ -115,7 +115,7 @@ export default function TopBar() {
           />
           <div className="flex flex-col hidden sm:flex">
             <span className="text-lg font-black font-sans tracking-tight leading-none">
-              6 ASTRA
+              U-Think
             </span>
             <span className="text-[10px] text-gray-400 font-medium">
               AI-Powered Education & Career Guidance

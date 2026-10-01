@@ -59,26 +59,6 @@ export default function After10thMap() {
     return 'bg-gray-50 border-gray-100';
   };
 
-  const getPathwayFeatures = (slug: string) => {
-    if (slug.includes('puc')) return ['Science', 'Commerce', 'Arts / Humanities'];
-    if (slug.includes('diploma')) return ['Engineering & Technology', 'Paramedical / Allied Health', 'Commercial / Management', 'Other Diploma Programs'];
-    if (slug.includes('it-polytechnic') || slug.includes('iti')) return ['Engineering Trades', 'Non-Engineering Trades', 'Craftsmen Training', 'Industry-oriented Programs'];
-    if (slug.includes('paramedical')) return ['Healthcare Support', 'Medical Technology', 'Allied Health Sciences', 'Community Health'];
-    if (slug.includes('vocational')) return ['Skill-based Short-term Programs', 'Job-oriented Training', 'Government & Private Programs', 'Multiple Trade Options'];
-    if (slug.includes('apprenticeship')) return ['On-the-job Training', 'Industry Collaboration', 'Stipend Based Programs', 'Employment Opportunities'];
-    return [];
-  };
-
-  const getPathwayDuration = (slug: string) => {
-    if (slug.includes('puc')) return '2 Years (11th and 12th)';
-    if (slug.includes('diploma')) return '3 Years (Varies by course)';
-    if (slug.includes('it-polytechnic') || slug.includes('iti')) return '1 - 2 Years';
-    if (slug.includes('paramedical')) return '2 - 3 Years';
-    if (slug.includes('vocational')) return '6 Months - 2 Years';
-    if (slug.includes('apprenticeship')) return '6 Months - 2 Years';
-    return 'Varies';
-  };
-
   const getPathwayActionText = (slug: string) => {
     if (slug.includes('diploma')) return 'Explore Diploma Courses';
     if (slug.includes('it-polytechnic') || slug.includes('iti')) return 'Explore IT / Polytechnic';
@@ -90,9 +70,15 @@ export default function After10thMap() {
     return `/pathways/after-10th/${slug}`;
   };
 
-  // Enforce specific order: PUC, Diploma, IT, Paramedical, Vocational, Apprenticeship
+  // First, get the prioritized existing pathways in order
   const orderedSlugs = ['puc-11th-12th', 'diploma', 'it-polytechnic', 'paramedical-allied-health', 'vocational-education', 'apprenticeship-skill-training'];
+  
+  // Create an array with all the ordered ones first
   const orderedPathways = orderedSlugs.map(slug => pathways.find(p => p.slug === slug)).filter(Boolean) as PathwayData[];
+  
+  // Then append any extra pathways fetched from the database that are NOT in the initial 6
+  const extraPathways = pathways.filter(p => !orderedSlugs.includes(p.slug));
+  const allPathwaysToDisplay = [...orderedPathways, ...extraPathways];
 
   return (
     <div className="w-full bg-[#F7F9FC] min-h-screen font-sans pb-20">
@@ -120,11 +106,11 @@ export default function After10thMap() {
 
             {/* Pathways Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {orderedPathways.map((pathway) => {
+              {allPathwaysToDisplay.map((pathway) => {
                 const icon = getPathwayIcon(pathway.slug);
                 const bgClass = getPathwayBg(pathway.slug);
-                const features = getPathwayFeatures(pathway.slug);
-                const durationText = getPathwayDuration(pathway.slug);
+                const features = pathway.streams?.slice(0, 4).map(s => s.name) || ['Specialized Curriculum', 'Industry Recognized'];
+                const durationText = pathway.duration || 'Duration Varies';
                 const actionText = pathway.slug.includes('puc') ? 'Explore Streams' : getPathwayActionText(pathway.slug);
                 
                 return (

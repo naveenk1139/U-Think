@@ -51,6 +51,7 @@ export interface ICollege extends Document {
   admissionLink?: string;
   entranceExams: string[];
   acceptedExamsRef?: mongoose.Types.ObjectId[];
+  offeredCoursesRef?: mongoose.Types.ObjectId[];
   offeredBranchesRef?: mongoose.Types.ObjectId[];
   eligibility?: string;
   fees?: {
@@ -143,6 +144,7 @@ const CollegeSchema: Schema = new Schema({
   admissionLink: { type: String },
   entranceExams: [{ type: String }],
   acceptedExamsRef: [{ type: Schema.Types.ObjectId, ref: 'Exam' }],
+  offeredCoursesRef: [{ type: Schema.Types.ObjectId, ref: 'Course' }],
   offeredBranchesRef: [{ type: Schema.Types.ObjectId, ref: 'Branch' }],
   eligibility: { type: String },
   fees: {
@@ -178,7 +180,7 @@ const CollegeSchema: Schema = new Schema({
   sourceName: { type: String },
   sourceUrl: { type: String },
   lastVerifiedAt: { type: Date },
-  verificationStatus: { type: String, enum: ['verified', 'unverified', 'stale', 'needs_review', 'partially_verified', 'conflicting'], default: 'unverified' },
+  verificationStatus: { type: String, enum: ['VERIFIED', 'NEEDS_REVIEW', 'STALE', 'UNKNOWN', 'verified', 'unverified', 'stale', 'needs_review', 'partially_verified', 'conflicting'], default: 'UNVERIFIED' },
   isVerified: { type: Boolean, default: false },
 }, { timestamps: true });
 

@@ -121,7 +121,7 @@ export default function CareerAssessment() {
             >
               <div className="text-center mb-12">
                 <h1 className="text-3xl md:text-4xl font-bold mb-4 text-white tracking-tight">What is your current education level?</h1>
-                <p className="text-gray-400 text-sm md:text-base">This helps 6 ASTRA personalize your aptitude assessment to your educational context.</p>
+                <p className="text-gray-400 text-sm md:text-base">This helps U-Think personalize your aptitude assessment to your educational context.</p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5 mb-12">

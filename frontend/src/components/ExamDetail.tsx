@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Calendar, ArrowLeft, ExternalLink, ShieldCheck, Clock, AlertCircle, FileText, CheckCircle2, Bookmark, CheckSquare, GraduationCap } from 'lucide-react';
+import { Calendar, ArrowLeft, ExternalLink, ShieldCheck, Clock, AlertCircle, FileText, CheckCircle2, Bookmark, CheckSquare, GraduationCap, Building, ChevronRight } from 'lucide-react';
 import { StructuredExam, ExamYear } from '../types';
 import { getExamBySlug, saveExam, unsaveExam, getSavedExams, trackExam } from '../api/examApi';
 
@@ -260,11 +260,70 @@ export default function ExamDetail() {
                <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
                  <GraduationCap className="w-5 h-5 text-purple-600" /> Target Courses
                </h2>
-               <div className="flex flex-wrap gap-2">
+               <div className="flex flex-wrap gap-2 mb-4">
                  {exam.target_courses.map(c => (
                    <span key={c} className="px-3 py-1.5 bg-purple-50 text-purple-700 rounded-lg text-sm font-semibold border border-purple-100">{c}</span>
                  ))}
                </div>
+               <button onClick={() => navigate('/courses')} className="text-sm font-bold text-purple-600 hover:text-purple-800 flex items-center gap-1 mt-2">
+                 Explore Eligible Courses <ChevronRight className="w-4 h-4" />
+               </button>
+            </div>
+          )}
+
+          {/* Exam Pattern & Subjects */}
+          {(exam.exam_pattern || (exam.subjects && exam.subjects.length > 0)) && (
+            <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
+               <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                 <FileText className="w-5 h-5 text-blue-600" /> Exam Pattern & Subjects
+               </h2>
+               {exam.exam_pattern && (
+                 <div className="mb-6">
+                   <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wider mb-2">Pattern Details</h3>
+                   <p className="text-gray-600 whitespace-pre-wrap">{exam.exam_pattern}</p>
+                 </div>
+               )}
+               {exam.subjects && exam.subjects.length > 0 && (
+                 <div>
+                   <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wider mb-2">Required Subjects</h3>
+                   <div className="flex flex-wrap gap-2">
+                     {exam.subjects.map(s => (
+                       <span key={s} className="px-3 py-1.5 bg-gray-100 text-gray-800 rounded-lg text-sm font-medium border border-gray-200">{s}</span>
+                     ))}
+                   </div>
+                 </div>
+               )}
+            </div>
+          )}
+
+          {/* Counselling & Institutions */}
+          {(exam.counselling_process || (exam.target_institutions && exam.target_institutions.length > 0)) && (
+            <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
+               <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                 <Building className="w-5 h-5 text-indigo-600" /> Counselling & Participating Institutions
+               </h2>
+               {exam.counselling_process && (
+                 <div className="mb-6">
+                   <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wider mb-2">Counselling Process</h3>
+                   <p className="text-gray-600 whitespace-pre-wrap">{exam.counselling_process}</p>
+                 </div>
+               )}
+               {exam.target_institutions && exam.target_institutions.length > 0 && (
+                 <div>
+                   <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wider mb-2">Participating Institutions</h3>
+                   <div className="flex flex-wrap gap-2 mb-4">
+                     {exam.target_institutions.slice(0, 10).map(i => (
+                       <span key={i} className="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-lg text-sm font-medium border border-indigo-100">{i}</span>
+                     ))}
+                     {exam.target_institutions.length > 10 && (
+                       <span className="px-3 py-1 bg-gray-50 text-gray-600 rounded-lg text-sm font-medium border border-gray-200">+{exam.target_institutions.length - 10} more</span>
+                     )}
+                   </div>
+                   <button onClick={() => navigate(`/colleges?examId=${exam._id}`)} className="text-sm font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1">
+                     View All Colleges <ChevronRight className="w-4 h-4" />
+                   </button>
+                 </div>
+               )}
             </div>
           )}
         </div>
@@ -336,7 +395,10 @@ export default function ExamDetail() {
              <div className="space-y-3">
                {isValidUrl(exam.official_website) ? (
                  <a href={exam.official_website} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-3 rounded-xl border border-gray-100 hover:border-blue-200 hover:bg-blue-50 transition-colors group">
-                    <span className="font-semibold text-gray-700 group-hover:text-blue-700">Official Website</span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold text-gray-700 group-hover:text-blue-700">Official Website</span>
+                      {exam.verification_status === 'VERIFIED' && <span title="Verified Link"><ShieldCheck className="w-4 h-4 text-emerald-500" /></span>}
+                    </div>
                     <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-blue-600" />
                  </a>
                ) : (
@@ -346,31 +408,46 @@ export default function ExamDetail() {
                )}
                {exam.official_application_url && (
                  <a href={exam.official_application_url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-3 rounded-xl border border-gray-100 hover:border-blue-200 hover:bg-blue-50 transition-colors group">
-                    <span className="font-semibold text-gray-700 group-hover:text-blue-700">Application Portal</span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold text-gray-700 group-hover:text-blue-700">Application Portal</span>
+                      {exam.verification_status === 'VERIFIED' && <span title="Verified Link"><ShieldCheck className="w-4 h-4 text-emerald-500" /></span>}
+                    </div>
                     <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-blue-600" />
                  </a>
                )}
                {exam.officialNotificationUrl && (
                  <a href={exam.officialNotificationUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-3 rounded-xl border border-gray-100 hover:border-blue-200 hover:bg-blue-50 transition-colors group">
-                    <span className="font-semibold text-gray-700 group-hover:text-blue-700">Official Notification</span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold text-gray-700 group-hover:text-blue-700">Official Notification</span>
+                      {exam.verification_status === 'VERIFIED' && <span title="Verified Link"><ShieldCheck className="w-4 h-4 text-emerald-500" /></span>}
+                    </div>
                     <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-blue-600" />
                  </a>
                )}
                {exam.syllabus_url && (
                  <a href={exam.syllabus_url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-3 rounded-xl border border-gray-100 hover:border-blue-200 hover:bg-blue-50 transition-colors group">
-                    <span className="font-semibold text-gray-700 group-hover:text-blue-700">Official Syllabus</span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold text-gray-700 group-hover:text-blue-700">Official Syllabus</span>
+                      {exam.verification_status === 'VERIFIED' && <span title="Verified Link"><ShieldCheck className="w-4 h-4 text-emerald-500" /></span>}
+                    </div>
                     <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-blue-600" />
                  </a>
                )}
                {exam.admit_card_url && (
                  <a href={exam.admit_card_url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-3 rounded-xl border border-gray-100 hover:border-blue-200 hover:bg-blue-50 transition-colors group">
-                    <span className="font-semibold text-gray-700 group-hover:text-blue-700">Download Admit Card</span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold text-gray-700 group-hover:text-blue-700">Download Admit Card</span>
+                      {exam.verification_status === 'VERIFIED' && <span title="Verified Link"><ShieldCheck className="w-4 h-4 text-emerald-500" /></span>}
+                    </div>
                     <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-blue-600" />
                  </a>
                )}
                {exam.result_url && (
                  <a href={exam.result_url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-3 rounded-xl border border-gray-100 hover:border-blue-200 hover:bg-blue-50 transition-colors group">
-                    <span className="font-semibold text-gray-700 group-hover:text-blue-700">Check Results</span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold text-gray-700 group-hover:text-blue-700">Check Results</span>
+                      {exam.verification_status === 'VERIFIED' && <span title="Verified Link"><ShieldCheck className="w-4 h-4 text-emerald-500" /></span>}
+                    </div>
                     <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-blue-600" />
                  </a>
                )}

@@ -70,7 +70,13 @@ export interface BranchData {
   careerOpportunities?: string[];
   exampleInstitutions?: string[];
   requiredSkills?: string[];
-  relatedCareers: { _id: string; name: string; slug: string }[];
+  relatedCareers: { 
+    _id: string; 
+    name: string; 
+    slug: string;
+    skillRefs?: { _id: string; name: string }[];
+    jobRoleRefs?: { _id: string; title: string }[];
+  }[];
   relatedExams: { _id: string; name: string; slug: string }[];
   higherStudies: { _id: string; name: string; slug: string }[];
   furtherStudies?: { _id: string; name: string; slug: string }[];

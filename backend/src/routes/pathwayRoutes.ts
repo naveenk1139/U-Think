@@ -35,7 +35,13 @@ router.get('/slug/:slug', async (req: Request, res: Response) => {
     
     // Fetch branches for these courses
     const courseIds = courses.map(c => c._id);
-    const branches = await Branch.find({ courseId: { $in: courseIds }, active: true }).sort({ order: 1 }).lean();
+    const branches = await Branch.find({ courseId: { $in: courseIds }, active: true })
+      .populate({
+        path: 'relatedCareers',
+        populate: { path: 'skillRefs' }
+      })
+      .sort({ order: 1 })
+      .lean();
 
     // Map branches to courses
     const coursesWithBranches = courses.map(c => ({

@@ -14,7 +14,32 @@ export interface ICourse extends Document {
   description?: string;
   subjects?: string[];
   eligibleCombinations?: mongoose.Types.ObjectId[];
-  higherStudyArea?: string;
+  shortName?: string;
+  courseType?: string;
+  degreeType?: string;
+  discipline?: string;
+  mode?: string[];
+  minimumMarks?: string;
+  admissionRoute?: string[];
+  entranceExams?: mongoose.Types.ObjectId[];
+  boardsAccepted?: mongoose.Types.ObjectId[];
+  states?: mongoose.Types.ObjectId[];
+  academicYears?: mongoose.Types.ObjectId[];
+  institutions?: mongoose.Types.ObjectId[];
+  branches?: mongoose.Types.ObjectId[];
+  specializations?: mongoose.Types.ObjectId[];
+  curriculum?: string;
+  semesterStructure?: string;
+  skills?: mongoose.Types.ObjectId[];
+  projects?: mongoose.Types.ObjectId[];
+  internships?: mongoose.Types.ObjectId[];
+  careerLinks?: mongoose.Types.ObjectId[];
+  jobRoles?: mongoose.Types.ObjectId[];
+  higherStudyLinks?: mongoose.Types.ObjectId[];
+  alternativeCourses?: mongoose.Types.ObjectId[];
+  relatedCourses?: mongoose.Types.ObjectId[];
+  sourceUrl?: string;
+  verificationStatus?: 'VERIFIED' | 'NEEDS_REVIEW' | 'STALE' | 'UNKNOWN';
   order: number;
   active: boolean;
   createdAt: Date;
@@ -36,6 +61,32 @@ const CourseSchema: Schema = new Schema({
   subjects: [{ type: String }],
   eligibleCombinations: [{ type: Schema.Types.ObjectId, ref: 'SubjectCombination' }],
   higherStudyArea: { type: String },
+  shortName: { type: String },
+  courseType: { type: String },
+  degreeType: { type: String },
+  discipline: { type: String },
+  mode: [{ type: String }],
+  minimumMarks: { type: String },
+  admissionRoute: [{ type: String }],
+  entranceExams: [{ type: Schema.Types.ObjectId, ref: 'Exam' }],
+  boardsAccepted: [{ type: Schema.Types.ObjectId, ref: 'Board' }],
+  states: [{ type: Schema.Types.ObjectId, ref: 'State' }],
+  academicYears: [{ type: Schema.Types.ObjectId, ref: 'AcademicYear' }],
+  institutions: [{ type: Schema.Types.ObjectId, ref: 'College' }],
+  branches: [{ type: Schema.Types.ObjectId, ref: 'Branch' }],
+  specializations: [{ type: Schema.Types.ObjectId, ref: 'Specialization' }],
+  curriculum: { type: String },
+  semesterStructure: { type: String },
+  skills: [{ type: Schema.Types.ObjectId, ref: 'Skill' }],
+  projects: [{ type: Schema.Types.ObjectId, ref: 'Project' }],
+  internships: [{ type: Schema.Types.ObjectId, ref: 'Internship' }],
+  careerLinks: [{ type: Schema.Types.ObjectId, ref: 'Career' }],
+  jobRoles: [{ type: Schema.Types.ObjectId, ref: 'JobRole' }],
+  higherStudyLinks: [{ type: Schema.Types.ObjectId, ref: 'Course' }],
+  alternativeCourses: [{ type: Schema.Types.ObjectId, ref: 'Course' }],
+  relatedCourses: [{ type: Schema.Types.ObjectId, ref: 'Course' }],
+  sourceUrl: { type: String },
+  verificationStatus: { type: String, enum: ['VERIFIED', 'NEEDS_REVIEW', 'STALE', 'UNKNOWN'], default: 'UNKNOWN' },
   order: { type: Number, default: 0 },
   active: { type: Boolean, default: true },
 }, { timestamps: true });

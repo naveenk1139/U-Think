@@ -373,9 +373,9 @@ export const NotificationSettings = () => {
   });
 
   const [channels, setChannels] = useState({
-    email: currentUser?.settings?.notifications?.channels?.email ?? true,
-    sms: currentUser?.settings?.notifications?.channels?.sms ?? false,
-    inApp: currentUser?.settings?.notifications?.channels?.inApp ?? true,
+    email: (currentUser?.settings?.notifications as any)?.channels?.email ?? true,
+    sms: (currentUser?.settings?.notifications as any)?.channels?.sms ?? false,
+    inApp: (currentUser?.settings?.notifications as any)?.channels?.inApp ?? true,
   });
 
   const [loading, setLoading] = useState(false);

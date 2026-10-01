@@ -12,6 +12,13 @@ export interface IStream extends Document {
   electives?: string[];
   examDates?: Map<string, string>;
   icon?: string;
+  boardId?: mongoose.Types.ObjectId;
+  stateId?: mongoose.Types.ObjectId;
+  academicYearId?: mongoose.Types.ObjectId;
+  educationLevelId?: mongoose.Types.ObjectId;
+  source?: string;
+  verificationStatus?: 'VERIFIED' | 'NEEDS_REVIEW' | 'STALE' | 'UNKNOWN';
+  lastVerifiedAt?: Date;
   order: number;
   active: boolean;
   createdAt: Date;
@@ -30,9 +37,18 @@ const StreamSchema: Schema = new Schema({
   electives: [{ type: String }],
   examDates: { type: Map, of: String },
   icon: { type: String },
+  boardId: { type: Schema.Types.ObjectId, ref: 'Board' },
+  stateId: { type: Schema.Types.ObjectId, ref: 'State' },
+  academicYearId: { type: Schema.Types.ObjectId, ref: 'AcademicYear' },
+  educationLevelId: { type: Schema.Types.ObjectId, ref: 'EducationLevel' },
+  source: { type: String },
+  verificationStatus: { type: String, enum: ['VERIFIED', 'NEEDS_REVIEW', 'STALE', 'UNKNOWN'], default: 'UNKNOWN' },
+  lastVerifiedAt: { type: Date },
   order: { type: Number, default: 0 },
   active: { type: Boolean, default: true },
 }, { timestamps: true });
+
+StreamSchema.index({ boardId: 1, stateId: 1, academicYearId: 1 });
 
 StreamSchema.index({ pathwayId: 1 });
 StreamSchema.index({ slug: 1 });

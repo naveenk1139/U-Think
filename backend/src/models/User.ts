@@ -17,6 +17,46 @@ export interface IAcademicProfile {
   source?: string;
 }
 
+export interface IStructuredSkill {
+  skillName: string;
+  skillLevel: 'Beginner' | 'Intermediate' | 'Advanced' | 'Expert';
+}
+
+export interface IStudentIntelligence {
+  // Education Stage
+  educationStage?: string; // 10th, 11th, 12th, Diploma, ITI, UG, PG, Working
+  boardOrUniversity?: string;
+  courseOrDegree?: string;
+  branchOrSpecialization?: string;
+  currentYear?: number;
+  currentSemester?: number;
+
+  // Academic Performance
+  cgpa?: number;
+  backlogs?: number;
+  subjectStrengths?: string[];
+  subjectWeaknesses?: string[];
+
+  // Extracurricular
+  structuredSkills?: IStructuredSkill[];
+  projectCount?: number;
+  internshipCount?: number;
+  certificationCount?: number;
+  hackathonsAttended?: number;
+  
+  // Preferences
+  higherStudyGoal?: string;
+  budgetRange?: string;
+  institutionPreference?: 'Government' | 'Private' | 'Any';
+  entranceExamInterest?: string[];
+  learningPreferences?: string[];
+  
+  // Computed (from AI/Rule Engine)
+  careerReadinessScore?: number;
+  academicRiskLevel?: 'Low' | 'Medium' | 'High';
+  opportunityReadiness?: number;
+}
+
 export interface IUser extends Document {
   _id: mongoose.Types.ObjectId;
   name: string;
@@ -52,6 +92,8 @@ export interface IUser extends Document {
   preferredLocation?: string[];
   profileCompletion?: number;
   academicProfile?: IAcademicProfile;
+  intelligenceProfile?: IStudentIntelligence;
+  preferredLanguage?: string;
   
   settings?: {
     notifications?: {
@@ -170,6 +212,39 @@ const UserSchema = new Schema<IUser>(
       lastUpdated: { type: Date },
       source: { type: String, default: 'MANUAL' }
     },
+    intelligenceProfile: {
+      educationStage: { type: String },
+      boardOrUniversity: { type: String },
+      courseOrDegree: { type: String },
+      branchOrSpecialization: { type: String },
+      currentYear: { type: Number },
+      currentSemester: { type: Number },
+      
+      cgpa: { type: Number },
+      backlogs: { type: Number, default: 0 },
+      subjectStrengths: [{ type: String }],
+      subjectWeaknesses: [{ type: String }],
+      
+      structuredSkills: [{
+        skillName: { type: String },
+        skillLevel: { type: String, enum: ['Beginner', 'Intermediate', 'Advanced', 'Expert'] }
+      }],
+      projectCount: { type: Number, default: 0 },
+      internshipCount: { type: Number, default: 0 },
+      certificationCount: { type: Number, default: 0 },
+      hackathonsAttended: { type: Number, default: 0 },
+      
+      higherStudyGoal: { type: String },
+      budgetRange: { type: String },
+      institutionPreference: { type: String, enum: ['Government', 'Private', 'Any'], default: 'Any' },
+      entranceExamInterest: [{ type: String }],
+      learningPreferences: [{ type: String }],
+      
+      careerReadinessScore: { type: Number, min: 0, max: 100 },
+      academicRiskLevel: { type: String, enum: ['Low', 'Medium', 'High'] },
+      opportunityReadiness: { type: Number, min: 0, max: 100 }
+    },
+    preferredLanguage: { type: String, default: 'en' },
     settings: {
       notifications: {
         examReminders: { type: Boolean, default: true },

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Search, BookOpen, GraduationCap, Award, Building, Bookmark, Filter, ChevronDown, CheckCircle2, ChevronRight, HelpCircle, Star, Sparkles, X, Loader2 } from 'lucide-react';
+import { Search, BookOpen, GraduationCap, Award, Building, Bookmark, Filter, ChevronDown, CheckCircle2, ChevronRight, HelpCircle, Star, Sparkles, X, Loader2, ShieldCheck } from 'lucide-react';
 import { StructuredExam } from '../types';
 import { getExams, getExamRecommendations, saveExam, unsaveExam, getSavedExams, getExamStates, getExamCategories, getUpcomingExams } from '../api/examApi';
 import ExamComparisonModal from './ExamComparisonModal';
@@ -229,10 +229,32 @@ export default function ExamsDirectory({ initialTab = 'exams' }: ExamsDirectoryP
         </div>
         
         <div className="space-y-3 mb-6 flex-grow">
+           {exam.verification_status && (
+             <div className="flex items-center gap-1.5 mb-2 bg-emerald-50 px-2 py-1 rounded-md w-fit border border-emerald-100">
+               <ShieldCheck className={`w-3.5 h-3.5 ${exam.verification_status === 'VERIFIED' ? 'text-emerald-500' : 'text-gray-400'}`} />
+               <span className={`text-[10px] font-bold uppercase tracking-wider ${exam.verification_status === 'VERIFIED' ? 'text-emerald-700' : 'text-gray-600'}`}>
+                 {exam.verification_status === 'VERIFIED' ? 'Verified Source' : 'Unverified'}
+               </span>
+             </div>
+           )}
            <div>
              <span className="text-xs font-semibold text-gray-500 uppercase">Conducting Body</span>
              <p className="text-sm font-medium text-gray-800 line-clamp-1">{exam.conducting_body}</p>
            </div>
+           {exam.scopeType && (
+             <div>
+               <span className="text-xs font-semibold text-gray-500 uppercase">Scope</span>
+               <p className="text-sm font-medium text-gray-800">{exam.scopeType} {exam.scopeName ? `- ${exam.scopeName}` : ''}</p>
+             </div>
+           )}
+           {(exam.target_degrees?.length > 0 || exam.target_courses?.length > 0) && (
+             <div>
+               <span className="text-xs font-semibold text-gray-500 uppercase">Eligible Programs</span>
+               <p className="text-sm font-medium text-gray-800 line-clamp-1">
+                 {exam.target_degrees?.length > 0 ? exam.target_degrees.join(', ') : exam.target_courses?.join(', ')}
+               </p>
+             </div>
+           )}
            <div>
              <span className="text-xs font-semibold text-gray-500 uppercase">Status</span>
              <p className="text-sm font-medium text-emerald-600 flex items-center gap-1"><CheckCircle2 className="w-3 h-3"/> {exam.status}</p>

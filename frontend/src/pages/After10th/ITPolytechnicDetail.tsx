@@ -3,8 +3,8 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getPathwayBySlug, PathwayData } from '../../api/pathwayApi';
 import { 
   ArrowLeft, Clock, GraduationCap, Share2, Heart, Wrench, Building2, 
-  ChevronRight, BookOpen, Settings, Settings2, ShieldCheck, Map,
-  ArrowRight, CheckCircle, Target
+  ChevronRight, BookOpen, Settings, Settings2, ShieldCheck, Map as MapIcon,
+  ArrowRight, CheckCircle, Target, Briefcase
 } from 'lucide-react';
 
 
@@ -16,7 +16,7 @@ const getIconForStream = (slug: string) => {
   if (slug.includes('civil')) return <Building2 className="w-6 h-6 text-emerald-500" />;
   if (slug.includes('design')) return <Settings2 className="w-6 h-6 text-purple-500" />;
   if (slug.includes('chemical')) return <ShieldCheck className="w-6 h-6 text-fuchsia-500" />;
-  return <Map className="w-6 h-6 text-gray-500" />;
+  return <MapIcon className="w-6 h-6 text-gray-500" />;
 };
 
 export default function ITPolytechnicDetail() {
@@ -35,7 +35,7 @@ export default function ITPolytechnicDetail() {
       try {
         const [iti, diploma] = await Promise.all([
           getPathwayBySlug('it-polytechnic'),
-          getPathwayBySlug('diploma-polytechnic')
+          getPathwayBySlug('diploma')
         ]);
         setItiPathway(iti);
         setDiplomaPathway(diploma);
@@ -93,6 +93,24 @@ export default function ITPolytechnicDetail() {
   const engineeringTrades = itiPathway?.streams.find(s => s.slug.includes('engineering'))?.courses || [];
   const nonEngineeringTrades = itiPathway?.streams.find(s => s.slug.includes('non-engineering'))?.courses || [];
   const polytechnicStreams = diplomaPathway?.streams || [];
+
+  const uniqueCareers = React.useMemo(() => {
+    const careersMap = new Map<string, any>();
+    const allStreams = [...(itiPathway?.streams || []), ...(diplomaPathway?.streams || [])];
+    
+    allStreams.forEach(stream => {
+      stream.courses?.forEach(course => {
+        course.branches?.forEach(branch => {
+          branch.relatedCareers?.forEach(career => {
+            if (!careersMap.has(career.name)) {
+              careersMap.set(career.name, career);
+            }
+          });
+        });
+      });
+    });
+    return Array.from(careersMap.values());
+  }, [itiPathway, diplomaPathway]);
 
   return (
     <div className="bg-[#F7F9FC] min-h-screen font-sans pb-20">
@@ -388,8 +406,58 @@ export default function ITPolytechnicDetail() {
               </div>
             )}
 
+            {/* Careers Tab Content */}
+            {activeTab === 'careers' && (
+              <div className="animate-in fade-in duration-300">
+                <div className="flex items-center justify-between mb-5">
+                  <div>
+                    <h2 className="text-xl font-extrabold text-[#0B1F44] tracking-tight">Careers after ITI & Polytechnic</h2>
+                    <p className="text-[13px] font-medium text-gray-600">Explore career opportunities and roles based on your chosen path.</p>
+                  </div>
+                </div>
+                {uniqueCareers.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {uniqueCareers.map((career: any) => (
+                      <div key={career._id} className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm hover:border-blue-300 transition-colors cursor-pointer" onClick={() => navigate(`/jobs/${career.slug || career._id}`)}>
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                            <Briefcase className="w-5 h-5"/>
+                          </div>
+                          <h3 className="text-sm font-black text-gray-900 line-clamp-2 leading-tight">{career.name}</h3>
+                        </div>
+                        
+                        {career.skillRefs && career.skillRefs.length > 0 && (
+                          <div className="mt-3">
+                            <div className="text-[10px] font-bold text-gray-500 mb-1.5 uppercase tracking-wide">Key Skills</div>
+                            <div className="flex flex-wrap gap-1.5">
+                              {career.skillRefs.slice(0, 3).map((skill: any) => (
+                                <span key={skill._id} className="bg-gray-100 text-gray-700 text-[10px] font-bold px-2 py-1 rounded-md">
+                                  {skill.name}
+                                </span>
+                              ))}
+                              {career.skillRefs.length > 3 && (
+                                <span className="bg-gray-50 text-gray-500 text-[10px] font-bold px-2 py-1 rounded-md border border-gray-200">
+                                  +{career.skillRefs.length - 3} more
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="bg-white border border-gray-200 rounded-[16px] p-12 text-center shadow-sm">
+                    <Briefcase className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+                    <h3 className="text-gray-900 font-bold mb-1">No careers found</h3>
+                    <p className="text-gray-500 text-sm font-medium">Careers data will be updated soon.</p>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Other Generic Tab Placeholders */}
-            {['branches', 'specializations', 'subjects', 'admission', 'careers', 'colleges', 'compare'].includes(activeTab) && (
+            {['branches', 'specializations', 'subjects', 'admission', 'colleges', 'compare'].includes(activeTab) && (
                <div className="bg-white rounded-2xl p-12 text-center border border-gray-200 shadow-sm animate-in fade-in">
                  <ShieldCheck className="w-12 h-12 text-gray-300 mx-auto mb-4" />
                  <h2 className="text-lg font-black text-gray-900 mb-2 capitalize">{activeTab} Info</h2>

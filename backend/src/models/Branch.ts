@@ -18,7 +18,17 @@ export interface IBranch extends Document {
   relatedExams?: mongoose.Types.ObjectId[];
   higherStudies?: mongoose.Types.ObjectId[];
   furtherStudies?: mongoose.Types.ObjectId[]; // PG courses
-  requiredSkills?: string[];
+  discipline?: string;
+  coreSubjects?: string[];
+  curriculum?: string;
+  specializationLinks?: mongoose.Types.ObjectId[];
+  projects?: mongoose.Types.ObjectId[];
+  internships?: mongoose.Types.ObjectId[];
+  institutions?: mongoose.Types.ObjectId[];
+  jobRoles?: mongoose.Types.ObjectId[];
+  source?: string;
+  verificationStatus?: 'VERIFIED' | 'NEEDS_REVIEW' | 'STALE' | 'UNKNOWN';
+  lastVerifiedAt?: Date;
   order: number;
   active: boolean;
   createdAt: Date;
@@ -44,6 +54,17 @@ const BranchSchema: Schema = new Schema({
   higherStudies: [{ type: Schema.Types.ObjectId, ref: 'Course' }],
   furtherStudies: [{ type: Schema.Types.ObjectId, ref: 'Course' }],
   requiredSkills: [{ type: String }],
+  discipline: { type: String },
+  coreSubjects: [{ type: String }],
+  curriculum: { type: String },
+  specializationLinks: [{ type: Schema.Types.ObjectId, ref: 'Specialization' }],
+  projects: [{ type: Schema.Types.ObjectId, ref: 'Project' }],
+  internships: [{ type: Schema.Types.ObjectId, ref: 'Internship' }],
+  institutions: [{ type: Schema.Types.ObjectId, ref: 'College' }],
+  jobRoles: [{ type: Schema.Types.ObjectId, ref: 'JobRole' }],
+  source: { type: String },
+  verificationStatus: { type: String, enum: ['VERIFIED', 'NEEDS_REVIEW', 'STALE', 'UNKNOWN'], default: 'UNKNOWN' },
+  lastVerifiedAt: { type: Date },
   order: { type: Number, default: 0 },
   active: { type: Boolean, default: true },
 }, { timestamps: true });

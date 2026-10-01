@@ -36,7 +36,10 @@ export const getPathwayTree = async (req: Request, res: Response, next: NextFunc
              const ugCoursesWithBranches = await Promise.all(ugCourses.map(async (ugCourse) => {
                // Fetch Branches for UG Course
                const branches = await Branch.find({ courseId: ugCourse._id, active: true })
-                 .populate('relatedCareers')
+                 .populate({
+                   path: 'relatedCareers',
+                   populate: [{ path: 'skillRefs' }, { path: 'jobRoleRefs' }]
+                 })
                  .populate('relatedExams')
                  .populate('higherStudies')
                  .populate('furtherStudies')
@@ -71,7 +74,10 @@ export const getPathwayTree = async (req: Request, res: Response, next: NextFunc
        if (courses && courses.length > 0) {
            const coursesWithDetails = await Promise.all(courses.map(async (course) => {
                const branches = await Branch.find({ courseId: course._id, active: true })
-                   .populate('relatedCareers')
+                   .populate({
+                     path: 'relatedCareers',
+                     populate: [{ path: 'skillRefs' }, { path: 'jobRoleRefs' }]
+                   })
                    .populate('relatedExams')
                    .populate('higherStudies')
                    .populate('furtherStudies')
@@ -91,7 +97,10 @@ export const getPathwayTree = async (req: Request, res: Response, next: NextFunc
        }
        
        const branches = await Branch.find({ streamId: stream._id, active: true })
-           .populate('relatedCareers')
+           .populate({
+             path: 'relatedCareers',
+             populate: [{ path: 'skillRefs' }, { path: 'jobRoleRefs' }]
+           })
            .populate('relatedExams')
            .populate('higherStudies')
            .populate('furtherStudies')

@@ -25,6 +25,7 @@ export interface ICollegeCourse extends Document {
   entranceExamId?: mongoose.Types.ObjectId;
   sourceUrl?: string;
   sourceName?: string;
+  verificationStatus?: 'VERIFIED' | 'NEEDS_REVIEW' | 'STALE' | 'UNKNOWN';
   lastVerifiedAt?: Date;
   currentAvailability?: boolean;
   active: boolean;
@@ -57,6 +58,7 @@ const CollegeCourseSchema: Schema = new Schema({
   entranceExamId: { type: Schema.Types.ObjectId, ref: 'Exam' },
   sourceUrl: { type: String },
   sourceName: { type: String },
+  verificationStatus: { type: String, enum: ['VERIFIED', 'NEEDS_REVIEW', 'STALE', 'UNKNOWN'], default: 'UNKNOWN' },
   lastVerifiedAt: { type: Date },
   currentAvailability: { type: Boolean, default: true },
   active: { type: Boolean, default: true },

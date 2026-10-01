@@ -7,6 +7,11 @@ export interface IJobRole extends Document {
   slug: string;
   description?: string;
   averageSalary?: string;
+  level?: string; // Entry, Mid, Senior
+  skillRefs?: mongoose.Types.ObjectId[];
+  responsibilities?: string[];
+  verificationStatus?: 'VERIFIED' | 'NEEDS_REVIEW' | 'STALE' | 'UNKNOWN';
+  lastVerifiedAt?: Date;
   active: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -19,6 +24,11 @@ const JobRoleSchema: Schema = new Schema({
   slug: { type: String, required: true },
   description: { type: String },
   averageSalary: { type: String },
+  level: { type: String },
+  skillRefs: [{ type: Schema.Types.ObjectId, ref: 'Skill' }],
+  responsibilities: [{ type: String }],
+  verificationStatus: { type: String, enum: ['VERIFIED', 'NEEDS_REVIEW', 'STALE', 'UNKNOWN'], default: 'UNKNOWN' },
+  lastVerifiedAt: { type: Date },
   active: { type: Boolean, default: true },
 }, { timestamps: true });
 

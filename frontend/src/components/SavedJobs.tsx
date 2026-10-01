@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getSavedJobs, removeSavedJob, updateSavedJob, SavedJob } from '../api/savedJobs';
 import { Bookmark, Search, MapPin, Briefcase, ExternalLink, IndianRupee, Loader, Trash2, Calendar, FileEdit, CheckCircle, ChevronDown, Bell } from 'lucide-react';
 import JobDetailsModal from './JobDetailsModal';
 import { Job } from '../types';
 
 export default function SavedJobs() {
+  const navigate = useNavigate();
   const [jobs, setJobs] = useState<SavedJob[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -147,7 +149,7 @@ export default function SavedJobs() {
              Jobs you save from Job Explorer will appear here so you can track your applications.
            </p>
            <button 
-             onClick={() => window.location.href = '/jobs'}
+             onClick={() => navigate('/jobs')}
              className="mt-6 bg-primary hover:bg-primary-hover text-white font-bold py-2.5 px-6 rounded-lg transition-colors"
            >
              Explore Jobs

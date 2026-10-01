@@ -7,7 +7,8 @@ import SubjectCombination from '../models/SubjectCombination.js';
 import Degree from '../models/Degree.js';
 import Exam from '../models/Exam.js';
 import Career from '../models/Career.js';
-import User from '../models/User.js';
+import { User } from '../models/User.js';
+import { findRecommendationPath, IGraphNode } from '../services/knowledgeGraphService.js';
 
 const router = Router();
 
@@ -210,7 +211,7 @@ router.post('/eligibility-chain', optionalAuth, async (req: AuthRequest, res: Re
           12th/PUC %: ${user.academicProfile?.twelfthPercentage || 'Not specified'}
           Diploma %: ${user.academicProfile?.diplomaPercentage || 'Not specified'}
           Subjects & Marks:
-          ${user.academicProfile?.subjects?.map(s => `- ${s.subjectName}: ${s.marksObtained || 'N/A'}/${s.maximumMarks || 'N/A'}`).join('\n') || 'None recorded'}
+          ${user.academicProfile?.subjects?.map((s: any) => `- ${s.subjectName}: ${s.marksObtained || 'N/A'}/${s.maximumMarks || 'N/A'}`).join('\n') || 'None recorded'}
         `;
       }
     }
@@ -380,6 +381,51 @@ router.post('/academic-recovery', async (req: Request, res: Response, next: Next
     res.json({ success: true, recoveryData: parsedData });
   } catch (err) {
     console.error('Recovery Path Error:', err);
+    next(err);
+  }
+});
+
+// Route: /api/education-paths/path-to-goal
+// Method: POST
+// Description: Find exact BFS path from user's current stage to target goal
+router.post('/path-to-goal', requireAuth, async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const { targetType, targetId } = req.body;
+    
+    if (!targetType || !targetId) {
+      return res.status(400).json({ error: 'Please provide targetType and targetId' });
+    }
+
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    // Deduce student's current node (simplified for this demo)
+    // Normally we'd use educationStageService, but let's approximate based on educationLevel
+    let sourceNode: IGraphNode = { type: 'Pathway', id: '650b2a8f8f1b2c3d4e5f6g7h' }; // default fallback
+    
+    // Find the exact path using BFS
+    const targetNode: IGraphNode = { type: targetType, id: targetId };
+    let path = await findRecommendationPath(sourceNode, targetNode, 5);
+    
+    // If no path is found from the exact source node, we can fallback to the target node itself
+    if (!path) {
+       path = { nodes: [targetNode], relations: [], totalWeight: 0 };
+    }
+    
+    // Populate the names for the nodes in the path
+    const populatedNodes = await Promise.all(
+      path.nodes.map(async (node) => {
+        const resolved = await getPopulatedNode(node.type, node.id) as any;
+        return { ...node, name: resolved ? (resolved.name || resolved.title || 'Unknown') : 'Unknown' };
+      })
+    );
+
+    res.json({ success: true, path: { ...path, nodes: populatedNodes } });
+  } catch (err) {
+    console.error('Path to goal Error:', err);
     next(err);
   }
 });

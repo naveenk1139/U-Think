@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { 
   Home, Compass, Building2, BookOpen, Search, Target, LayoutDashboard,
   Users, Award, Brain, Settings, Bell, Heart, CheckCircle, GraduationCap, Briefcase, Bookmark, ArrowRight, User, FileText, Network, Split, ShieldAlert, BadgeCheck, GitMerge, Beaker, Link as LinkIcon, Shuffle, HeartPulse, CalendarClock, IndianRupee, Activity, GitBranch, Map
@@ -8,36 +8,21 @@ import { useAuth } from '../contexts/AuthContext';
 
 export default function Sidebar() {
   const { currentUser } = useAuth();
-  const mainMenuItems = [
+  const navigate = useNavigate();
+    const mainMenuItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
     { icon: Home, label: 'Explore Home', path: '/' },
     { icon: CalendarClock, label: 'Deadline Hub', path: '/deadlines' },
-    { icon: IndianRupee, label: 'Scholarships', path: '/scholarships' },
-    { icon: Target, label: '6 ASTRA Education Tree', path: '/school' },
     { icon: Compass, label: 'Pathways & Streams', path: '/streams' },
     { icon: Building2, label: 'Colleges', path: '/colleges' },
-    { icon: GitMerge, label: 'Admission Simulator', path: '/simulator' },
     { icon: GraduationCap, label: 'Exams & Degrees', path: '/exams' },
-    { icon: BookOpen, label: 'Exam Prep Engine', path: '/exam-prep' },
     { icon: Brain, label: 'Aptitude Assessment', path: '/quiz' },
     { icon: Briefcase, label: 'Job Explorer', path: '/jobs' },
-    { icon: GitBranch, label: 'Career Transition', path: '/career-transition' },
     { icon: Users, label: 'Industry Mentors', path: '/mentorship' },
     { icon: BookOpen, label: 'Professional Courses', path: '/professional-courses' },
-    { icon: Activity, label: 'Scraper Health', path: '/scraper-health' },
   ];
 
     const yourSpaceItems = [
-    { icon: GitMerge, label: 'Dependency Engine', path: '/dependency-engine' },
-    { icon: Beaker, label: 'Subject Simulator', path: '/impact-simulator' },
-    { icon: LinkIcon, label: 'Eligibility Chain', path: '/eligibility-chain' },
-    { icon: Shuffle, label: 'Route Switch Engine', path: '/route-switch' },
-    { icon: HeartPulse, label: 'Recovery Planner', path: '/recovery-planner' },
-    { icon: Compass, label: 'Career GPS', path: '/career-gps' },
-    { icon: Network, label: 'Skill Evidence Graph', path: '/skill-graph' },
-    { icon: Split, label: 'Career Fork Simulator', path: '/career-fork' },
-    { icon: ShieldAlert, label: 'Stability Engine', path: '/stability-engine' },
-    { icon: BadgeCheck, label: 'Career Passport', path: '/career-passport' },
     { icon: Target, label: 'Aptitude Test', path: '/quiz' },
     { icon: FileText, label: 'Academic Documents', path: '/documents/analyze' },
     { icon: Bookmark, label: 'Saved Jobs', path: '/saved-jobs' },
@@ -134,7 +119,7 @@ export default function Sidebar() {
             </p>
             
             <button 
-              onClick={() => window.location.href = '/settings?tab=account'}
+              onClick={() => navigate('/settings?tab=account')}
               className="text-blue-600 hover:text-blue-700 text-[10px] font-bold transition-colors flex items-center gap-1"
             >
               Continue Profile <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />

@@ -23,7 +23,7 @@ export default function MyRoadmap() {
   if (roadmaps.length === 0) return (
     <div className="p-8 max-w-4xl mx-auto text-center mt-20">
       <h2 className="text-2xl font-bold text-slate-800">No Roadmaps Found</h2>
-      <p className="text-slate-600 mt-2">Go to the 6 ASTRA Education Tree, find a Career, and save it to generate your roadmap!</p>
+      <p className="text-slate-600 mt-2">Go to the U-Think Education Tree, find a Career, and save it to generate your roadmap!</p>
     </div>
   );
 

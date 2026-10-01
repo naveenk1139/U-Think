@@ -25,6 +25,23 @@ const PathwayDetail: React.FC = () => {
     fetchDetail();
   }, [slug]);
 
+  const uniqueCareers = React.useMemo(() => {
+    if (!pathway?.streams) return [];
+    const careersMap = new Map<string, any>();
+    pathway.streams.forEach(stream => {
+      stream.courses?.forEach(course => {
+        course.branches?.forEach(branch => {
+          branch.relatedCareers?.forEach(career => {
+            if (!careersMap.has(career.name)) {
+              careersMap.set(career.name, career);
+            }
+          });
+        });
+      });
+    });
+    return Array.from(careersMap.values()).slice(0, 10);
+  }, [pathway]);
+
   if (loading) {
     return (
       <div className="flex justify-center items-center py-32 min-h-screen bg-[#F7F9FC]">
@@ -165,7 +182,7 @@ const PathwayDetail: React.FC = () => {
             </section>
             
             {/* General Info placeholder */}
-            <section className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+            <section className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm mb-8">
                <h2 className="text-base font-black text-gray-900 mb-4">Why Choose {pathway.name}?</h2>
                <p className="text-xs font-medium text-gray-600 leading-relaxed mb-4">
                  Choosing the right educational pathway is critical for your future. The {pathway.name} pathway offers specialized focus, robust career opportunities, and acts as a stepping stone to higher education or immediate employment depending on the stream chosen.
@@ -182,6 +199,45 @@ const PathwayDetail: React.FC = () => {
                  </li>
                </ul>
             </section>
+
+            {/* Top Careers Section */}
+            {uniqueCareers.length > 0 && (
+              <section className="mb-8">
+                <div className="flex items-center justify-between mb-5">
+                  <h2 className="text-xl font-black text-gray-900">Top Careers in {pathway.name}</h2>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {uniqueCareers.map((career: any) => (
+                    <div key={career._id} className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm hover:border-blue-300 transition-colors cursor-pointer" onClick={() => navigate(`/jobs/${career.slug || career._id}`)}>
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                          <Briefcase className="w-5 h-5"/>
+                        </div>
+                        <h3 className="text-sm font-black text-gray-900 line-clamp-2 leading-tight">{career.name}</h3>
+                      </div>
+                      
+                      {career.skillRefs && career.skillRefs.length > 0 && (
+                        <div className="mt-3">
+                          <div className="text-[10px] font-bold text-gray-500 mb-1.5 uppercase tracking-wide">Key Skills</div>
+                          <div className="flex flex-wrap gap-1.5">
+                            {career.skillRefs.slice(0, 3).map((skill: any) => (
+                              <span key={skill._id} className="bg-gray-100 text-gray-700 text-[10px] font-bold px-2 py-1 rounded-md">
+                                {skill.name}
+                              </span>
+                            ))}
+                            {career.skillRefs.length > 3 && (
+                              <span className="bg-gray-50 text-gray-500 text-[10px] font-bold px-2 py-1 rounded-md border border-gray-200">
+                                +{career.skillRefs.length - 3} more
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
 
           </div>
 

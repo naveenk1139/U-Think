@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import ReactMarkdown from 'react-markdown';
+import { useNavigate } from 'react-router-dom';
 
 interface AICounselorModalProps {
   isOpen: boolean;
@@ -28,6 +29,7 @@ interface Conversation {
 
 export default function AICounselorModal({ isOpen, onClose }: AICounselorModalProps) {
   const { currentUser } = useAuth();
+  const navigate = useNavigate();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -225,7 +227,7 @@ export default function AICounselorModal({ isOpen, onClose }: AICounselorModalPr
             <button 
               onClick={() => {
                 onClose();
-                window.location.href = '/settings';
+                navigate('/settings');
               }}
               className="flex items-center gap-2 text-text-secondary hover:text-text-primary text-sm font-medium transition-colors w-full p-2 rounded-lg hover:bg-background-secondary cursor-pointer"
             >
@@ -278,7 +280,7 @@ export default function AICounselorModal({ isOpen, onClose }: AICounselorModalPr
                 <button
                   onClick={() => {
                     onClose();
-                    window.location.href = '/login';
+                    navigate('/login');
                   }}
                   className="bg-primary hover:bg-primary-hover text-white font-bold py-3 px-8 rounded-xl transition-colors shadow-md"
                 >
