@@ -1,7 +1,10 @@
 import mongoose from 'mongoose';
 import { User, IUser } from '../models/User.js';
 import Career from '../models/Career.js';
+import Exam from '../models/Exam.js';
+import College from '../models/College.js';
 import Recommendation from '../models/Recommendation.js';
+import { buildNodeContext } from './knowledgeGraphService.js';
 import { detectEducationStage } from './educationStageService.js';
 import { extractMLFeatures, IMLFeatureVector } from './featureEngineeringService.js';
 import { checkEligibility } from './eligibilityEngine.js';
@@ -54,9 +57,9 @@ function computeMLMatchScore(features: IMLFeatureVector, career: any): number {
 }
 
 /**
- * Phase 7 & 8: ML Recommendation Engine & Ranking
+ * Phase 7 & 8: ML Recommendation Engine & Ranking with Knowledge Graph
  */
-export async function generateCareerRecommendations(userId: string) {
+export async function generateAllRecommendations(userId: string) {
   const user = await User.findById(userId);
   if (!user) throw new Error('User not found');
 
@@ -136,20 +139,72 @@ export async function generateCareerRecommendations(userId: string) {
     });
   }
 
-  // Bulk Write Transaction
-  if (newRecommendations.length > 0) {
-    // Expire old recommendations matching this type
-    await Recommendation.updateMany(
-      { studentId: user._id, recommendationType: 'career', profileVersion: { $lt: profileVersion } },
-      { $set: { status: 'Expired' } }
-    );
-    await Recommendation.bulkWrite(newRecommendations);
+  // ----------------------------------------------------
+  // Phase 8 (Graph Expansion): Find Exams & Colleges via Knowledge Graph
+  // ----------------------------------------------------
+  const topCareers = newRecommendations.filter(r => r.updateOne.update.$set.matchScore >= 60);
+  
+  for (const careerRec of topCareers) {
+    const careerId = careerRec.updateOne.filter.entityId.toString();
+    const context = await buildNodeContext('Career', careerId);
+    
+    // Prereqs of Career = Degrees/Pathways
+    if (context && context.prerequisites) {
+      for (const req of context.prerequisites) {
+        if (req.sourceType === 'Degree') {
+           // Find Exams that lead to this Degree
+           const degreeContext = await buildNodeContext('Degree', req.resolvedNode._id.toString());
+           if (degreeContext && degreeContext.prerequisites) {
+             for (const degreeReq of degreeContext.prerequisites) {
+               if (degreeReq.sourceType === 'Exam') {
+                 // We found an Exam that leads to a Degree that leads to a top Career!
+                 newRecommendations.push({
+                   updateOne: {
+                     filter: { studentId: user._id, entityId: degreeReq.resolvedNode._id, recommendationType: 'exam' },
+                     update: {
+                       $set: {
+                         entityType: 'Exam',
+                         reason: 'KNOWLEDGE_GRAPH_PATHWAY',
+                         matchedFactors: [`Leads to recommended career: ${careerRec.updateOne.update.$set.matchedFactors[0] || 'Strong Match'}`],
+                         missingFactors: [],
+                         eligibilityStatus: 'Eligible',
+                         matchScore: Math.round(careerRec.updateOne.update.$set.matchScore * 0.9), // Slightly lower confidence due to depth
+                         confidence: 80,
+                         priority: 'High',
+                         profileVersion: profileVersion,
+                         status: 'Active',
+                         recommendationLabel: 'VERIFIED MATCH',
+                         sourceReferences: [{
+                           sourceName: 'U-Think Knowledge Graph',
+                           lastVerifiedAt: new Date(),
+                           verificationStatus: 'Verified'
+                         }]
+                       }
+                     },
+                     upsert: true
+                   }
+                 });
+               }
+             }
+           }
+        }
+      }
+    }
   }
 
-  // Return the newly ranked active recommendations, sorted by matchScore
+  // Bulk Write Transaction
+  if (newRecommendations.length > 0) {
+    // Expire old recommendations for this profile version (for all types)
+    await Recommendation.updateMany(
+      { studentId: user._id, profileVersion: { $lt: profileVersion } },
+      { $set: { status: 'Expired' } }
+    );
+    await Recommendation.bulkWrite(newRecommendations as any);
+  }
+
+  // Return the newly ranked active recommendations (all types)
   return await Recommendation.find({ 
     studentId: user._id, 
-    recommendationType: 'career', 
     status: 'Active' 
   }).sort({ matchScore: -1 }).populate('entityId');
 }

@@ -1,6 +1,6 @@
 import { Response } from 'express';
 import { AuthRequest } from '../middleware/authMiddleware.js';
-import { generateCareerRecommendations, explainRecommendation } from '../services/recommendationService.js';
+import { generateAllRecommendations, explainRecommendation } from '../services/recommendationService.js';
 import Recommendation from '../models/Recommendation.js';
 import { User } from '../models/User.js';
 
@@ -12,7 +12,7 @@ export const generateForUser = async (req: AuthRequest, res: Response) => {
     const userId = req.user?.id;
     if (!userId) return res.status(401).json({ error: 'Unauthorized' });
 
-    const recommendations = await generateCareerRecommendations(userId);
+    const recommendations = await generateAllRecommendations(userId);
     res.json({ success: true, count: recommendations.length, recommendations });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
