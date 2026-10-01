@@ -11,7 +11,7 @@ const router = Router();
 // Body: { targetCareer: string }
 router.post('/calculate', requireAuth, async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const userId = req.user?.id;
+    const userId = (req as any).user?.id;
     const { targetCareer } = req.body;
 
     if (!targetCareer) {
@@ -97,7 +97,7 @@ router.post('/calculate', requireAuth, async (req: Request, res: Response, next:
 // Method: GET
 router.get('/current', requireAuth, async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const userId = req.user?.id;
+    const userId = (req as any).user?.id;
     const roadmap = await StudentRoadmap.findOne({ studentId: userId, isActive: true });
     
     if (!roadmap) {

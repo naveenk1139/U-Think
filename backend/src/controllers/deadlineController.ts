@@ -88,7 +88,7 @@ export const subscribeToDeadline = async (req: Request, res: Response): Promise<
     const newSchedules = [];
 
     // User preferences determine which channels get queued
-    const user = await User.findById(userId).select('settings').lean();
+    const user = await User.findById(userId).select('settings').lean() as any;
     const prefs = user?.settings?.notifications?.channels || { email: true, inApp: true, sms: false };
     
     const activeChannels = [];

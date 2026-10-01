@@ -49,6 +49,7 @@ export default function StudentDashboard() {
     totalSaved: 0,
     details: {}
   });
+  const [nextActions, setNextActions] = useState<any[]>([]);
   
   const [careerDNA, setCareerDNA] = useState<any>(currentUser?.settings?.careerDNA || null);
   const [generatingDNA, setGeneratingDNA] = useState(false);
@@ -78,6 +79,13 @@ export default function StudentDashboard() {
       api.get('/api/documents')
       .then(res => {
         if (Array.isArray(res.data)) setDocuments(res.data);
+      })
+      .catch(console.error);
+
+      // Fetch Next Best Actions
+      api.get('/api/profile/next-best-actions')
+      .then(res => {
+        if (Array.isArray(res.data)) setNextActions(res.data);
       })
       .catch(console.error);
     }
@@ -181,45 +189,38 @@ export default function StudentDashboard() {
           {/* YOUR NEXT STEPS & RECOMMENDED FOR YOU (Grid) */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             
-            {/* Your Next Steps (4 cols) */}
+             {/* Your Next Steps (4 cols) */}
             <div className="lg:col-span-4 bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden flex flex-col">
                <div className="p-4 border-b border-gray-100 bg-gray-50/50">
                  <h2 className="text-sm font-black text-gray-900 flex items-center gap-2">
-                   <CheckCircle className="w-4 h-4 text-emerald-500" /> Your Next Steps
+                   <CheckCircle className="w-4 h-4 text-emerald-500" /> AI Next Best Actions
                  </h2>
                </div>
                <div className="p-4 flex-1 space-y-4">
                  
-                 {/* Completed Step */}
-                 <div className="flex gap-3 opacity-60">
-                   <div className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0"><CheckCircle className="w-3.5 h-3.5" /></div>
-                   <div className="text-xs font-bold text-gray-900 mt-1 line-through decoration-gray-400">Complete your profile</div>
-                 </div>
-                 
-                 {/* Current Priority Step */}
-                 <div className="flex gap-3 bg-blue-50/50 p-3 rounded-xl border border-blue-100 relative">
-                   <div className="absolute left-3 top-0 bottom-0 w-0.5 bg-blue-200 -z-10"></div>
-                   <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0 border-2 border-white shadow-sm"><span className="text-[10px] font-bold">2</span></div>
-                   <div>
-                     <div className="text-xs font-black text-blue-900">Take Aptitude Assessment</div>
-                     <p className="text-[10px] font-medium text-blue-700/80 mt-1 mb-2 leading-tight">Discover your strengths and get personalized career suggestions.</p>
-                     <button onClick={() => navigate('/quiz')} className="bg-blue-600 text-white text-[10px] font-bold px-3 py-1.5 rounded-lg shadow-sm hover:bg-blue-700 transition-colors">Start Assessment →</button>
-                   </div>
-                 </div>
-
-                 {/* Upcoming Steps */}
-                 {[
-                   { id: 3, label: 'Select your preferred pathway', path: '/pathways/after-10th' },
-                   { id: 4, label: 'Explore suitable courses', path: '/courses' },
-                   { id: 5, label: 'Shortlist colleges', path: '/colleges' },
-                   { id: 6, label: 'Check upcoming exams', path: '/exams' }
-                 ].map(step => (
-                   <div key={step.id} className="flex gap-3 relative cursor-pointer hover:bg-gray-50 p-1 -ml-1 rounded transition-colors group" onClick={() => navigate(step.path)}>
-                     <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-100 -z-10"></div>
-                     <div className="w-6 h-6 rounded-full bg-gray-100 text-gray-500 group-hover:bg-blue-50 group-hover:text-blue-600 flex items-center justify-center shrink-0 border-2 border-white transition-colors"><span className="text-[10px] font-bold">{step.id}</span></div>
-                     <div className="text-xs font-bold text-gray-600 mt-1 group-hover:text-blue-700 transition-colors">{step.label}</div>
-                   </div>
-                 ))}
+                 {nextActions.length === 0 ? (
+                   <div className="text-xs text-gray-500 italic">No urgent actions pending.</div>
+                 ) : (
+                   nextActions.map((action, index) => (
+                     <div key={action.id} className={`flex gap-3 ${index === 0 ? 'bg-blue-50/50 p-3 rounded-xl border border-blue-100' : 'hover:bg-gray-50 p-1 -ml-1 rounded cursor-pointer'} relative group transition-colors`} onClick={() => navigate(action.actionUrl)}>
+                       <div className={`absolute left-3 top-0 bottom-0 w-0.5 ${index === 0 ? 'bg-blue-200' : 'bg-gray-100'} -z-10`}></div>
+                       <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 border-2 border-white transition-colors ${index === 0 ? 'bg-blue-600 text-white shadow-sm' : 'bg-gray-100 text-gray-500 group-hover:bg-blue-50 group-hover:text-blue-600'}`}>
+                         <span className="text-[10px] font-bold">{index + 1}</span>
+                       </div>
+                       <div>
+                         <div className={`text-xs font-black ${index === 0 ? 'text-blue-900' : 'text-gray-600 group-hover:text-blue-700'}`}>{action.title}</div>
+                         {index === 0 && (
+                           <>
+                             <p className="text-[10px] font-medium text-blue-700/80 mt-1 mb-2 leading-tight">{action.description}</p>
+                             <button onClick={(e) => { e.stopPropagation(); navigate(action.actionUrl); }} className="bg-blue-600 text-white text-[10px] font-bold px-3 py-1.5 rounded-lg shadow-sm hover:bg-blue-700 transition-colors">
+                               {action.actionText} →
+                             </button>
+                           </>
+                         )}
+                       </div>
+                     </div>
+                   ))
+                 )}
 
                </div>
             </div>

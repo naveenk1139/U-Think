@@ -202,10 +202,10 @@ Return valid JSON exactly matching this schema:
     });
 
     // Poll for file state to become ACTIVE (required for PDFs)
-    let fileState = await ai.files.get({ name: uploadResult.name });
+    let fileState = await ai.files.get({ name: uploadResult.name || '' });
     while (fileState.state === 'PROCESSING') {
       await new Promise((resolve) => setTimeout(resolve, 2000));
-      fileState = await ai.files.get({ name: uploadResult.name });
+      fileState = await ai.files.get({ name: uploadResult.name || '' });
     }
 
     if (fileState.state === 'FAILED') {

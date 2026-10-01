@@ -10,10 +10,10 @@ interface Props {
 }
 
 export default function KnowledgeGraphView({ targetType, targetId, onClose }: Props) {
-  const [graphData, setGraphData] = useState({ nodes: [], links: [] });
+  const [graphData, setGraphData] = useState<{nodes: any[], links: any[]}>({ nodes: [], links: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const graphRef = useRef<any>();
+  const graphRef = useRef<any>(null);
 
   const loadNodeContext = useCallback(async (type: string, id: string, existingData: any) => {
     try {

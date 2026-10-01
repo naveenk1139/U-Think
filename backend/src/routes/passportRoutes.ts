@@ -12,7 +12,7 @@ const router = Router();
 // Description: Aggregates verified data to create the Career Passport
 router.get('/', requireAuth, async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const userId = req.user?.id;
+    const userId = (req as any).user?.id;
     
     // Fetch core user
     const user = await User.findById(userId).select('-password');

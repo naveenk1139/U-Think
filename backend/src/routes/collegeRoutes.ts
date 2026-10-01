@@ -551,9 +551,11 @@ router.post('/counselling/simulate', optionalAuth, async (req: AuthRequest, res:
       }
     `;
 
-    const model = ai.getGenerativeModel({ model: "gemini-2.5-flash" });
-    const result = await model.generateContent(prompt);
-    const text = result.response.text();
+    const result = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt
+    });
+    const text = result.text || '';
     const cleanJson = text.replace(/```json/g, '').replace(/```/g, '').trim();
     const parsed = JSON.parse(cleanJson);
 

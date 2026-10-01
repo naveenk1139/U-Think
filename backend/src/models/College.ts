@@ -88,7 +88,6 @@ export interface ICollege extends Document {
   aisheUrl?: string;
   sourceName?: string;
   sourceUrl?: string;
-  lastVerifiedAt?: Date;
   verificationStatus?: 'verified' | 'unverified' | 'stale' | 'needs_review' | 'partially_verified' | 'conflicting';
   isVerified?: boolean;
   createdAt?: Date;
@@ -183,7 +182,6 @@ const CollegeSchema: Schema = new Schema({
   aisheUrl: { type: String },
   sourceName: { type: String },
   sourceUrl: { type: String },
-  lastVerifiedAt: { type: Date },
   verificationStatus: { type: String, enum: ['VERIFIED', 'NEEDS_REVIEW', 'STALE', 'UNKNOWN', 'verified', 'unverified', 'stale', 'needs_review', 'partially_verified', 'conflicting'], default: 'UNVERIFIED' },
   isVerified: { type: Boolean, default: false },
 }, { timestamps: true });

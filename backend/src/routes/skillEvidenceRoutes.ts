@@ -11,7 +11,7 @@ const router = Router();
 // Method: GET
 router.get('/', requireAuth, async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const userId = req.user?.id;
+    const userId = (req as any).user?.id;
     let graph = await SkillEvidenceGraph.findOne({ studentId: userId });
     
     // If no graph exists, return empty structure (UI will show empty state or prompt sync)
@@ -31,7 +31,7 @@ router.get('/', requireAuth, async (req: Request, res: Response, next: NextFunct
 // Goal: Use AI to construct the skill graph from user profile and their document analysis history.
 router.post('/sync', requireAuth, async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const userId = req.user?.id;
+    const userId = (req as any).user?.id;
     
     // Gather data context
     const user = await User.findById(userId);

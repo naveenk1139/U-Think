@@ -59,8 +59,8 @@ export const buildNodeContext = async (type: string, id: string) => {
   // 2. Fetch IMPLICIT Edges based on the entity type
   if (type === 'Career') {
     const career = await Career.findById(id).lean();
-    if (career && career.pathways_ref && career.pathways_ref.length > 0) {
-      for (const pRef of career.pathways_ref) {
+    if (career && career.pathwayRefs && career.pathwayRefs.length > 0) {
+      for (const pRef of career.pathwayRefs) {
         const resolved = await getPopulatedNode('Pathway', pRef);
         if (resolved) parents.push({ sourceType: 'Pathway', relationType: 'LEADS_TO', resolvedNode: resolved });
       }
@@ -85,7 +85,7 @@ export const buildNodeContext = async (type: string, id: string) => {
       }
     }
   } else if (type === 'Pathway') {
-    const pathway = await Pathway.findById(id).lean();
+    const pathway = await Pathway.findById(id).lean() as any;
     if (pathway && pathway.options) {
       for (const opt of pathway.options) {
         if (opt.ref_id && opt.type) {

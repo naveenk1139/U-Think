@@ -6,6 +6,7 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import { generateCareerDNA } from '../services/studentTwinService.js';
+import { generateNextBestActions } from '../services/nextBestActionEngine.js';
 
 const router = Router();
 
@@ -254,6 +255,21 @@ router.get('/career-dna', async (req: AuthRequest, res: Response, next: NextFunc
     await user.save();
     
     res.json(dna);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Get Next Best Actions
+router.get('/next-best-actions', async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(401).json({ error: 'Not authenticated' });
+      return;
+    }
+    const actions = await generateNextBestActions(userId);
+    res.json(actions);
   } catch (err) {
     next(err);
   }

@@ -10,7 +10,7 @@ const router = Router();
 // Method: POST
 router.post('/analyze', requireAuth, async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const userId = req.user?.id;
+    const userId = (req as any).user?.id;
     const { targetCareer } = req.body;
 
     if (!targetCareer) {
@@ -82,7 +82,7 @@ router.post('/analyze', requireAuth, async (req: Request, res: Response, next: N
 // Method: GET
 router.get('/history', requireAuth, async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const history = await StabilityAnalysis.find({ studentId: req.user?.id }).sort({ analyzedAt: -1 });
+    const history = await StabilityAnalysis.find({ studentId: (req as any).user?.id }).sort({ analyzedAt: -1 });
     res.json({ history });
   } catch (err) {
     next(err);
