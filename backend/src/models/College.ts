@@ -26,6 +26,8 @@ export interface ICollege extends Document {
   googleMapsUrl?: string;
   googleDirectionsUrl?: string;
   statusVerifiedAt?: Date;
+  verification_status?: string;
+  lastVerifiedAt?: Date;
   sourceRecordId?: string;
   state: string;
   stateRef?: mongoose.Types.ObjectId;
@@ -164,6 +166,8 @@ const CollegeSchema: Schema = new Schema({
   nirfRank: { type: Number },
   website: { type: String },
   officialWebsiteUrl: { type: String },
+  verification_status: { type: String, enum: ['VERIFIED', 'UNVERIFIED', 'PENDING'], default: 'UNVERIFIED' },
+  lastVerifiedAt: { type: Date },
   websiteVerified: { type: Boolean, default: false },
   websiteSource: { type: String },
   websiteVerifiedAt: { type: Date },

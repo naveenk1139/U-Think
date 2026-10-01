@@ -3,11 +3,12 @@ import { useParams, Link } from 'react-router-dom';
 import { 
   Building2, MapPin, Star, Share2, Heart, GraduationCap, 
   Clock, DollarSign, CheckCircle, Award, Phone, Mail, Globe, ShieldCheck, ArrowLeft,
-  ChevronRight, BookOpen, AlertCircle
+  ChevronRight, BookOpen, AlertCircle, Network
 } from 'lucide-react';
 import { fetchCollegeByIdOrSlug, fetchCollegeCourses, fetchCollegeFees, College, CollegeCourse, FeeRecord } from '../api/collegeApi';
 import { useAuth } from '../contexts/AuthContext';
 import { useJsApiLoader, GoogleMap, Marker } from '@react-google-maps/api';
+import KnowledgeGraphView from './KnowledgeGraphView';
 
 export default function CollegeDetail() {
   const { slug } = useParams<{ slug: string }>();
@@ -20,6 +21,28 @@ export default function CollegeDetail() {
 
   const { currentUser } = useAuth();
   const [isSaved, setIsSaved] = useState(false);
+  const [showGraph, setShowGraph] = useState(false);
+
+  const isValidUrl = (url: string | undefined): boolean => {
+    if (!url) return false;
+    const lowerUrl = url.toLowerCase();
+    if (lowerUrl.includes('careers360.com') ||
+        lowerUrl.includes('shiksha.com') ||
+        lowerUrl.includes('collegedekho.com') ||
+        lowerUrl.includes('collegedunia.com') ||
+        lowerUrl.includes('wikipedia.org') ||
+        lowerUrl.includes('byjus.com') ||
+        lowerUrl.includes('vedantu.com') ||
+        lowerUrl.includes('unacademy.com')) {
+      return false;
+    }
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+    }
+  };
 
   // Maps configuration
   const { isLoaded: isMapLoaded } = useJsApiLoader({
@@ -120,11 +143,17 @@ export default function CollegeDetail() {
                     <span className="bg-blue-500/20 text-blue-300 text-xs font-black px-2.5 py-1 rounded-md border border-blue-500/30 backdrop-blur-md">
                       {college.type || 'Private'}
                     </span>
-                    {college.isVerified && (
+                    {(college.verification_status === 'VERIFIED' || college.isVerified) && (
                       <span className="bg-emerald-500/20 text-emerald-300 text-xs font-black px-2.5 py-1 rounded-md border border-emerald-500/30 backdrop-blur-md flex items-center gap-1">
-                        <CheckCircle className="w-3 h-3" /> Verified by Gov Source
+                        <ShieldCheck className="w-3 h-3" /> Verified Source
                       </span>
                     )}
+                    <button 
+                      onClick={() => setShowGraph(true)}
+                      className="bg-indigo-500/20 text-indigo-300 text-xs font-black px-2.5 py-1 rounded-md border border-indigo-500/30 backdrop-blur-md flex items-center gap-1 hover:bg-indigo-500/40 transition-colors cursor-pointer"
+                    >
+                      <Network className="w-3 h-3" /> Knowledge Graph
+                    </button>
                     {college.nirfRank && (
                       <span className="bg-amber-500/20 text-amber-300 text-xs font-black px-2.5 py-1 rounded-md border border-amber-500/30 backdrop-blur-md flex items-center gap-1">
                         <Star className="w-3 h-3" /> NIRF Rank #{college.nirfRank}
@@ -135,7 +164,7 @@ export default function CollegeDetail() {
                   <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-slate-200 font-semibold">
                     <span className="flex items-center gap-1.5">📍 {college.city ? `${college.city}, ` : ''}{college.district}, {college.state}</span>
                     <span className="flex items-center gap-1.5">🏛️ {college.ownership || college.type || 'Private'}</span>
-                    {college.isVerified && (
+                    {(college.verification_status === 'VERIFIED' || college.isVerified) && (
                       <span className="flex items-center gap-1.5 text-emerald-300">🛡️ Verified by {college.sourceName || 'AISHE/Govt'}</span>
                     )}
                     <span className="flex items-center gap-1.5">📅 Est. {college.establishedYear || 'N/A'}</span>
@@ -350,12 +379,12 @@ export default function CollegeDetail() {
                   </div>
                   <div className="min-w-0">
                     <div className="text-[10px] font-bold text-text-muted uppercase mb-1">Website</div>
-                    {college.officialWebsiteUrl || college.website ? (
+                    {isValidUrl(college.officialWebsiteUrl || college.website) ? (
                       <a href={college.officialWebsiteUrl || college.website} target="_blank" rel="noopener noreferrer" className="text-sm font-black text-primary hover:underline truncate block">
                         {(college.officialWebsiteUrl || college.website)?.replace(/^https?:\/\//, '').replace(/\/$/, '')}
                       </a>
                     ) : (
-                      <div className="text-sm font-semibold text-text-secondary">Not Available</div>
+                      <div className="text-sm font-semibold text-text-secondary" title="Official website is unavailable or not verified">Not Available</div>
                     )}
                   </div>
                 </li>
@@ -424,6 +453,14 @@ export default function CollegeDetail() {
           </div>
         </div>
       </div>
+      
+      {showGraph && college && (
+        <KnowledgeGraphView 
+          targetType="College" 
+          targetId={college._id} 
+          onClose={() => setShowGraph(false)} 
+        />
+      )}
     </div>
   );
 }

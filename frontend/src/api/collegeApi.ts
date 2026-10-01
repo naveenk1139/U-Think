@@ -72,6 +72,7 @@ export interface College {
   verifiedAt?: string;
   isVerified?: boolean;
   verificationStatus?: string;
+  verification_status?: string;
   nirfRank?: number;
   sourceId?: string;
 }

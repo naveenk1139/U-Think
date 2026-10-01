@@ -57,6 +57,28 @@ export default function CollegesDirectory() {
   });
   const [selectedMapCollege, setSelectedMapCollege] = useState<College | null>(null);
 
+  const isValidUrl = (url: string | undefined): boolean => {
+    if (!url) return false;
+    const lowerUrl = url.toLowerCase();
+    // Block common coaching/aggregator sites
+    if (lowerUrl.includes('careers360.com') ||
+        lowerUrl.includes('shiksha.com') ||
+        lowerUrl.includes('collegedekho.com') ||
+        lowerUrl.includes('collegedunia.com') ||
+        lowerUrl.includes('wikipedia.org') ||
+        lowerUrl.includes('byjus.com') ||
+        lowerUrl.includes('vedantu.com') ||
+        lowerUrl.includes('unacademy.com')) {
+      return false;
+    }
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
   const openOfficialWebsite = (url: string | undefined, e: React.MouseEvent) => {
     e.stopPropagation();
     if (url) {
@@ -666,9 +688,9 @@ export default function CollegesDirectory() {
                         </Link>
                         
                         <div className="flex flex-wrap items-center gap-2 mb-3">
-                          {college.isVerified !== false && (
-                            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                              <CheckCircle className="w-3.5 h-3.5" /> Verified
+                          {(college.verification_status === 'VERIFIED' || college.isVerified) && (
+                            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 shadow-sm">
+                              <ShieldCheck className="w-3.5 h-3.5" /> Verified Source
                             </span>
                           )}
                           <span className="text-xs text-slate-500 font-medium flex items-center gap-1">
@@ -714,12 +736,18 @@ export default function CollegesDirectory() {
 
                       <div className="space-y-3 mt-6">
                         <div className="flex items-center gap-4 text-xs font-bold">
-                          <button 
-                            onClick={(e) => openOfficialWebsite(college.officialWebsiteUrl, e)}
-                            className="flex items-center gap-1.5 text-blue-600 hover:text-blue-800 transition-colors"
-                          >
-                            <ExternalLink className="w-3.5 h-3.5" /> Official Website
-                          </button>
+                          {isValidUrl(college.officialWebsiteUrl || college.website) ? (
+                            <button 
+                              onClick={(e) => openOfficialWebsite(college.officialWebsiteUrl || college.website, e)}
+                              className="flex items-center gap-1.5 text-blue-600 hover:text-blue-800 transition-colors"
+                            >
+                              <ExternalLink className="w-3.5 h-3.5" /> Official Website
+                            </button>
+                          ) : (
+                            <button className="flex items-center gap-1.5 text-slate-400 cursor-not-allowed" disabled title="Official website is unavailable or not verified">
+                              <ExternalLink className="w-3.5 h-3.5" /> Website Unavailable
+                            </button>
+                          )}
                           <button 
                             onClick={(e) => openMaps(college, e)}
                             className="flex items-center gap-1.5 text-slate-600 hover:text-slate-900 transition-colors"
