@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Home as HomeIcon, BookOpen, Award, Briefcase, Users, MessageSquareCode, GraduationCap } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import NotificationDropdown from './NotificationDropdown';
 
 interface HeaderProps {
   activeTab?: string;
@@ -85,6 +86,7 @@ export default function Header({ onOpenCounselor }: HeaderProps) {
 
           {/* Right: User & AI Counselor */}
           <div className="flex items-center gap-4">
+            {currentUser && <NotificationDropdown />}
             {currentUser ? (
               <div className="hidden sm:flex items-center gap-3 pr-2 border-r border-border shrink-0">
                 <img

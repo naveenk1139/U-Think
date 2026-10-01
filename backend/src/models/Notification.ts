@@ -5,6 +5,7 @@ export interface INotification extends Document {
   title: string;
   message: string;
   type: 'system' | 'reminder' | 'pathway' | 'exam' | 'general';
+  link?: string;
   isRead: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -30,6 +31,9 @@ const NotificationSchema = new Schema<INotification>(
       type: String,
       enum: ['system', 'reminder', 'pathway', 'exam', 'general'],
       default: 'general',
+    },
+    link: {
+      type: String,
     },
     isRead: {
       type: Boolean,

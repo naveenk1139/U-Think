@@ -1,4 +1,6 @@
 import express from 'express';
+import http from 'http';
+import { Server } from 'socket.io';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
@@ -85,7 +87,33 @@ import { errorHandler } from './middleware/errorHandler.js';
 dotenv.config();
 
 const app = express();
+const server = http.createServer(app);
 const PORT = process.env.PORT || 5000;
+
+export const io = new Server(server, {
+  cors: {
+    origin: [
+      process.env.CORS_ORIGIN || 'http://localhost:3000',
+      'http://localhost:3000',
+      'http://localhost:3001',
+      'http://localhost:5173'
+    ],
+    credentials: true,
+  }
+});
+
+io.on('connection', (socket) => {
+  console.log('User connected to socket:', socket.id);
+  
+  socket.on('join_room', (userId: string) => {
+    socket.join(userId);
+    console.log(`User ${userId} joined personal notification room`);
+  });
+
+  socket.on('disconnect', () => {
+    console.log('User disconnected from socket:', socket.id);
+  });
+});
 
 // ─── Global Middleware ────────────────────────────────────────────
 app.use(cors({
@@ -169,7 +197,7 @@ app.get('/api/education-catalog/search', getFilteredPathways);
 app.use(errorHandler);
 
 // ─── Start Server ─────────────────────────────────────────────────
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`\n🚀 U-THINK Backend (MongoDB) running on http://localhost:${PORT}`);
   console.log(`   Health Check: http://localhost:${PORT}/api/health\n`);
   

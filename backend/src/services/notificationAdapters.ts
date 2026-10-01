@@ -1,4 +1,4 @@
-import Notification from '../models/Notification.js';
+import { sendNotification } from './notificationService.js';
 import { sendDeadlineReminderEmail } from './emailService.js';
 import { sendDeadlineReminderSms } from './smsService.js';
 
@@ -18,13 +18,11 @@ export async function dispatchInAppNotification(
   else if (deadlineCategory.includes('SCHOLARSHIP')) type = 'general'; // Or 'scholarship' if supported
   else type = 'reminder';
 
-  await Notification.create({
+  await sendNotification({
     userId,
     title,
     message,
-    type,
-    isRead: false,
-    link: sourceUrl
+    type: type as any
   });
   
   console.log(`📱 In-App Notification dispatched for User: ${userId}`);

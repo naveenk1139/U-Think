@@ -5,6 +5,7 @@ import App from './App.tsx';
 import './index.css';
 import { AuthProvider } from './contexts/AuthContext';
 import { AppearanceProvider } from './contexts/AppearanceContext';
+import { NotificationProvider } from './contexts/NotificationContext';
 
 class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
   constructor(props: any) {
@@ -40,7 +41,9 @@ createRoot(document.getElementById('root')!).render(
       <ErrorBoundary>
         <AuthProvider>
           <AppearanceProvider>
-            <App />
+            <NotificationProvider>
+              <App />
+            </NotificationProvider>
           </AppearanceProvider>
         </AuthProvider>
       </ErrorBoundary>
