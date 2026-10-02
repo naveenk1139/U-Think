@@ -5,15 +5,15 @@ U-THINK is an exhaustive, comprehensive, and highly detailed educational navigat
 ## 🌟 Key Features
 
 *   **100% Real Karnataka Institutional Data:** Covers ALL 31 districts and EVERY taluk in Karnataka with zero placeholder or fake data. All 3,500+ colleges and institutions are directly verified from official AISHE, UGC, and KEA databases.
-*   **Pathways Explorer & Knowledge Graph:** Interactive visual pathway trees (`PathwayTree`) and a full `KnowledgeGraphView` to explore educational routes seamlessly.
-*   **Colleges & Exams Directory:** Comprehensive and highly filterable directories for colleges and exams, featuring detailed profile pages and direct comparison tools (`ExamComparisonModal`, `DegreeComparisonModal`, `CourseComparisonModal`).
-*   **AI Counselor & Recommendations:** An integrated AI mentor (`AICounselorModal`) and smart recommendation widget (`AIRecommendationWidget`) utilizing Gemini to offer personalized guidance.
-*   **Multilingual AI Translation Layer:** Seamlessly supports local languages dynamically through an AI-powered translation middleware (`LanguageSwitcher`), making educational guidance accessible to everyone.
-*   **Job Finder & Career Tracker:** Integrated job boards (`JobFinder`, `SavedJobs`) and career tools (`AdminJobPanel`) directly tied to educational outcomes.
-*   **Student Dashboard & Roadmaps:** A personalized portal (`StudentDashboard`) featuring application trackers, visual roadmaps (`RoadmapVisualizer`), and deadline monitoring.
-*   **Document Analysis:** Automatically extracts academic information from uploaded marksheets securely using Gemini Vision capabilities (`DocumentAnalysis`).
-*   **Mentorship Program:** Connects students with experienced mentors (`MentorshipProgram`) to guide them through complex career decisions.
-*   **Security & High-Performance Caching:** Fully protected against DDoS and NoSQL injections with strict rate-limiting, Helmet, and query sanitization. Employs aggressive in-memory caching to drastically reduce TTFB for major educational catalog reads.
+*   **Pathways Explorer & Knowledge Graph:** Interactive visual pathway trees and a full Knowledge Graph to explore complex educational routes, degree prerequisites, and downstream career options seamlessly.
+*   **Colleges & Exams Directory:** Comprehensive and highly filterable directories for colleges and exams, featuring detailed profile pages and direct side-by-side comparison tools.
+*   **AI Counselor & Recommendations:** An integrated AI mentor and smart recommendation engine utilizing Gemini LLMs to offer personalized career guidance based on user profiles.
+*   **Multilingual AI Translation Layer:** Seamlessly supports local languages dynamically through an AI-powered translation middleware, making educational guidance accessible to everyone in their native language.
+*   **Job Finder & Career Tracker:** Integrated job boards and career tracking tools directly tied to educational outcomes and required degrees.
+*   **Student Dashboard & Roadmaps:** A personalized student portal featuring application trackers, highly visual academic roadmaps, and automated deadline monitoring.
+*   **Document Analysis:** Automatically extracts and structures academic information from uploaded marksheets securely using Gemini Vision capabilities.
+*   **Mentorship Program:** Connects students with experienced mentors and alumni to guide them through complex career and academic decisions.
+*   **Security & High-Performance Caching:** Fully protected against DDoS and NoSQL injections with strict rate-limiting, Helmet, and query sanitization. Employs aggressive in-memory caching to drastically reduce response times for major educational catalog reads.
 
 ## 🛠️ Technology Stack
 
