@@ -6,6 +6,9 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+import mongoSanitize from 'express-mongo-sanitize';
 import { connectDB } from './config/db.js';
 
 // Pre-register all models to prevent MissingSchemaError on dynamic populate
@@ -84,6 +87,7 @@ import { getPathwayTree, getPathwayStats, getFilteredPathways } from './controll
 
 // Middleware
 import { errorHandler } from './middleware/errorHandler.js';
+import { cacheMiddleware } from './middleware/cacheMiddleware.js';
 
 dotenv.config();
 
@@ -117,6 +121,10 @@ io.on('connection', (socket) => {
 });
 
 // ─── Global Middleware ────────────────────────────────────────────
+// Security Headers
+app.use(helmet());
+
+// Cross-Origin Resource Sharing
 app.use(cors({
   origin: [
     process.env.CORS_ORIGIN || 'http://localhost:3000',
@@ -126,8 +134,23 @@ app.use(cors({
   ],
   credentials: true,
 }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+
+// Request Parsers
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// NoSQL Injection Prevention
+app.use(mongoSanitize());
+
+// Rate Limiting (Phase 17: Security)
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 200, // limit each IP to 200 requests per windowMs
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests, please try again later.' }
+});
+app.use('/api', limiter);
 
 // Request logger
 app.use((req, _res, next) => {
@@ -154,9 +177,9 @@ app.use('/api', healthRoutes);
 app.use('/api/auth', authRoutes);     // MongoDB Auth (register, login, me)
 app.use('/api/users', userRoutes);
 app.use('/api/ai', aiRoutes);            // /api/ai/aptitude/evaluate, /api/ai/chat/stream
-app.use('/api/colleges', collegeRoutes);
+app.use('/api/colleges', cacheMiddleware(300), collegeRoutes);
 app.use('/api/quiz', quizRoutes);
-app.use('/api/pathways', pathwayRoutes);
+app.use('/api/pathways', cacheMiddleware(300), pathwayRoutes);
 app.use('/api/exams', examRoutes);
 app.use('/api/deadlines', deadlineRoutes);
 app.use('/api/reminders', reminderRoutes);
@@ -192,10 +215,10 @@ app.use('/api/subject-combinations', subjectCombinationRoutes);
   app.use('/api/recommendations', recommendationRoutes);
   app.use('/api/student/intelligence', studentIntelligenceRoutes);
 
-// Public Catalog API
-app.get('/api/education-catalog', getPathwayTree);
-app.get('/api/education-catalog/stats', getPathwayStats);
-app.get('/api/education-catalog/search', getFilteredPathways);
+// Public Catalog API (Cached for 15 minutes)
+app.get('/api/education-catalog', cacheMiddleware(900), getPathwayTree);
+app.get('/api/education-catalog/stats', cacheMiddleware(900), getPathwayStats);
+app.get('/api/education-catalog/search', cacheMiddleware(300), getFilteredPathways);
 
 // ─── Global Error Handler ─────────────────────────────────────────
 app.use(errorHandler);
