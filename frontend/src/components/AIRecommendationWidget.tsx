@@ -22,6 +22,16 @@ export default function AIRecommendationWidget() {
   const [loading, setLoading] = useState(true);
   const [selectedGraphTarget, setSelectedGraphTarget] = useState<{type: string, id: string} | null>(null);
 
+  const handleFeedback = async (id: string, action: 'accept' | 'dismiss') => {
+    try {
+      await api.post(`/api/recommendations/${id}/feedback`, { action });
+      // Remove from list or update status
+      setRecommendations(prev => prev.filter(r => r._id !== id));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
     const fetchRecommendations = async () => {
       try {
@@ -110,12 +120,27 @@ export default function AIRecommendationWidget() {
               </div>
             )}
 
-            <button 
-              onClick={() => setSelectedGraphTarget({ type: rec.entityType, id: rec.entityId || 'fallback_id' })}
-              className="text-[10px] font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 transition-colors"
-            >
-              Explore Path <ArrowRight className="w-3 h-3" />
-            </button>
+            <div className="flex items-center gap-3 mt-4 border-t border-gray-100 pt-3">
+              <button 
+                onClick={() => handleFeedback(rec._id, 'accept')}
+                className="text-[10px] font-bold bg-indigo-50 text-indigo-700 px-3 py-1.5 rounded hover:bg-indigo-100 transition-colors"
+              >
+                Accept Match
+              </button>
+              <button 
+                onClick={() => handleFeedback(rec._id, 'dismiss')}
+                className="text-[10px] font-bold text-gray-500 hover:text-rose-600 transition-colors"
+              >
+                Dismiss
+              </button>
+              <div className="flex-1"></div>
+              <button 
+                onClick={() => setSelectedGraphTarget({ type: rec.entityType, id: rec.entityId || 'fallback_id' })}
+                className="text-[10px] font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 transition-colors"
+              >
+                Explore Path <ArrowRight className="w-3 h-3" />
+              </button>
+            </div>
           </div>
         ))}
       </div>

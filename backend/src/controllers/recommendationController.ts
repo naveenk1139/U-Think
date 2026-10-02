@@ -57,3 +57,33 @@ export const getUserRecommendations = async (req: AuthRequest, res: Response) =>
     res.status(500).json({ error: error.message });
   }
 };
+
+/**
+ * Phase 14: Recommendation Feedback
+ * Update the status of a recommendation (Accept, Dismiss, Save)
+ */
+export const updateRecommendationFeedback = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
+    const { id } = req.params;
+    const { action } = req.body; // 'accept', 'dismiss', 'save'
+
+    const recommendation = await Recommendation.findOne({ _id: id, studentId: userId });
+    if (!recommendation) return res.status(404).json({ error: 'Recommendation not found' });
+
+    if (action === 'dismiss') {
+      recommendation.status = 'Dismissed';
+    } else if (action === 'accept') {
+      recommendation.status = 'Accepted';
+    }
+    // For 'save', we just leave it active or handle it on the user profile side
+    
+    await recommendation.save();
+    
+    res.json({ success: true, status: recommendation.status });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
