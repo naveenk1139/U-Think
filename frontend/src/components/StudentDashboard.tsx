@@ -15,7 +15,7 @@ import { getSavedPathways } from '../api/pathwayApi';
 import api from '../api/axios';
 import { getCareerDNA } from '../api/profileApi';
 import AIRecommendationWidget from './AIRecommendationWidget';
-import { useNotification } from '../contexts/NotificationContext';
+import { useNotifications } from '../contexts/NotificationContext';
 
 export default function StudentDashboard() {
   const { currentUser, updateProfile, loading } = useAuth();
@@ -53,7 +53,7 @@ export default function StudentDashboard() {
   const [nextActions, setNextActions] = useState<any[]>([]);
   const [deadlines, setDeadlines] = useState<any[]>([]);
   
-  const { notifications } = useNotification();
+  const { notifications } = useNotifications();
   
   const [careerDNA, setCareerDNA] = useState<any>(currentUser?.settings?.careerDNA || null);
   const [generatingDNA, setGeneratingDNA] = useState(false);
@@ -558,9 +558,9 @@ export default function StudentDashboard() {
                  <div className="text-xs text-gray-500 italic">No recent notifications.</div>
                ) : (
                  notifications.slice(0, 4).map((notif, idx) => (
-                   <div key={notif.id || idx} className="flex gap-3 cursor-pointer group" onClick={() => notif.link && navigate(notif.link)}>
-                     <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${notif.type === 'ALERT' ? 'bg-rose-50 text-rose-500' : 'bg-blue-50 text-blue-500'}`}>
-                       {notif.type === 'ALERT' ? <ShieldAlert className="w-4 h-4"/> : <Building2 className="w-4 h-4"/>}
+                   <div key={notif._id || idx} className="flex gap-3 cursor-pointer group" onClick={() => notif.link && navigate(notif.link)}>
+                     <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${notif.type === 'system' ? 'bg-rose-50 text-rose-500' : 'bg-blue-50 text-blue-500'}`}>
+                       {notif.type === 'system' ? <ShieldAlert className="w-4 h-4"/> : <Building2 className="w-4 h-4"/>}
                      </div>
                      <div className="flex-1 min-w-0">
                        <div className="text-[11px] font-bold text-gray-900 leading-tight truncate group-hover:text-blue-600 transition-colors">{notif.title}</div>

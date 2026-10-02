@@ -17,8 +17,8 @@ export interface IStream extends Document {
   academicYearId?: mongoose.Types.ObjectId;
   educationLevelId?: mongoose.Types.ObjectId;
   source?: string;
-  verificationStatus?: 'VERIFIED' | 'NEEDS_REVIEW' | 'STALE' | 'UNKNOWN';
-  lastVerifiedAt?: Date;
+  verificationStatus?: 'DRAFT' | 'UNVERIFIED' | 'VERIFIED' | 'EXPIRED' | 'REQUIRES_REVIEW';
+  lastVerified?: Date;
   order: number;
   active: boolean;
   createdAt: Date;
@@ -42,8 +42,8 @@ const StreamSchema: Schema = new Schema({
   academicYearId: { type: Schema.Types.ObjectId, ref: 'AcademicYear' },
   educationLevelId: { type: Schema.Types.ObjectId, ref: 'EducationLevel' },
   source: { type: String },
-  verificationStatus: { type: String, enum: ['VERIFIED', 'NEEDS_REVIEW', 'STALE', 'UNKNOWN'], default: 'UNKNOWN' },
-  lastVerifiedAt: { type: Date },
+  verificationStatus: { type: String, enum: ['DRAFT', 'UNVERIFIED', 'VERIFIED', 'EXPIRED', 'REQUIRES_REVIEW'], default: 'UNVERIFIED' },
+  lastVerified: { type: Date },
   order: { type: Number, default: 0 },
   active: { type: Boolean, default: true },
 }, { timestamps: true });

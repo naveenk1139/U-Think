@@ -14,7 +14,7 @@ const router = Router();
 router.get('/', async (req: Request, res: Response) => {
   try {
     const pathways = await Pathway.find({ active: true }).sort({ order: 1 });
-    res.json(pathways);
+    res.json({ data: pathways });
   } catch (error) {
     console.error('Error fetching pathways:', error);
     res.status(500).json({ message: 'Server error' });
@@ -52,7 +52,7 @@ router.get('/slug/:slug', async (req: Request, res: Response) => {
     // Map courses to streams
     const streamsWithCourses = streams.map(s => ({
       ...s,
-      courses: coursesWithBranches.filter(c => c.streamId?.toString() === s._id.toString())
+      courses: coursesWithBranches.filter(c => c.stream === s._id.toString() || c.stream === s.slug)
     }));
 
     res.json({ ...pathway, streams: streamsWithCourses });

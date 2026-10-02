@@ -27,6 +27,26 @@ export const uThinkTools = [
           },
           required: ['name']
         }
+      },
+      {
+        name: 'search_pathways',
+        description: 'Search for post-10th education pathways, streams, and subject combinations in the U-THINK database.',
+        parameters: {
+          type: 'OBJECT',
+          properties: {
+            query: { type: 'STRING', description: 'Search query for pathway or stream name (e.g., PUC, Science, ITI, Diploma).' }
+          }
+        }
+      },
+      {
+        name: 'search_courses',
+        description: 'Search for specific courses, degrees, or trades in the U-THINK database.',
+        parameters: {
+          type: 'OBJECT',
+          properties: {
+            query: { type: 'STRING', description: 'Search query for course name (e.g., Computer Science, Electrician, B.Tech).' }
+          }
+        }
       }
     ]
   }
@@ -47,6 +67,28 @@ export async function executeTool(callName: string, callArgs: any) {
     if (callName === 'get_college_details') {
       const college = await College.findOne({ name: { $regex: new RegExp(callArgs.name, 'i') } });
       return { college: college || 'College not found.' };
+    }
+    
+    if (callName === 'search_pathways') {
+      const { default: Pathway } = await import('../models/Pathway.js');
+      const { default: Stream } = await import('../models/Stream.js');
+      
+      const filter = callArgs.query ? { name: { $regex: new RegExp(callArgs.query, 'i') } } : {};
+      const pathways = await Pathway.find(filter).limit(3).select('name level duration eligibility');
+      const streams = await Stream.find(filter).limit(3).select('name duration eligibility pathwayId');
+      
+      return { pathways, streams };
+    }
+    
+    if (callName === 'search_courses') {
+      const { default: Course } = await import('../models/Course.js');
+      const { default: Trade } = await import('../models/Trade.js');
+      
+      const filter = callArgs.query ? { name: { $regex: new RegExp(callArgs.query, 'i') } } : {};
+      const courses = await Course.find(filter).limit(4).select('name level duration eligibility');
+      const trades = await Trade.find(filter).limit(4).select('name duration qualification');
+      
+      return { courses, trades };
     }
 
     return { error: 'Unknown tool.' };
@@ -97,7 +139,7 @@ ${aptitude}
 
 export async function generateGeminiResponse(prompt: string): Promise<string> {
   const result = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
+    model: "gemini-2.0-flash",
     contents: prompt
   });
   return result.text || '';

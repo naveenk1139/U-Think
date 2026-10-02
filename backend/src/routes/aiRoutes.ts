@@ -373,7 +373,7 @@ router.post('/translate', async (req: Request, res: Response, next: NextFunction
       Output ONLY the translated text.
     `;
 
-    const model = ai.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const model = ai.getGenerativeModel({ model: "gemini-2.0-flash" });
     const result = await model.generateContent(prompt);
     
     res.json({ success: true, translation: result.response.text().trim() });

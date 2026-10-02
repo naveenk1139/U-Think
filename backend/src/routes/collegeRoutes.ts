@@ -552,7 +552,7 @@ router.post('/counselling/simulate', optionalAuth, async (req: AuthRequest, res:
     `;
 
     const result = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-2.0-flash",
       contents: prompt
     });
     const text = result.text || '';

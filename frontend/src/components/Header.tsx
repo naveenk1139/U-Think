@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import NotificationDropdown from './NotificationDropdown';
 import LanguageSwitcher from './LanguageSwitcher';
 import { useTranslation } from 'react-i18next';
+import GlobalSearch from './GlobalSearch';
 
 interface HeaderProps {
   activeTab?: string;
@@ -32,7 +33,6 @@ export default function Header({ onOpenCounselor }: HeaderProps) {
 
   const navItems = [
     { id: 'home', label: t('nav.home'), icon: HomeIcon, path: '/' },
-    { id: 'streams', label: t('nav.pathways'), icon: BookOpen, path: '/streams' },
     { id: 'exams', label: t('nav.exams'), icon: GraduationCap, path: '/exams' },
     { id: 'quiz', label: t('nav.assessment'), icon: Award, path: '/quiz' },
     { id: 'jobs', label: t('nav.jobs'), icon: Briefcase, path: '/jobs' },
@@ -89,6 +89,9 @@ export default function Header({ onOpenCounselor }: HeaderProps) {
 
           {/* Right: User & AI Counselor */}
           <div className="flex items-center gap-4">
+            <div className="hidden md:block">
+              <GlobalSearch />
+            </div>
             <LanguageSwitcher />
             {currentUser && <NotificationDropdown />}
             {currentUser ? (

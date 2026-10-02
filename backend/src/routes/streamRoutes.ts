@@ -3,22 +3,26 @@ import Stream from '../models/Stream.js';
 
 const router = Router();
 
+// GET /api/streams
 router.get('/', async (req: Request, res: Response) => {
   try {
-    const streams = await Stream.find({ active: true }).sort({ order: 1 }).lean();
-    res.json(streams);
+    const streams = await Stream.find({ active: true }).sort({ order: 1 });
+    res.json({ data: streams });
   } catch (error) {
-    res.status(500).json({ error: 'Server error fetching streams' });
+    console.error('Error fetching streams:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
-router.get('/:slug', async (req: Request, res: Response) => {
+// GET /api/streams/:id
+router.get('/:id', async (req: Request, res: Response) => {
   try {
-    const stream = await Stream.findOne({ slug: req.params.slug, active: true }).lean();
-    if (!stream) return res.status(404).json({ error: 'Stream not found' });
-    res.json(stream);
+    const stream = await Stream.findById(req.params.id);
+    if (!stream) return res.status(404).json({ message: 'Stream not found' });
+    res.json({ data: stream });
   } catch (error) {
-    res.status(500).json({ error: 'Server error fetching stream' });
+    console.error('Error fetching stream:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 

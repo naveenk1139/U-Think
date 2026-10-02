@@ -15,8 +15,8 @@ export interface IPathway extends Document {
   academicYearId?: mongoose.Types.ObjectId;
   sourceName?: string;
   sourceUrl?: string;
-  verificationStatus?: 'VERIFIED' | 'NEEDS_REVIEW' | 'STALE' | 'UNKNOWN';
-  verifiedAt?: Date;
+  verificationStatus?: 'DRAFT' | 'UNVERIFIED' | 'VERIFIED' | 'EXPIRED' | 'REQUIRES_REVIEW';
+  lastVerified?: Date;
   active: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -37,8 +37,8 @@ const PathwaySchema: Schema = new Schema({
   academicYearId: { type: Schema.Types.ObjectId, ref: 'AcademicYear' },
   sourceName: { type: String },
   sourceUrl: { type: String },
-  verificationStatus: { type: String, enum: ['VERIFIED', 'NEEDS_REVIEW', 'STALE', 'UNKNOWN'], default: 'UNKNOWN' },
-  verifiedAt: { type: Date },
+  verificationStatus: { type: String, enum: ['DRAFT', 'UNVERIFIED', 'VERIFIED', 'EXPIRED', 'REQUIRES_REVIEW'], default: 'UNVERIFIED' },
+  lastVerified: { type: Date },
   active: { type: Boolean, default: true },
 }, { timestamps: true });
 

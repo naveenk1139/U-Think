@@ -12,14 +12,12 @@ export default function Sidebar() {
     const mainMenuItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
     { icon: Home, label: 'Explore Home', path: '/' },
+    { icon: Split, label: 'Education Pathways', path: '/pathways-and-streams' },
     { icon: CalendarClock, label: 'Deadline Hub', path: '/deadlines' },
-    { icon: Compass, label: 'Pathways & Streams', path: '/streams' },
     { icon: Building2, label: 'Colleges', path: '/colleges' },
     { icon: GraduationCap, label: 'Exams & Degrees', path: '/exams' },
-    { icon: Brain, label: 'Aptitude Assessment', path: '/quiz' },
     { icon: Briefcase, label: 'Job Explorer', path: '/jobs' },
     { icon: Users, label: 'Industry Mentors', path: '/mentorship' },
-    { icon: BookOpen, label: 'Professional Courses', path: '/professional-courses' },
   ];
 
     const yourSpaceItems = [

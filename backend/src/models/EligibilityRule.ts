@@ -14,6 +14,11 @@ export interface IEligibilityRule extends Document {
   requiredQualification?: string;
   category?: string; // General, OBC, SC, ST
   otherConditions?: string[];
+  
+  // Rule Engine support for logical conditions (AND, OR, NOT)
+  // e.g. { operator: 'AND', conditions: [ { field: 'marks', operator: '>=', value: 50 }, ... ] }
+  ruleData?: any;
+  
   source?: string;
   verificationStatus?: 'VERIFIED' | 'NEEDS_REVIEW' | 'STALE' | 'UNKNOWN';
   lastVerifiedAt?: Date;
@@ -36,6 +41,7 @@ const EligibilityRuleSchema: Schema = new Schema({
   requiredQualification: { type: String },
   category: { type: String, default: 'General' },
   otherConditions: [{ type: String }],
+  ruleData: { type: Schema.Types.Mixed },
   source: { type: String },
   verificationStatus: { type: String, enum: ['VERIFIED', 'NEEDS_REVIEW', 'STALE', 'UNKNOWN'], default: 'UNKNOWN' },
   lastVerifiedAt: { type: Date },

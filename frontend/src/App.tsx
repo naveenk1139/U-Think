@@ -7,14 +7,14 @@ import Home from './components/Home';
 import AptitudeQuiz from './AptitudeQuiz';
 import JobFinder from './components/JobFinder';
 import SavedJobs from './components/SavedJobs';
-import PathwaysExplorer from './components/PathwaysExplorer';
+import PathwaysExplorer from './pages/Pathways/PathwaysExplorer';
 import MentorshipProgram from './components/MentorshipProgram';
 import AICounselorModal from './components/AICounselorModal';
 import ExamsDirectory from './components/ExamsDirectory';
 import ExamDetail from './components/ExamDetail';
 import DegreeDetail from './components/DegreeDetail';
 import BranchDetail from './components/BranchDetail';
-import CourseDetail from './components/CourseDetail';
+
 import ProfessionalCourses from './components/ProfessionalCourses';
 
 import CollegesDirectory from './components/CollegesDirectory';
@@ -28,14 +28,7 @@ import { EmployerDashboard, AdminDashboard, CollegeDashboard } from './component
 import ApplicationTracker from './components/ApplicationTracker';
 import AdminJobPanel from './components/AdminJobPanel';
 import AdminDataHealth from './components/AdminDataHealth';
-import After10thMap from './pages/After10th/After10thMap';
-import PathwayDetail from './pages/After10th/PathwayDetail';
-import StreamDetailWrapper from './pages/After10th/StreamDetailWrapper';
-import PathwayCompare from './pages/After10th/PathwayCompare';
-import CombinationDetail from './pages/After10th/CombinationDetail';
-import DiplomaCourseDetail from './pages/After10th/DiplomaCourseDetail';
-import ITPolytechnicDetail from './pages/After10th/ITPolytechnicDetail';
-import DiplomaDetail from './pages/After10th/DiplomaDetail';
+
 import { AuthReminderModal } from './components/AuthReminderModal';
 import Settings from './components/Settings';
 import Deadlines from './pages/Deadlines';
@@ -196,18 +189,7 @@ function AppShell() {
             <Route path="/documents/analyze" element={<DocumentAnalysis />} />
             <Route path="/jobs" element={<JobFinder initialRole={selectedJobRole} />} />
             <Route path="/saved-jobs" element={<SavedJobs />} />
-            <Route path="/pathways" element={<Navigate to="/pathways/after-10th" replace />} />
-            <Route path="/pathways/after-10th" element={<After10thMap />} />
-            <Route path="/pathways/after-10th/compare" element={<PathwayCompare />} />
-            <Route path="/pathways/after-10th/it-polytechnic" element={<ITPolytechnicDetail />} />
-            <Route path="/pathways/after-10th/diploma" element={<DiplomaDetail />} />
-            <Route path="/pathways/after-10th/:slug" element={<PathwayDetail />} />
-            <Route path="/pathways/:levelSlug" element={<PathwaysExplorer />} />
-            <Route path="/pathways/:levelSlug/:pathwaySlug" element={<PathwaysExplorer />} />
-            <Route path="/pathways/:levelSlug/:pathwaySlug/:streamSlug" element={<StreamDetailWrapper />} />
-            <Route path="/pathways/:levelSlug/:pathwaySlug/:streamSlug/:comboSlug" element={<CombinationDetail />} />
-            <Route path="/pathways/:levelSlug/:pathwaySlug/:streamSlug/course/:courseSlug" element={<DiplomaCourseDetail />} />
-            <Route path="/courses/:courseSlug" element={<CourseDetail />} />
+            <Route path="/pathways-and-streams" element={<PathwaysExplorer />} />
             <Route path="/professional-courses" element={<ProfessionalCourses />} />
 
             <Route path="/applications" element={<ApplicationTracker />} />
