@@ -44,10 +44,11 @@ This is a modern **MERN** stack application built with a focus on performance, s
 *   **Communications:** Nodemailer (Email), Twilio (SMS), node-cron (Scheduler)
 *   **Development Tools:** TSX (TypeScript Execute), Dotenv
 
-### 🧠 Artificial Intelligence & Graph
+### 🧠 Artificial Intelligence (AI/ML) & Graph
 *   **Provider:** Google Gemini SDK (`@google/genai` v2.4.0)
-*   **Models Applied:** Gemini 2.5 Pro / 3.6 Flash (Complex Reasoning, Recommendations, Simulation, Multilingual Translation)
-*   **Vision AI:** Gemini Vision API (for extracting structured data from 10th/12th Marksheets)
+*   **LLM Integration:** Utilizes Large Language Models (LLMs) like Gemini 2.5 Pro / 3.6 Flash for complex reasoning, personalized career recommendations, educational simulations, and dynamic multilingual translation.
+*   **RAG Architecture:** Employs Retrieval-Augmented Generation (RAG) by dynamically injecting context from the real, verified institutional Knowledge Graph into AI prompts, ensuring completely grounded and hallucination-free advice.
+*   **Vision AI:** Gemini Vision API used for extracting and processing structured data from uploaded 10th/12th Marksheets.
 
 ## 📁 Repository Structure
 
