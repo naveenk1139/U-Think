@@ -15,6 +15,7 @@ import { getSavedPathways } from '../api/pathwayApi';
 import api from '../api/axios';
 import { getCareerDNA } from '../api/profileApi';
 import AIRecommendationWidget from './AIRecommendationWidget';
+import { useNotification } from '../contexts/NotificationContext';
 
 export default function StudentDashboard() {
   const { currentUser, updateProfile, loading } = useAuth();
@@ -50,6 +51,9 @@ export default function StudentDashboard() {
     details: {}
   });
   const [nextActions, setNextActions] = useState<any[]>([]);
+  const [deadlines, setDeadlines] = useState<any[]>([]);
+  
+  const { notifications } = useNotification();
   
   const [careerDNA, setCareerDNA] = useState<any>(currentUser?.settings?.careerDNA || null);
   const [generatingDNA, setGeneratingDNA] = useState(false);
@@ -86,6 +90,15 @@ export default function StudentDashboard() {
       api.get('/api/profile/next-best-actions')
       .then(res => {
         if (Array.isArray(res.data)) setNextActions(res.data);
+      })
+      .catch(console.error);
+
+      // Fetch upcoming Deadlines
+      api.get('/api/deadlines')
+      .then(res => {
+        if (res.data?.success && Array.isArray(res.data.deadlines)) {
+          setDeadlines(res.data.deadlines);
+        }
       })
       .catch(console.error);
     }
@@ -492,63 +505,45 @@ export default function StudentDashboard() {
               <button onClick={() => navigate('/exams')} className="text-[10px] font-bold text-blue-600 hover:underline">View All →</button>
             </div>
             <div className="space-y-4">
-              {/* Manual layout for dates to match design closely */}
-              <div className="flex gap-3">
-                <div className="w-10 h-10 flex flex-col items-center justify-center bg-rose-50 text-rose-700 rounded-lg shrink-0 border border-rose-100">
-                  <span className="text-[8px] font-black uppercase">Apr</span>
-                  <span className="text-sm font-black leading-none mt-0.5">25</span>
-                </div>
-                <div className="flex-1 min-w-0 flex flex-col justify-center">
-                  <div className="text-[11px] font-bold text-gray-900 truncate">JEE Main 2025</div>
-                  <div className="text-[9px] font-medium text-gray-500 truncate">Application Deadline</div>
-                </div>
-                <div className="text-[9px] font-bold text-rose-600 bg-white border border-rose-200 px-1.5 py-0.5 rounded flex items-center h-fit mt-1">
-                  12 days left
-                </div>
-              </div>
-
-              <div className="flex gap-3">
-                <div className="w-10 h-10 flex flex-col items-center justify-center bg-blue-50 text-blue-700 rounded-lg shrink-0 border border-blue-100">
-                  <span className="text-[8px] font-black uppercase">May</span>
-                  <span className="text-sm font-black leading-none mt-0.5">10</span>
-                </div>
-                <div className="flex-1 min-w-0 flex flex-col justify-center">
-                  <div className="text-[11px] font-bold text-gray-900 truncate">KCET 2025</div>
-                  <div className="text-[9px] font-medium text-gray-500 truncate">Registration Deadline</div>
-                </div>
-                <div className="text-[9px] font-bold text-blue-600 bg-white border border-blue-200 px-1.5 py-0.5 rounded flex items-center h-fit mt-1">
-                  27 days left
-                </div>
-              </div>
-
-              <div className="flex gap-3">
-                <div className="w-10 h-10 flex flex-col items-center justify-center bg-emerald-50 text-emerald-700 rounded-lg shrink-0 border border-emerald-100">
-                  <span className="text-[8px] font-black uppercase">May</span>
-                  <span className="text-sm font-black leading-none mt-0.5">20</span>
-                </div>
-                <div className="flex-1 min-w-0 flex flex-col justify-center">
-                  <div className="text-[11px] font-bold text-gray-900 truncate">COMEDK UGET 2025</div>
-                  <div className="text-[9px] font-medium text-gray-500 truncate">Application Deadline</div>
-                </div>
-                <div className="text-[9px] font-bold text-emerald-600 bg-white border border-emerald-200 px-1.5 py-0.5 rounded flex items-center h-fit mt-1">
-                  37 days left
-                </div>
-              </div>
-
-              <div className="flex gap-3">
-                <div className="w-10 h-10 flex flex-col items-center justify-center bg-orange-50 text-orange-700 rounded-lg shrink-0 border border-orange-100">
-                  <span className="text-[8px] font-black uppercase">Jun</span>
-                  <span className="text-sm font-black leading-none mt-0.5">05</span>
-                </div>
-                <div className="flex-1 min-w-0 flex flex-col justify-center">
-                  <div className="text-[11px] font-bold text-gray-900 truncate">CUET UG 2025</div>
-                  <div className="text-[9px] font-medium text-gray-500 truncate">Form Correction</div>
-                </div>
-                <div className="text-[9px] font-bold text-orange-600 bg-white border border-orange-200 px-1.5 py-0.5 rounded flex items-center h-fit mt-1">
-                  53 days left
-                </div>
-              </div>
-
+              {deadlines.length === 0 ? (
+                <div className="text-xs text-gray-500 italic">No upcoming deadlines found.</div>
+              ) : (
+                deadlines.slice(0, 4).map((dl, idx) => {
+                  const dDate = new Date(dl.deadlineDate);
+                  const month = dDate.toLocaleString('default', { month: 'short' });
+                  const dateNum = dDate.getDate();
+                  
+                  // Calculate days left
+                  const diffTime = Math.abs(dDate.getTime() - new Date().getTime());
+                  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                  
+                  // Color coding based on urgency
+                  let colorTheme = 'blue';
+                  if (diffDays <= 7) colorTheme = 'rose';
+                  else if (diffDays <= 30) colorTheme = 'orange';
+                  else colorTheme = 'emerald';
+                  
+                  const bgClass = `bg-${colorTheme}-50`;
+                  const borderClass = `border-${colorTheme}-100`;
+                  const textClass = `text-${colorTheme}-700`;
+                  
+                  return (
+                    <div key={idx} className="flex gap-3 cursor-pointer group" onClick={() => dl.sourceUrl && window.open(dl.sourceUrl, '_blank')}>
+                      <div className={`w-10 h-10 flex flex-col items-center justify-center ${bgClass} ${textClass} rounded-lg shrink-0 border ${borderClass}`}>
+                        <span className="text-[8px] font-black uppercase">{month}</span>
+                        <span className="text-sm font-black leading-none mt-0.5">{dateNum}</span>
+                      </div>
+                      <div className="flex-1 min-w-0 flex flex-col justify-center">
+                        <div className="text-[11px] font-bold text-gray-900 truncate group-hover:text-blue-600 transition-colors">{dl.title}</div>
+                        <div className="text-[9px] font-medium text-gray-500 truncate">{dl.description || 'Deadline'}</div>
+                      </div>
+                      <div className={`text-[9px] font-bold ${textClass} bg-white border ${borderClass} px-1.5 py-0.5 rounded flex items-center h-fit mt-1`}>
+                        {diffDays} days left
+                      </div>
+                    </div>
+                  );
+                })
+              )}
             </div>
           </div>
 
@@ -559,23 +554,24 @@ export default function StudentDashboard() {
               <button className="text-[10px] font-bold text-blue-600 hover:underline">View All →</button>
             </div>
             <div className="space-y-4">
-               {[
-                 { title: 'New college recommendation', desc: 'Based on your profile', time: '10 min ago', icon: Building2, color: 'text-rose-500', bg: 'bg-rose-50' },
-                 { title: 'JEE Main application reminder', desc: 'Deadline in 12 days', time: '2 hours ago', icon: CalendarDays, color: 'text-blue-500', bg: 'bg-blue-50' },
-                 { title: 'Your aptitude report is ready', desc: 'Check your results', time: 'Yesterday', icon: Target, color: 'text-emerald-500', bg: 'bg-emerald-50' },
-                 { title: 'Profile completion reminder', desc: 'Add your location preference', time: 'Yesterday', icon: User, color: 'text-orange-500', bg: 'bg-orange-50' }
-               ].map((notif, idx) => (
-                 <div key={idx} className="flex gap-3">
-                   <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${notif.bg} ${notif.color}`}>
-                     <notif.icon className="w-4 h-4"/>
+               {notifications.length === 0 ? (
+                 <div className="text-xs text-gray-500 italic">No recent notifications.</div>
+               ) : (
+                 notifications.slice(0, 4).map((notif, idx) => (
+                   <div key={notif.id || idx} className="flex gap-3 cursor-pointer group" onClick={() => notif.link && navigate(notif.link)}>
+                     <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${notif.type === 'ALERT' ? 'bg-rose-50 text-rose-500' : 'bg-blue-50 text-blue-500'}`}>
+                       {notif.type === 'ALERT' ? <ShieldAlert className="w-4 h-4"/> : <Building2 className="w-4 h-4"/>}
+                     </div>
+                     <div className="flex-1 min-w-0">
+                       <div className="text-[11px] font-bold text-gray-900 leading-tight truncate group-hover:text-blue-600 transition-colors">{notif.title}</div>
+                       <div className="text-[9px] text-gray-500 font-medium truncate mt-0.5">{notif.message}</div>
+                     </div>
+                     <div className="text-[9px] font-medium text-gray-400 shrink-0">
+                       {new Date(notif.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                     </div>
                    </div>
-                   <div className="flex-1 min-w-0">
-                     <div className="text-[11px] font-bold text-gray-900 leading-tight truncate">{notif.title}</div>
-                     <div className="text-[9px] text-gray-500 font-medium truncate mt-0.5">{notif.desc}</div>
-                   </div>
-                   <div className="text-[9px] font-medium text-gray-400 shrink-0">{notif.time}</div>
-                 </div>
-               ))}
+                 ))
+               )}
             </div>
           </div>
 
