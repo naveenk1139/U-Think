@@ -66,6 +66,8 @@ U-Think/
 │   │   ├── models/           # Mongoose schemas (Polymorphic Graph, DataImportRun)
 │   │   ├── routes/           # RESTful API endpoints
 │   │   ├── scripts/          # Massive seeders & Real Data ingestion engines
+│   │   │   └── migrations/   # Database migration and cleanup scripts
+│   │   ├── services/         # Integrations & Core Business Logic (AI, Scraping, Email)
 │   │   └── index.ts          # Application entry point & Global middleware loader
 │   └── package.json          # Backend dependencies
 │
@@ -73,8 +75,18 @@ U-Think/
 │   ├── src/
 │   │   ├── api/              # Axios API clients for backend communication
 │   │   ├── components/       # Highly reusable UI components (Sidebar, Modals, Loaders)
+│   │   ├── contexts/         # Global React Contexts (Auth, Notifications)
+│   │   ├── hooks/            # Custom React Hooks
+│   │   ├── lib/              # Shared utility functions and formatting libraries
+│   │   ├── locales/          # Translation JSON files for multi-language support (i18next)
 │   │   ├── pages/            # Core Feature Page Components
+│   │   │   ├── Admin/        # Admin dashboards and data health tools
+│   │   │   ├── After10th/    # Career navigation post-10th grade
+│   │   │   ├── Roadmap/      # Interactive visual roadmaps
+│   │   │   └── ...
 │   │   ├── App.tsx           # Main application routing logic
+│   │   ├── index.css         # Global Tailwind directives
+│   │   ├── i18n.ts           # i18next configuration
 │   │   └── main.tsx          # React DOM mounting point
 │   ├── tailwind.config.js    # Tailwind v4 design system configuration
 │   └── vite.config.ts        # Vite build & proxy configuration
