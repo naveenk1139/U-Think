@@ -19,6 +19,11 @@ U-THINK is an exhaustive, comprehensive, and highly detailed educational navigat
 
 This is a modern **MERN** stack application built with a focus on performance, scalability, type safety, and seamless Artificial Intelligence integration.
 
+### 💻 Languages Used
+*   **TypeScript (91.8%)**: The core language for both the React frontend and the Express backend, ensuring strict type-safety and robust development.
+*   **JavaScript (6.0%)**: Utilized for specific utility scripts, database commands, and legacy ETL processing.
+*   **Python (2.1%)**: Used for backend data scraping, exam generation scripts, and theme refactoring utilities.
+
 ### 🎨 Frontend (Client-Side)
 *   **Core Framework:** React 19, TypeScript
 *   **Build Tool & Bundler:** Vite 6
