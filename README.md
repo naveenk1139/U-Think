@@ -2,36 +2,18 @@
 
 U-THINK is an exhaustive, comprehensive, and highly detailed educational navigation ecosystem built specifically for Karnataka students. It guides students from post-10th grade all the way to Research level (PhD), covering every single educational pathway, stream, course combination, branch, specialization, exam, career path, and institution available in the state.
 
-## 🚀 5 New Educational Intelligence Features
-
-*   **Education Path Dependency Engine:** Interactive graph explorer showing prerequisites and downstream pathways for any stream, course, or degree.
-*   **Subject Combination Impact Simulator:** AI tool to pick 3-5 subjects and instantly see what career paths are unlocked and permanently locked.
-*   **Eligibility Chain Analyzer:** Reverse-engineers the exact academic steps (exams, degrees, combinations) required to reach a target career starting from 10th grade.
-*   **Education Route Switch Engine:** Analyzes lateral entry options, bridge courses, and shortcuts for switching between entirely different academic tracks.
-*   **Academic Recovery Path Planner:** Compassionate AI that finds alternative routes (like NIOS or Diplomas) if a student faces an academic setback or failure.
-
 ## 🌟 Key Features
 
 *   **100% Real Karnataka Institutional Data:** Covers ALL 31 districts and EVERY taluk in Karnataka with zero placeholder or fake data. All 3,500+ colleges and institutions are directly verified from official AISHE, UGC, and KEA databases.
-*   **Multilingual AI Translation Layer:** Seamlessly supports local languages dynamically through an AI-powered translation middleware, making educational guidance accessible to everyone.
+*   **Pathways Explorer & Knowledge Graph:** Interactive visual pathway trees (`PathwayTree`) and a full `KnowledgeGraphView` to explore educational routes seamlessly.
+*   **Colleges & Exams Directory:** Comprehensive and highly filterable directories for colleges and exams, featuring detailed profile pages and direct comparison tools (`ExamComparisonModal`, `DegreeComparisonModal`, `CourseComparisonModal`).
+*   **AI Counselor & Recommendations:** An integrated AI mentor (`AICounselorModal`) and smart recommendation widget (`AIRecommendationWidget`) utilizing Gemini to offer personalized guidance.
+*   **Multilingual AI Translation Layer:** Seamlessly supports local languages dynamically through an AI-powered translation middleware (`LanguageSwitcher`), making educational guidance accessible to everyone.
+*   **Job Finder & Career Tracker:** Integrated job boards (`JobFinder`, `SavedJobs`) and career tools (`AdminJobPanel`) directly tied to educational outcomes.
+*   **Student Dashboard & Roadmaps:** A personalized portal (`StudentDashboard`) featuring application trackers, visual roadmaps (`RoadmapVisualizer`), and deadline monitoring.
+*   **Document Analysis:** Automatically extracts academic information from uploaded marksheets securely using Gemini Vision capabilities (`DocumentAnalysis`).
+*   **Mentorship Program:** Connects students with experienced mentors (`MentorshipProgram`) to guide them through complex career decisions.
 *   **Security & High-Performance Caching:** Fully protected against DDoS and NoSQL injections with strict rate-limiting, Helmet, and query sanitization. Employs aggressive in-memory caching to drastically reduce TTFB for major educational catalog reads.
-*   **Career GPS Engine:** Turn-by-turn academic navigation mapping out the exact steps, exams, and skills required to reach a specific target career.
-*   **Skill Evidence Graph:** Visual node-based graph mapping user skills to verifiable academic documents and projects.
-*   **Career Fork Simulator:** AI-driven opportunity cost simulator that directly compares two career paths across Time Investment, Financial Cost, Job Growth, and Earning Potential.
-*   **Recommendation Stability Engine:** "Devil's Advocate" AI that critically evaluates career choices against a student's profile to expose hidden risks, mismatched traits, and provide alternative suggestions.
-*   **6 ASTRA Educational Pathway Engine:** The core navigation system mapping the 6 major educational transitions in Karnataka:
-    1. **Post-10th Streams (PUC)**: Science, Commerce, Arts with detailed combinations.
-    2. **ITI (Industrial Training)**: Engineering & Non-Engineering trades.
-    3. **Polytechnic (Diploma)**: 3-year technical courses and lateral entry routes.
-    4. **Paramedical & Allied Health**: Nursing, lab tech, and medical diplomas.
-    5. **Undergraduate (UG)**: B.Tech, B.Com, B.Sc, BA, etc. mapped to pre-requisites.
-    6. **Postgraduate (PG) & Research**: Specializations, Masters, and PhDs.
-*   **Eligibility & Exams Engine:** Hard-linked prerequisites for degrees, automatically rendering mandatory entrance exams (e.g., JEE Main for B.Tech) directly in the pathway explorer.
-*   **Career Passport:** A shareable, aggregated snapshot of the student's verified skills, stability scores, and active roadmap.
-*   **Live Exam & Degree Directory:** A real-time engine tracking major entrance exams (JEE, NEET, KCET, CA, UPSC, etc.) with dynamic countdowns, eligibility checkers, and automated status calculations.
-*   **AI Document Analysis:** Automatically extracts academic information (grades, subjects, institution) from uploaded 10th, 12th, or Diploma marksheets securely using Gemini Vision capabilities.
-*   **AI Student Twin:** A virtual AI counselor and personalized data twin that maps the student's unique academic profile, allowing 24/7 intelligent, contextual advice and tailored pathway navigation.
-*   **AI-Powered Recommendations:** Built-in AI integration (Gemini 2.5 Pro) that scores and recommends personalized pathways and colleges based on the user's aptitude, budget, and career goals.
 
 ## 🛠️ Technology Stack
 
@@ -45,7 +27,6 @@ This is a modern **MERN** stack application built with a focus on performance, s
 *   **Animations:** Motion (Framer Motion)
 *   **Maps & Geospatial:** Google Maps API (`@react-google-maps/api`)
 *   **HTTP Client:** Axios
-*   **Data Parsing:** React Markdown
 *   **Localization:** i18next
 
 ### ⚙️ Backend (Server-Side)
@@ -62,7 +43,6 @@ This is a modern **MERN** stack application built with a focus on performance, s
 *   **Provider:** Google Gemini SDK (`@google/genai` v2.4.0)
 *   **Models Applied:** Gemini 2.5 Pro / 3.6 Flash (Complex Reasoning, Recommendations, Simulation, Multilingual Translation)
 *   **Vision AI:** Gemini Vision API (for extracting structured data from 10th/12th Marksheets)
-*   **Resilience Engineering:** Built-in automated fallback mechanisms and mock data simulators to elegantly handle `429 RESOURCE_EXHAUSTED` rate limits.
 
 ## 📁 Repository Structure
 
@@ -73,7 +53,7 @@ U-Think/
 │   │   ├── config/           # Environment variables, MongoDB connection, Gemini setup
 │   │   ├── controllers/      # API Controllers for pathways, exams, colleges, and auth
 │   │   ├── middleware/       # Security (Helmet, Sanitize), Cache, Auth, AI Translation
-│   │   ├── models/           # Mongoose schemas (College, Exam, Pathway, DataImportRun)
+│   │   ├── models/           # Mongoose schemas (College, Exam, Pathway, DataImportRun, etc)
 │   │   ├── routes/           # REST endpoints (educationGraphRoutes, aiRoutes, etc.)
 │   │   ├── scripts/          # Massive seeders & Real Data ingestion
 │   │   │   ├── seedGeography.ts      # Seeds 31 Districts and all Taluks
@@ -95,11 +75,10 @@ U-Think/
 │   │   ├── contexts/         # React Contexts (AuthContext, NotificationContext)
 │   │   ├── locales/          # Translation JSON files for multi-language support (i18next)
 │   │   ├── pages/            # Feature Page Components
-│   │   │   ├── DependencyEngine/   # Path Graph Explorer
-│   │   │   ├── ImpactSimulator/    # Subject Combination Tool
-│   │   │   ├── EligibilityChain/   # Target Career Reverse-Engineering
-│   │   │   ├── RouteSwitch/        # Lateral Entry & Switch Strategy Tool
-│   │   │   └── AcademicRecovery/   # AI Backup Planner for Setbacks
+│   │   │   ├── Admin/              # Admin dashboards and tools
+│   │   │   ├── After10th/          # Career paths after 10th grade
+│   │   │   ├── Roadmap/            # Roadmap views
+│   │   │   └── Deadlines.tsx       # Important deadlines overview
 │   │   ├── App.tsx           # Main application routing
 │   │   └── main.tsx          # React DOM entry point
 │   ├── package.json          # Frontend dependencies
@@ -164,18 +143,12 @@ To power the core ecosystem, you **must** populate the database with the structu
 cd backend
 
 # 1. Core Educational Pathways
-# Seeds all high school streams (PCMB, CEBA), undergraduate degrees (B.Tech, B.Com), 
-# and master's specializations into the database.
 npx tsx src/scripts/seedMegaPathways.ts
 
 # 2. Entrance Exams Directory
-# Seeds the state and national entrance exams (KCET, NEET, JEE) along with 
-# their current status (Upcoming, Registration Open, etc.).
 npx tsx src/scripts/seedMegaExams.ts
 
 # 3. Graph Relationships Mapping
-# (CRITICAL for the Dependency Engine & Impact Simulator)
-# Creates the complex prerequisite relationships mapping which subjects unlock which degrees.
 npx tsx src/scripts/seedGraphRelations.ts
 
 # 4. Phase-wise Seeders (For Advanced Pathways and Colleges)
