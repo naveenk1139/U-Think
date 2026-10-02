@@ -9,10 +9,9 @@ U-THINK is an exhaustive, comprehensive, and highly detailed educational navigat
 *   **Colleges & Exams Directory:** Comprehensive and highly filterable directories for colleges and exams, featuring detailed profile pages and direct side-by-side comparison tools.
 *   **AI Counselor & Recommendations:** An integrated AI mentor and smart recommendation engine utilizing Gemini LLMs to offer personalized career guidance based on user profiles.
 *   **Multilingual AI Translation Layer:** Seamlessly supports local languages dynamically through an AI-powered translation middleware, making educational guidance accessible to everyone in their native language.
-*   **Job Finder & Career Tracker:** Integrated job boards and career tracking tools directly tied to educational outcomes and required degrees.
+*   **Live Job Boards & Market Trends:** Directly pulls real-time job openings and career statistics via the Adzuna API to map educational choices to actual market demand.
 *   **Student Dashboard & Roadmaps:** A personalized student portal featuring application trackers, highly visual academic roadmaps, and automated deadline monitoring.
 *   **Document Analysis:** Automatically extracts and structures academic information from uploaded marksheets securely using Gemini Vision capabilities.
-*   **Mentorship Program:** Connects students with experienced mentors and alumni to guide them through complex career and academic decisions.
 *   **Security & High-Performance Caching:** Fully protected against DDoS and NoSQL injections with strict rate-limiting, Helmet, and query sanitization. Employs aggressive in-memory caching to drastically reduce response times for major educational catalog reads.
 
 ## 🛠️ Technology Stack
@@ -38,21 +37,17 @@ This is a modern **MERN** stack application built with a focus on performance, s
 *   **Runtime & Framework:** Node.js, Express.js (v4.21), TypeScript
 *   **Database & ODM:** MongoDB, Mongoose 8 (with Polymorphic Graph Schemas)
 *   **Authentication & Security:** JWT, bcryptjs, Helmet, Express-Rate-Limit, Express-Mongo-Sanitize, CORS
-*   **Performance:** Custom API response caching middleware
 *   **File Handling:** Multer (for document uploads)
-*   **Data Ingestion & Scraping:** Puppeteer, Cheerio (AISHE ETL pipeline)
 *   **Communications:** Nodemailer (Email), Twilio (SMS), node-cron (Scheduler)
-*   **Development Tools:** TSX (TypeScript Execute), Dotenv
 
-### 🧠 Artificial Intelligence (AI/ML) & Graph
-*   **Provider:** Google Gemini SDK (`@google/genai` v2.4.0)
-*   **LLM Integration:** Utilizes Large Language Models (LLMs) like Gemini 2.5 Pro / 3.6 Flash for complex reasoning, personalized career recommendations, educational simulations, and dynamic multilingual translation.
-*   **RAG Architecture:** Employs Retrieval-Augmented Generation (RAG) by dynamically injecting context from the real, verified institutional Knowledge Graph into AI prompts, ensuring completely grounded and hallucination-free advice.
-*   **Vision AI:** Gemini Vision API used for extracting and processing structured data from uploaded 10th/12th Marksheets.
+### 🧠 APIs & Integrations (Required Keys)
+This project relies on several critical third-party APIs to function optimally. You must obtain API keys for the following services:
+*   **Google Gemini API (`GEMINI_API_KEY`)**: Used heavily for the AI Counselor, dynamic multilingual translation, intelligent roadmap generation, and RAG architectures.
+*   **Adzuna API (`ADZUNA_APP_ID`, `ADZUNA_APP_KEY`)**: Used to fetch live job listings, career market trends, and salary insights.
+*   **CollegeDB API (`COLLEGEDB_API_KEY`)**: Used to aggregate extended institutional meta-data for universities and polytechnics.
+*   **Gmail SMTP (`SMTP_USER`, `SMTP_PASS`)**: Used by Nodemailer to dispatch authentication OTPs and system notifications.
 
 ## 📁 Repository Structure
-
-The workspace is organized into a clean, modern monorepo structure separating the AI-driven Node.js backend from the highly interactive React Vite frontend.
 
 ```text
 U-Think/
@@ -64,35 +59,20 @@ U-Think/
 │   │   ├── models/           # Mongoose schemas (Polymorphic Graph, DataImportRun)
 │   │   ├── routes/           # RESTful API endpoints
 │   │   ├── scripts/          # Massive seeders & Real Data ingestion engines
-│   │   │   ├── seedGeography.ts      # Hydrates 31 Districts and Taluks
-│   │   │   ├── seedColleges.ts       # Core seeder for verified institutions
-│   │   │   └── importRealCollegesPipeline.ts # Automated ETL data pipeline
-│   │   ├── services/         # Integrations & Core Business Logic
-│   │   │   ├── ingestion/    # AISHE Scraper & College DB Client
-│   │   │   ├── geminiService # Core Google Gemini AI integrations
-│   │   │   └── reminderScheduler # Cron-based notification engine
 │   │   └── index.ts          # Application entry point & Global middleware loader
 │   └── package.json          # Backend dependencies
 │
 ├── 🎨 frontend/                 # React Vite Application
 │   ├── src/
 │   │   ├── api/              # Axios API clients for backend communication
-│   │   ├── assets/           # Static assets, UI graphics, and global CSS
 │   │   ├── components/       # Highly reusable UI components (Sidebar, Modals, Loaders)
-│   │   ├── contexts/         # Global React Contexts (Auth, Notifications)
-│   │   ├── locales/          # Translation JSON files for multi-language support (i18next)
 │   │   ├── pages/            # Core Feature Page Components
-│   │   │   ├── Admin/              # Admin dashboards and data health tools
-│   │   │   ├── After10th/          # Career navigation post-10th grade
-│   │   │   ├── Roadmap/            # Interactive visual roadmaps
-│   │   │   └── Deadlines.tsx       # Important chronological deadlines overview
 │   │   ├── App.tsx           # Main application routing logic
 │   │   └── main.tsx          # React DOM mounting point
 │   ├── tailwind.config.js    # Tailwind v4 design system configuration
 │   └── vite.config.ts        # Vite build & proxy configuration
 │
 ├── 📄 docs/                     # Extensive Audit Reports & Architecture Plans (Phases 1-17)
-├── 📦 package.json              # Workspace root package manager
 └── 📖 README.md                 # Project documentation
 ```
 
@@ -104,7 +84,7 @@ Follow these instructions to get a copy of the project up and running on your lo
 Ensure you have the following installed on your local environment:
 *   **Node.js** (v18.x or higher)
 *   **MongoDB** (Local instance running on port `27017` or a MongoDB Atlas cluster URL)
-*   **Google Gemini API Key** *(Required for AI features. If the free-tier rate limit (HTTP 429) is hit, the application gracefully degrades to using mock data).*
+*   **API Keys** for Gemini, Adzuna, and SMTP.
 
 ### 💻 Installation & Setup
 
@@ -125,9 +105,24 @@ You must set up environment files for both the frontend and backend.
 *   **Backend** (`backend/.env`):
     ```env
     PORT=5000
-    MONGO_URI=mongodb://127.0.0.1:27017/u-think
+    MONGODB_URI=mongodb://127.0.0.1:27017/uthink
     CORS_ORIGIN=http://localhost:3000
+    
+    # Required API Keys
     GEMINI_API_KEY=your_google_gemini_api_key_here
+    ADZUNA_APP_ID=your_adzuna_app_id
+    ADZUNA_APP_KEY=your_adzuna_app_key
+    COLLEGEDB_API_KEY=your_collegedb_api_key
+    
+    # Email SMTP (Gmail)
+    SMTP_HOST=smtp.gmail.com
+    SMTP_PORT=587
+    SMTP_USER=your_email@gmail.com
+    SMTP_PASS=your_app_password
+    SMTP_FROM=your_email@gmail.com
+    
+    # Security
+    JWT_SECRET=your_jwt_secret
     ```
 *   **Frontend** (`frontend/.env`):
     ```env
@@ -160,23 +155,25 @@ To power the core ecosystem, you **must** populate the database with the structu
 ```bash
 cd backend
 
-# 1. Base Graph Nodes
-npx tsx src/scripts/seedMegaPathways.ts   # Core Educational Pathways
+# 1. Base Graph Nodes & Foundation
 npx tsx src/scripts/seedMegaExams.ts      # Entrance Exams Directory
+npx tsx src/scripts/seedPathwaysSystem.ts # Master Pathways Hierarchy
 
-# 2. Edges & Relationships
-npx tsx src/scripts/seedGraphRelations.ts # Connects subjects to degrees
+# 2. Detailed Course Blueprints & Mapping
+npx tsx src/scripts/migrations/20261003_seed_pathway_courses.ts
+npx tsx src/scripts/migrations/20261003_seed_all_combinations.ts
 
-# 3. Advanced Pathways (Phase-wise Seeders)
-npx tsx src/scripts/seedSchoolPhase3.ts
-npx tsx src/scripts/seedPhase4.ts
-npx tsx src/scripts/seedPhase5.ts
-npx tsx src/scripts/seedPhase6.ts
-npx tsx src/scripts/seedPhase9.ts
+# 3. Categorization & Duplicate Cleanup
+npx tsx src/scripts/migrations/20261003_fix_categories.ts
+npx tsx src/scripts/migrations/20261003_remove_empty_streams.ts
+npx tsx src/scripts/migrations/20261003_remove_empty_pathways.ts
 
-# 4. Real Institutional Data Mapping
+# 4. Real Institutional Data Mapping (Colleges & Geography)
 npx tsx src/scripts/seedGeography.ts      # 31 Districts & Taluks
 npx tsx src/scripts/seedColleges.ts       # 3,500+ Verified Colleges
+
+# 5. Edges & Relationships
+npx tsx src/scripts/seedGraphRelations.ts # Connects subjects to degrees
 ```
 
 ---
