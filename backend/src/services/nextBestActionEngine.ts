@@ -4,7 +4,7 @@ import Recommendation from '../models/Recommendation.js';
 
 export interface INextBestAction {
   id: string;
-  type: 'URGENT_DEADLINE' | 'PROFILE_INCOMPLETE' | 'SKILL_GAP' | 'RECOMMENDATION_REVIEW';
+  type: 'URGENT_DEADLINE' | 'PROFILE_INCOMPLETE' | 'SKILL_GAP' | 'RECOMMENDATION_REVIEW' | 'PATHWAY_EXPLORATION';
   title: string;
   description: string;
   actionText: string;
@@ -66,11 +66,11 @@ export const generateNextBestActions = async (userId: string): Promise<INextBest
     });
   }
 
-  // 3. Unreviewed AI Recommendations
+  // 3. Unreviewed AI Recommendations and Skill Gaps
   const unreviewedRecs = await Recommendation.find({
     studentId: user._id,
     status: 'Active'
-  }).sort({ matchScore: -1 }).limit(1).populate('entityId');
+  }).sort({ matchScore: -1 }).populate('entityId');
 
   if (unreviewedRecs.length > 0) {
     const topRec = unreviewedRecs[0];
@@ -85,6 +85,33 @@ export const generateNextBestActions = async (userId: string): Promise<INextBest
       actionText: 'Review Match',
       actionUrl: '/dashboard', // User can view it in the widget
       priority: 75
+    });
+
+    // Check for Skill Gaps in top recommendations
+    const gapRec = unreviewedRecs.find(r => r.missingFactors && r.missingFactors.length > 0);
+    if (gapRec) {
+      actions.push({
+        id: `nba_skill_gap_${gapRec._id}`,
+        type: 'SKILL_GAP',
+        title: `Upskill Required: ${gapRec.missingFactors[0]}`,
+        description: `You are missing '${gapRec.missingFactors[0]}' which is critical for your matched goal. Take a course to bridge this gap.`,
+        actionText: 'Find Courses',
+        actionUrl: '/professional-courses', // Direct to professional courses
+        priority: 80
+      });
+    }
+  }
+
+  // 4. Educational Pathway Mapping for High Schoolers
+  if (user.educationLevel === '10th' || user.educationLevel === '11th') {
+    actions.push({
+      id: `nba_pathway_explore`,
+      type: 'PATHWAY_EXPLORATION',
+      title: `Map Your Future Stream`,
+      description: `Students in ${user.educationLevel} should explore available streams (Science, Commerce, Arts) to align with their future goals.`,
+      actionText: 'Explore Pathways',
+      actionUrl: '/pathways/after-10th',
+      priority: 60
     });
   }
 
