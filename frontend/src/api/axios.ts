@@ -17,6 +17,11 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    
+    // Attach current language for backend AI translation layer
+    const lang = localStorage.getItem('i18nextLng') || 'en';
+    config.headers['x-language'] = lang;
+
     return config;
   },
   (error) => Promise.reject(error)

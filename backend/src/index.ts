@@ -1,6 +1,7 @@
 import express from 'express';
 import http from 'http';
 import { Server } from 'socket.io';
+import { aiTranslationMiddleware } from './middleware/aiTranslationMiddleware.js';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
@@ -133,6 +134,9 @@ app.use((req, _res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
   next();
 });
+
+// Dynamic AI Translation Layer (Phase 11: Multilingual AI)
+app.use(aiTranslationMiddleware);
 
 // Serve uploads directory
 app.use('/uploads', express.static(path.join(__dirname, '../../uploads')));

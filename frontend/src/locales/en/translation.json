@@ -1,0 +1,15 @@
+{
+  "nav": {
+    "home": "Home Feed",
+    "pathways": "Pathways & Streams",
+    "exams": "Exams & Degrees",
+    "assessment": "Aptitude Assessment",
+    "jobs": "Job Explorer",
+    "mentors": "Industry Mentors"
+  },
+  "dashboard": {
+    "welcome": "Welcome back",
+    "deadlines": "Upcoming Deadlines",
+    "roadmap": "Your Next Steps"
+  }
+}

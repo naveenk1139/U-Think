@@ -5,6 +5,7 @@ import App from './App.tsx';
 import './index.css';
 import { AuthProvider } from './contexts/AuthContext';
 import { AppearanceProvider } from './contexts/AppearanceContext';
+import './i18n';
 import { NotificationProvider } from './contexts/NotificationContext';
 
 class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {

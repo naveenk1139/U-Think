@@ -3,6 +3,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Home as HomeIcon, BookOpen, Award, Briefcase, Users, MessageSquareCode, GraduationCap } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import NotificationDropdown from './NotificationDropdown';
+import LanguageSwitcher from './LanguageSwitcher';
+import { useTranslation } from 'react-i18next';
 
 interface HeaderProps {
   activeTab?: string;
@@ -14,6 +16,7 @@ export default function Header({ onOpenCounselor }: HeaderProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const { currentUser, logout } = useAuth();
+  const { t } = useTranslation();
   const [customPhotoURL, setCustomPhotoURL] = useState(localStorage.getItem('custom_photo_url') || null);
 
   useEffect(() => {
@@ -28,12 +31,12 @@ export default function Header({ onOpenCounselor }: HeaderProps) {
   const activeTab = location.pathname.replace('/', '') || 'home';
 
   const navItems = [
-    { id: 'home', label: 'Home Feed', icon: HomeIcon, path: '/' },
-    { id: 'streams', label: 'Pathways & Streams', icon: BookOpen, path: '/streams' },
-    { id: 'exams', label: 'Exams & Degrees', icon: GraduationCap, path: '/exams' },
-    { id: 'quiz', label: 'Aptitude Assessment', icon: Award, path: '/quiz' },
-    { id: 'jobs', label: 'Job Explorer', icon: Briefcase, path: '/jobs' },
-    { id: 'mentorship', label: 'Industry Mentors', icon: Users, path: '/mentorship' },
+    { id: 'home', label: t('nav.home'), icon: HomeIcon, path: '/' },
+    { id: 'streams', label: t('nav.pathways'), icon: BookOpen, path: '/streams' },
+    { id: 'exams', label: t('nav.exams'), icon: GraduationCap, path: '/exams' },
+    { id: 'quiz', label: t('nav.assessment'), icon: Award, path: '/quiz' },
+    { id: 'jobs', label: t('nav.jobs'), icon: Briefcase, path: '/jobs' },
+    { id: 'mentorship', label: t('nav.mentors'), icon: Users, path: '/mentorship' },
   ];
 
   const goTo = (path: string) => navigate(path);
@@ -86,6 +89,7 @@ export default function Header({ onOpenCounselor }: HeaderProps) {
 
           {/* Right: User & AI Counselor */}
           <div className="flex items-center gap-4">
+            <LanguageSwitcher />
             {currentUser && <NotificationDropdown />}
             {currentUser ? (
               <div className="hidden sm:flex items-center gap-3 pr-2 border-r border-border shrink-0">
