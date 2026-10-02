@@ -195,10 +195,10 @@ We welcome contributions to make U-Think the best educational platform possible!
 
 To maintain absolute data integrity and prevent AI hallucinations during RAG injection, U-Think grounds its Knowledge Graph and College Directory exclusively in verified, official government and institutional sources. 
 
-*   🏛️ **AISHE (All India Survey on Higher Education):** Provides the foundational dataset for the 3,500+ verified colleges in Karnataka.
-*   🎓 **KEA (Karnataka Examination Authority):** Source of truth for state-level entrance exams (KCET, PGCET, DCET) and state matrix seat counseling rules.
-*   📝 **NTA (National Testing Agency):** Centralized data for national entrance exams like JEE Main and NEET.
-*   📜 **UGC (University Grants Commission):** Validation of University accreditations and approved degree nomenclatures.
-*   ⚙️ **AICTE (All India Council for Technical Education):** Technical and engineering college approval data.
-*   🏢 **KSHEC (Karnataka State Higher Education Council):** State-specific higher education policies and structural pathways.
-*   🔧 **DTE (Directorate of Technical Education, Karnataka):** Diploma and Polytechnic curriculum and lateral entry eligibility rules.
+*   🏛️ **AISHE (All India Survey on Higher Education):** Provides the foundational dataset for the 3,500+ verified colleges in Karnataka. [https://aishe.gov.in](https://aishe.gov.in)
+*   🎓 **KEA (Karnataka Examination Authority):** Source of truth for state-level entrance exams (KCET, PGCET, DCET) and state matrix seat counseling rules. [https://cetonline.karnataka.gov.in/kea](https://cetonline.karnataka.gov.in/kea)
+*   📝 **NTA (National Testing Agency):** Centralized data for national entrance exams like JEE Main and NEET. [https://nta.ac.in](https://nta.ac.in)
+*   📜 **UGC (University Grants Commission):** Validation of University accreditations and approved degree nomenclatures. [https://www.ugc.gov.in](https://www.ugc.gov.in)
+*   ⚙️ **AICTE (All India Council for Technical Education):** Technical and engineering college approval data. [https://www.aicte-india.org](https://www.aicte-india.org)
+*   🏢 **KSHEC (Karnataka State Higher Education Council):** State-specific higher education policies and structural pathways. [https://kshec.karnataka.gov.in](https://kshec.karnataka.gov.in)
+*   🔧 **DTE (Directorate of Technical Education, Karnataka):** Diploma and Polytechnic curriculum and lateral entry eligibility rules. [https://dte.karnataka.gov.in](https://dte.karnataka.gov.in)
