@@ -7,7 +7,8 @@ U-THINK is an exhaustive, comprehensive, and highly detailed educational navigat
 *   **100% Real Karnataka Institutional Data:** Covers ALL 31 districts and EVERY taluk in Karnataka with zero placeholder or fake data. All 3,500+ colleges and institutions are directly verified from official AISHE, UGC, and KEA databases.
 *   **Pathways Explorer & Knowledge Graph:** Interactive visual pathway trees and a full Knowledge Graph to explore complex educational routes, degree prerequisites, and downstream career options seamlessly.
 *   **Colleges & Exams Directory:** Comprehensive and highly filterable directories for colleges and exams, featuring detailed profile pages and direct side-by-side comparison tools.
-*   **AI Counselor & Recommendations:** An integrated AI mentor and smart recommendation engine utilizing Gemini LLMs to offer personalized career guidance based on user profiles.
+*   **AI Counselor & Recommendations:** An integrated AI mentor and smart recommendation engine utilizing Gemini LLMs to offer highly personalized, profile-based career and course recommendations.
+*   **LLM & RAG Architecture:** Employs advanced Retrieval-Augmented Generation (RAG) by injecting context from the real, verified institutional Knowledge Graph into AI prompts, ensuring completely grounded and hallucination-free advice.
 *   **Multilingual AI Translation Layer:** Seamlessly supports local languages dynamically through an AI-powered translation middleware, making educational guidance accessible to everyone in their native language.
 *   **Live Job Boards & Market Trends:** Directly pulls real-time job openings and career statistics via the Adzuna API to map educational choices to actual market demand.
 *   **Student Dashboard & Roadmaps:** A personalized student portal featuring application trackers, highly visual academic roadmaps, and automated deadline monitoring.
@@ -40,7 +41,13 @@ This is a modern **MERN** stack application built with a focus on performance, s
 *   **File Handling:** Multer (for document uploads)
 *   **Communications:** Nodemailer (Email), Twilio (SMS), node-cron (Scheduler)
 
-### 🧠 APIs & Integrations (Required Keys)
+### 🧠 Artificial Intelligence (LLM, AI/ML & RAG)
+*   **Provider:** Google Gemini SDK (`@google/genai` v2.4.0)
+*   **Profile-Based Recommendations:** Utilizes Large Language Models (LLMs) like Gemini 2.5 Pro / Flash for complex reasoning, personalized career recommendations based on student aptitude/interest profiles, and dynamic multilingual translation.
+*   **RAG Architecture:** Employs Retrieval-Augmented Generation (RAG) by dynamically injecting context from the real, verified institutional Knowledge Graph into AI prompts, ensuring completely grounded and hallucination-free advice.
+*   **Vision AI:** Gemini Vision API used for extracting and processing structured data from uploaded 10th/12th Marksheets.
+
+### ⚙️ APIs & Integrations (Required Keys)
 This project relies on several critical third-party APIs to function optimally. You must obtain API keys for the following services:
 *   **Google Gemini API (`GEMINI_API_KEY`)**: Used heavily for the AI Counselor, dynamic multilingual translation, intelligent roadmap generation, and RAG architectures.
 *   **Adzuna API (`ADZUNA_APP_ID`, `ADZUNA_APP_KEY`)**: Used to fetch live job listings, career market trends, and salary insights.
