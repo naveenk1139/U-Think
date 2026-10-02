@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { ai } from '../services/geminiService.js';
+import { ai } from '../config/gemini.js';
 import crypto from 'crypto';
 
 // Simple in-memory cache for translations (In a real app, use Redis or MongoDB)
