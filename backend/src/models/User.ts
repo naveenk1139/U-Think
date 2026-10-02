@@ -110,6 +110,8 @@ export interface IUser extends Document {
     aiCounselor?: {
       enableGuidance?: boolean;
       personalization?: boolean;
+      implicitLikes?: string[];
+      implicitDislikes?: string[];
     };
     privacy?: {
       publicProfile?: boolean;
@@ -260,6 +262,8 @@ const UserSchema = new Schema<IUser>(
       aiCounselor: {
         enableGuidance: { type: Boolean, default: true },
         personalization: { type: Boolean, default: true },
+        implicitLikes: [{ type: String }],
+        implicitDislikes: [{ type: String }]
       },
       privacy: {
         publicProfile: { type: Boolean, default: false },

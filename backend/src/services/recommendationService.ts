@@ -15,7 +15,7 @@ import { generateGeminiResponse } from './geminiService.js';
  * Calculates a heuristic similarity score between the student's ML features and a Career's requirements.
  * In a true Python microservice, this would be `model.predict(features)`.
  */
-function computeMLMatchScore(features: IMLFeatureVector, career: any): number {
+function computeMLMatchScore(features: IMLFeatureVector, career: any, user: IUser): number {
   let score = 0;
   let maxPossible = 0;
 
@@ -53,7 +53,29 @@ function computeMLMatchScore(features: IMLFeatureVector, career: any): number {
 
   // Normalize final score to 0-100
   if (maxPossible === 0) return 0;
-  return Math.min(100, Math.round((score / maxPossible) * 100));
+  let finalScore = (score / maxPossible) * 100;
+
+  // 4. Phase 15: Implicit Feedback Calibration
+  const implicitLikes = user.settings?.aiCounselor?.implicitLikes || [];
+  const implicitDislikes = user.settings?.aiCounselor?.implicitDislikes || [];
+
+  const careerTags = [
+    career.industry?.toLowerCase(),
+    ...(career.skills || []).map((s: string) => s.toLowerCase())
+  ].filter(Boolean);
+
+  let implicitBonus = 0;
+  let implicitPenalty = 0;
+
+  careerTags.forEach(tag => {
+    if (implicitLikes.some(like => like.toLowerCase() === tag)) implicitBonus += 5;
+    if (implicitDislikes.some(dislike => dislike.toLowerCase() === tag)) implicitPenalty += 10;
+  });
+
+  // Apply bound penalties and bonuses
+  finalScore = finalScore + Math.min(implicitBonus, 15) - Math.min(implicitPenalty, 25);
+
+  return Math.max(0, Math.min(100, Math.round(finalScore)));
 }
 
 /**
@@ -83,7 +105,7 @@ export async function generateAllRecommendations(userId: string) {
     }
 
     // Phase 7: ML Scoring
-    const mlScore = computeMLMatchScore(mlFeatures, career);
+    const mlScore = computeMLMatchScore(mlFeatures, career, user);
 
     // Filter out completely irrelevant careers
     if (mlScore < 20) {

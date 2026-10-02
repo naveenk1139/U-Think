@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import { Response } from 'express';
 import { AuthRequest } from '../middleware/authMiddleware.js';
 import { generateAllRecommendations, explainRecommendation } from '../services/recommendationService.js';
@@ -59,8 +60,8 @@ export const getUserRecommendations = async (req: AuthRequest, res: Response) =>
 };
 
 /**
- * Phase 14: Recommendation Feedback
- * Update the status of a recommendation (Accept, Dismiss, Save)
+ * Phase 14 & 15: Recommendation Feedback & Continuous Personalization
+ * Update the status of a recommendation and train user preferences implicitly
  */
 export const updateRecommendationFeedback = async (req: AuthRequest, res: Response) => {
   try {
@@ -73,12 +74,59 @@ export const updateRecommendationFeedback = async (req: AuthRequest, res: Respon
     const recommendation = await Recommendation.findOne({ _id: id, studentId: userId });
     if (!recommendation) return res.status(404).json({ error: 'Recommendation not found' });
 
-    if (action === 'dismiss') {
-      recommendation.status = 'Dismissed';
-    } else if (action === 'accept') {
-      recommendation.status = 'Accepted';
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    if (action === 'dismiss' || action === 'accept') {
+      recommendation.status = action === 'dismiss' ? 'Dismissed' : 'Accepted';
+
+      // --- PHASE 15: Continuous Personalization ---
+      try {
+        const EntityModel = mongoose.model(recommendation.entityType);
+        const entity: any = await EntityModel.findById(recommendation.entityId);
+        
+        if (entity) {
+          // Extract keywords safely
+          const keywords = new Set<string>();
+          
+          if (recommendation.entityType === 'Career') {
+            if (entity.industry) keywords.add(entity.industry);
+            if (entity.skills && Array.isArray(entity.skills)) entity.skills.slice(0, 3).forEach((s: string) => keywords.add(s));
+          } else if (recommendation.entityType === 'College') {
+            if (entity.categories && Array.isArray(entity.categories)) entity.categories.forEach((c: string) => keywords.add(c));
+            if (entity.programs && Array.isArray(entity.programs)) entity.programs.slice(0, 2).forEach((p: string) => keywords.add(p));
+          } else if (recommendation.entityType === 'Course') {
+            if (entity.category) keywords.add(entity.category);
+            if (entity.tags && Array.isArray(entity.tags)) entity.tags.slice(0, 3).forEach((t: string) => keywords.add(t));
+          }
+
+          if (keywords.size > 0) {
+            if (!user.settings) user.settings = {};
+            if (!user.settings.aiCounselor) user.settings.aiCounselor = {};
+            if (!user.settings.aiCounselor.implicitLikes) user.settings.aiCounselor.implicitLikes = [];
+            if (!user.settings.aiCounselor.implicitDislikes) user.settings.aiCounselor.implicitDislikes = [];
+
+            const targetArray = action === 'accept' ? user.settings.aiCounselor.implicitLikes : user.settings.aiCounselor.implicitDislikes;
+            
+            keywords.forEach(kw => {
+              if (kw && !targetArray.includes(kw)) {
+                targetArray.push(kw);
+              }
+            });
+
+            // Keep arrays bounded to prevent bloating
+            if (targetArray.length > 20) {
+              targetArray.splice(0, targetArray.length - 20);
+            }
+
+            await user.save();
+          }
+        }
+      } catch (mlErr) {
+        console.error("Continuous Personalization Error:", mlErr);
+        // Fail silently for ML tuning so we don't break the user flow
+      }
     }
-    // For 'save', we just leave it active or handle it on the user profile side
     
     await recommendation.save();
     
