@@ -70,23 +70,30 @@ This is a modern **MERN** stack application built with a focus on performance, s
 U-Think/
 ├── backend/                  # Express API Server (Node.js/Express)
 │   ├── src/
-│   │   ├── config/           # Environment, Database, and API settings
-│   │   ├── controllers/      # Route handlers (pathwayController, etc.)
-│   │   ├── middleware/       # Custom middlewares (Security, Cache, auth, AI translation)
-│   │   ├── models/           # Mongoose schemas (Exam, College, Pathway, etc.)
-│   │   ├── routes/           # API endpoints (educationGraphRoutes.ts, etc.)
-│   │   ├── scripts/          # Data ingestion (seedMegaExams, seedGraphRelations, seedColleges)
-│   │   ├── services/         # Integrations (geminiService, Email, SMS, cron, Ingestion ETL)
-│   │   └── index.ts          # Application entry point
-│   ├── package.json
-│   └── tsconfig.json
+│   │   ├── config/           # Environment variables, MongoDB connection, Gemini setup
+│   │   ├── controllers/      # API Controllers for pathways, exams, colleges, and auth
+│   │   ├── middleware/       # Security (Helmet, Sanitize), Cache, Auth, AI Translation
+│   │   ├── models/           # Mongoose schemas (College, Exam, Pathway, DataImportRun)
+│   │   ├── routes/           # REST endpoints (educationGraphRoutes, aiRoutes, etc.)
+│   │   ├── scripts/          # Massive seeders & Real Data ingestion
+│   │   │   ├── seedGeography.ts      # Seeds 31 Districts and all Taluks
+│   │   │   ├── seedColleges.ts       # Main seeder for verified institutions
+│   │   │   └── importRealCollegesPipeline.ts # Automated ETL pipeline
+│   │   ├── services/         # Integrations & Core Logic
+│   │   │   ├── ingestion/    # AISHE Scraper & College DB Client
+│   │   │   ├── geminiService # Core AI integrations
+│   │   │   ├── reminderScheduler # Cron-based notification engine
+│   │   │   └── notificationAdapters # SMS/Email/In-App dispatcher
+│   │   └── index.ts          # Application entry point & Global middlewares
+│   ├── package.json          # Backend dependencies
+│   └── tsconfig.json         # TypeScript configuration
 ├── frontend/                 # React Vite Application (Client)
 │   ├── src/
 │   │   ├── api/              # Axios API clients for backend communication
 │   │   ├── assets/           # Static assets, images, and global CSS
-│   │   ├── components/       # Reusable UI components (Sidebar, Loaders)
-│   │   ├── contexts/         # React Context providers (AuthContext)
-│   │   ├── locales/          # Translation JSON files for multi-language support
+│   │   ├── components/       # Reusable UI components (Sidebar, Loaders, Modals)
+│   │   ├── contexts/         # React Contexts (AuthContext, NotificationContext)
+│   │   ├── locales/          # Translation JSON files for multi-language support (i18next)
 │   │   ├── pages/            # Feature Page Components
 │   │   │   ├── DependencyEngine/   # Path Graph Explorer
 │   │   │   ├── ImpactSimulator/    # Subject Combination Tool
@@ -95,9 +102,9 @@ U-Think/
 │   │   │   └── AcademicRecovery/   # AI Backup Planner for Setbacks
 │   │   ├── App.tsx           # Main application routing
 │   │   └── main.tsx          # React DOM entry point
-│   ├── package.json
-│   ├── tailwind.config.js
-│   └── vite.config.ts
+│   ├── package.json          # Frontend dependencies
+│   ├── tailwind.config.js    # Tailwind v4 configuration
+│   └── vite.config.ts        # Vite build configuration
 ├── docs/                     # Audit Reports & Architecture Plans (Phase 1-17)
 ├── package.json              # Workspace root package manager
 └── README.md                 # Project documentation
