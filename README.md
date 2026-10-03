@@ -4,6 +4,7 @@ U-THINK is an exhaustive, comprehensive, and highly detailed educational navigat
 
 ## 🌟 Key Features
 
+*   **Dynamic Hierarchical Data Engine:** A robust, N-level deep database architecture powering the Education Pathways. Progressively loads nested options (Pathway → Stream → Course → Combination → Branch) while dynamically calculating and rendering available options via fast MongoDB Aggregations.
 *   **100% Real Karnataka Institutional Data:** Covers ALL 31 districts and EVERY taluk in Karnataka with zero placeholder or fake data. All 3,500+ colleges and institutions are directly verified from official AISHE, UGC, and KEA databases.
 *   **Pathways Explorer & Knowledge Graph:** Interactive visual pathway trees and a full Knowledge Graph to explore complex educational routes, degree prerequisites, and downstream career options seamlessly.
 *   **Colleges & Exams Directory:** Comprehensive and highly filterable directories for colleges and exams, featuring detailed profile pages and direct side-by-side comparison tools.
@@ -13,7 +14,7 @@ U-THINK is an exhaustive, comprehensive, and highly detailed educational navigat
 *   **Live Job Boards & Market Trends:** Directly pulls real-time job openings and career statistics via the Adzuna API to map educational choices to actual market demand.
 *   **Student Dashboard & Roadmaps:** A personalized student portal featuring application trackers, highly visual academic roadmaps, and automated deadline monitoring.
 *   **Document Analysis:** Automatically extracts and structures academic information from uploaded marksheets securely using Gemini Vision capabilities.
-*   **Security & High-Performance Caching:** Fully protected against DDoS and NoSQL injections with strict rate-limiting, Helmet, and query sanitization. Employs aggressive in-memory caching to drastically reduce response times for major educational catalog reads.
+*   **Security & High-Performance Caching:** Fully protected against DDoS and NoSQL injections with strict rate-limiting, Helmet, and query sanitization. Employs aggressive in-memory caching and progressive data-loading to drastically reduce response times.
 
 ## 🛠️ Technology Stack
 
