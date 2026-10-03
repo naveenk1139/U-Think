@@ -5,7 +5,7 @@ export const calculateProfileCompletion = (user: any) => {
     { key: 'displayName', weight: 15, label: 'Name' },
     { key: 'email', weight: 15, label: 'Email' },
     { key: 'educationLevel', weight: 20, label: 'Education Level' },
-    { key: 'streamPreference', weight: 20, label: 'Stream' },
+    { key: 'stream', weight: 20, label: 'Stream' },
     { key: 'interests', weight: 15, label: 'Interests', isArray: true },
     { key: 'careerGoal', weight: 15, label: 'Career Goal' }
   ];
@@ -36,7 +36,7 @@ export const calculateMatchScore = (itemTags: string[], user: any) => {
   if (!user || !itemTags || itemTags.length === 0) return 60; // Default baseline score
   
   const userInterests = Array.isArray(user.interests) ? user.interests : [];
-  const userStream = user.streamPreference || '';
+  const userStream = user.stream || user.streamPreference || '';
   
   let score = 50; // base score
   

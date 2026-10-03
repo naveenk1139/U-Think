@@ -13,8 +13,23 @@ const router = Router();
 // GET /api/pathways
 router.get('/', async (req: Request, res: Response) => {
   try {
-    const pathways = await Pathway.find({ active: true }).sort({ order: 1 });
-    res.json({ data: pathways });
+    const pathways = await Pathway.find({ active: true }).lean().sort({ order: 1 });
+    
+    // Dynamically calculate counts
+    const pathwaysWithCounts = await Promise.all(pathways.map(async (p) => {
+      // Find all streams for this pathway
+      const streams = await Stream.find({ pathwayId: p._id, active: true }).select('_id');
+      const streamIds = streams.map(s => s._id);
+      
+      let count = 0;
+      if (streamIds.length > 0) {
+        count = await Course.countDocuments({ streamId: { $in: streamIds }, parentId: { $exists: false }, active: true });
+      }
+      // Return total top-level courses across all streams as options count
+      return { ...p, optionCount: count || streams.length };
+    }));
+    
+    res.json({ data: pathwaysWithCounts });
   } catch (error) {
     console.error('Error fetching pathways:', error);
     res.status(500).json({ message: 'Server error' });

@@ -269,6 +269,7 @@ export const EducationSettings = () => {
   const [stream, setStream] = useState(currentUser?.stream || 'Science (PCM)');
   const [preferredCareer, setPreferredCareer] = useState(currentUser?.preferredCareer?.[0] || '');
   const [preferredCollege, setPreferredCollege] = useState(currentUser?.preferredLocation?.[0] || ''); // Or another field if needed
+  const [interestsStr, setInterestsStr] = useState(currentUser?.interests?.join(', ') || '');
   
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
@@ -283,7 +284,8 @@ export const EducationSettings = () => {
         educationLevel,
         stream,
         preferredCareer: preferredCareer ? [preferredCareer] : [],
-        preferredLocation: preferredCollege ? [preferredCollege] : []
+        preferredLocation: preferredCollege ? [preferredCollege] : [],
+        interests: interestsStr ? interestsStr.split(',').map(i => i.trim()).filter(Boolean) : []
       };
       await updateProfile(updates);
       updateContextProfile(updates);
@@ -343,6 +345,16 @@ export const EducationSettings = () => {
             placeholder="e.g. Bangalore, IIT Bombay" 
             value={preferredCollege}
             onChange={(e) => setPreferredCollege(e.target.value)}
+            className="w-full px-4 py-2.5 bg-background border border-border rounded-xl text-sm focus:outline-none focus:border-primary" 
+          />
+        </div>
+        <div className="md:col-span-2">
+          <label className="block text-xs font-semibold text-text-primary mb-1.5">Interests (comma-separated)</label>
+          <input 
+            type="text" 
+            placeholder="e.g. Writing, Politics, History, AI" 
+            value={interestsStr}
+            onChange={(e) => setInterestsStr(e.target.value)}
             className="w-full px-4 py-2.5 bg-background border border-border rounded-xl text-sm focus:outline-none focus:border-primary" 
           />
         </div>

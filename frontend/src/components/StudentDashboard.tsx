@@ -31,9 +31,11 @@ export default function StudentDashboard() {
   const userName = currentUser?.displayName || currentUser?.name || 'Student';
   const firstName = userName.split(' ')[0];
   const educationLevel = currentUser?.educationLevel || 'Class 12th';
-  const streamPreference = currentUser?.streamPreference || 'Science (PCM)';
+  const streamPreference = currentUser?.stream || currentUser?.streamPreference || 'Science (PCM)';
   const rawInterests = currentUser?.interests;
-  const interests = Array.isArray(rawInterests) ? rawInterests : (typeof rawInterests === 'string' ? (rawInterests as string).split(',') : ['Technology', 'AI']);
+  const interests = Array.isArray(rawInterests) && rawInterests.length > 0 
+    ? rawInterests 
+    : (typeof rawInterests === 'string' && rawInterests !== '' ? (rawInterests as string).split(',') : []);
   
   const { percentage: profilePercentage } = calculateProfileCompletion(currentUser);
   const journeySteps = getEducationJourney(currentUser);

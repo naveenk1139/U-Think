@@ -20,6 +20,7 @@ interface IRecommendation {
 export default function AIRecommendationWidget() {
   const [recommendations, setRecommendations] = useState<IRecommendation[]>([]);
   const [loading, setLoading] = useState(true);
+  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
   const [selectedGraphTarget, setSelectedGraphTarget] = useState<{type: string, id: string} | null>(null);
 
   const handleFeedback = async (id: string, action: 'accept' | 'dismiss') => {
@@ -48,6 +49,12 @@ export default function AIRecommendationWidget() {
         }
         
         setRecommendations(recs.slice(0, 3)); // Show top 3
+        if (recs.length > 0 && recs[0].createdAt) {
+          setLastUpdated(new Date(recs[0].createdAt).toLocaleString('en-US', {
+            day: '2-digit', month: 'short', year: 'numeric',
+            hour: '2-digit', minute: '2-digit'
+          }));
+        }
       } catch (error) {
         console.error("Failed to load AI Recommendations", error);
       } finally {
@@ -60,10 +67,10 @@ export default function AIRecommendationWidget() {
 
   if (loading) {
     return (
-      <div className="bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-100 rounded-2xl p-6 animate-pulse">
-        <div className="h-4 bg-indigo-200 rounded w-1/3 mb-4"></div>
-        <div className="h-20 bg-white/50 rounded mb-4"></div>
-        <div className="h-20 bg-white/50 rounded"></div>
+      <div className="bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-100 rounded-2xl p-6 flex flex-col items-center justify-center min-h-[300px]">
+        <Brain className="w-10 h-10 text-indigo-400 animate-pulse mb-3" />
+        <h3 className="font-bold text-indigo-900 text-sm">Processing Latest Analysis...</h3>
+        <p className="text-xs text-indigo-600/80 mt-1">Re-evaluating Profile and Marks Card.</p>
       </div>
     );
   }
@@ -79,9 +86,16 @@ export default function AIRecommendationWidget() {
 
   return (
     <div className="bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-200 rounded-2xl p-6 shadow-sm">
-      <div className="flex items-center gap-2 mb-4">
-        <Sparkles className="w-5 h-5 text-indigo-600" />
-        <h2 className="text-sm font-black text-indigo-950">AI Personalized Matches</h2>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <Sparkles className="w-5 h-5 text-indigo-600" />
+          <h2 className="text-sm font-black text-indigo-950">AI Personalized Matches</h2>
+        </div>
+        {lastUpdated && (
+          <span className="text-[9px] font-semibold text-indigo-500 uppercase tracking-wider">
+            Updated: {lastUpdated}
+          </span>
+        )}
       </div>
 
       <div className="space-y-4">

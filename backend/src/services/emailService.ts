@@ -61,11 +61,7 @@ export async function sendOtpEmail(
 
   try {
     if (!EMAIL_USER || !EMAIL_APP_PASSWORD) {
-      console.log(`⚠️ SMTP NOT CONFIGURED. MOCKING EMAIL DELIVERY.`);
-      console.log(`=================================================`);
-      console.log(`MOCK OTP FOR ${to}: ${otp}`);
-      console.log(`=================================================`);
-      return;
+      throw new Error('SMTP credentials not configured. Cannot send real OTP email.');
     }
 
     await transporter.sendMail({

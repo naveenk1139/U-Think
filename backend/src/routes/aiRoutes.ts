@@ -70,7 +70,7 @@ router.post('/aptitude/evaluate', async (req: Request, res: Response, next: Next
       };
     } else {
       const response = await generateWithRetry(model, {
-        model: 'gemini-3.8-flash',
+        model: 'gemini-3.5-flash',
         contents: prompt,
       });
       
@@ -113,7 +113,7 @@ router.post('/ai/counselor', async (req: Request, res: Response, next: NextFunct
 
     const model = ai.models;
     const response = await generateWithRetry(model, {
-      model: 'gemini-3.8-flash',
+      model: 'gemini-3.5-flash',
       contents: prompt,
     });
 
@@ -148,7 +148,7 @@ router.post('/advisor/chat', async (req: Request, res: Response, next: NextFunct
       responseText = "This is a **simulated response** because the real Gemini API key is not configured in the backend `.env` file.\n\nTo get actual AI career guidance, please obtain a free API key from Google AI Studio and update the backend configuration. In the meantime, I can tell you that for ITI and Polytechnic, practical skills are highly valued!";
     } else {
       const response = await generateWithRetry(model, {
-        model: 'gemini-3.8-flash',
+        model: 'gemini-3.5-flash',
         contents: prompt,
       });
       responseText = response.text || 'I am sorry, I am currently unable to answer. Please try again.';
@@ -198,7 +198,7 @@ Respond strictly in valid JSON format like this (no markdown block, just JSON):
       });
     } else {
       const response = await generateWithRetry(model, {
-        model: 'gemini-3.8-flash',
+        model: 'gemini-3.5-flash',
         contents: prompt,
       });
       
@@ -298,7 +298,7 @@ router.post('/chat/stream', async (req: Request, res: Response, next: NextFuncti
 
     // Start Chat
     const chat = ai.chats.create({
-      model: 'gemini-3.8-flash',
+      model: 'gemini-3.5-flash',
       config: {
         systemInstruction: sysInst,
         tools: uThinkTools,
@@ -373,7 +373,7 @@ router.post('/translate', async (req: Request, res: Response, next: NextFunction
       Output ONLY the translated text.
     `;
 
-    const model = ai.getGenerativeModel({ model: "gemini-2.0-flash" });
+    const model = ai.getGenerativeModel({ model: "gemini-3.5-flash" });
     const result = await model.generateContent(prompt);
     
     res.json({ success: true, translation: result.response.text().trim() });

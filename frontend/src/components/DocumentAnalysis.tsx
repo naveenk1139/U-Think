@@ -29,7 +29,10 @@ interface IDocumentAnalysis {
   confidence: number;
 }
 
+import { useNavigate } from 'react-router-dom';
+
 export default function DocumentAnalysis() {
+  const navigate = useNavigate();
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [analysis, setAnalysis] = useState<IDocumentAnalysis | null>(null);
@@ -84,7 +87,8 @@ export default function DocumentAnalysis() {
       const res = await api.post('/api/documents/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
-        }
+        },
+        timeout: 120000 // 120 seconds for AI analysis
       });
       
       setAnalysis(res.data.analysis);
@@ -110,20 +114,34 @@ export default function DocumentAnalysis() {
     setEditedAnalysis({ ...editedAnalysis, [field]: value });
   };
 
+  const [processingState, setProcessingState] = useState<string | null>(null);
+
   const confirmAnalysis = async () => {
     if (!editedAnalysis) return;
     setIsConfirming(true);
     setError(null);
+    setProcessingState('Marks Card Saved Successfully. Triggering Academic Analysis...');
     try {
       await api.post(`/api/documents/${editedAnalysis.documentId}/confirm`, editedAnalysis);
+      
+      setProcessingState('Analyzing your academic profile and calculating eligibility...');
+      
+      // Wait a moment for UX purposes so they can read it
+      await new Promise(r => setTimeout(r, 1500));
+      
+      setProcessingState('Generating personalized recommendations...');
+      
+      // Force trigger generation immediately so it's ready when dashboard loads
+      await api.post('/api/recommendations/generate');
+      
       setSuccess(true);
-      setAnalysis(null);
-      setEditedAnalysis(null);
-      setFile(null);
+      
+      // Redirect to Dashboard
+      navigate('/dashboard');
     } catch (err: any) {
       setError(err.response?.data?.error || err.message || 'Failed to confirm data');
-    } finally {
       setIsConfirming(false);
+      setProcessingState(null);
     }
   };
 
@@ -188,7 +206,14 @@ export default function DocumentAnalysis() {
                 {file.name}
               </div>
               <button 
-                onClick={(e) => { e.stopPropagation(); uploadAndAnalyze(); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (!localStorage.getItem('uthink_token')) {
+                    setError('You must be logged in to upload and analyze academic documents. Please log in first.');
+                    return;
+                  }
+                  uploadAndAnalyze();
+                }}
                 className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-xl transition-colors shadow-sm"
               >
                 Upload & Analyze Document
@@ -355,7 +380,13 @@ export default function DocumentAnalysis() {
             </div>
           </div>
 
-          <div className="bg-gray-50 p-6 border-t border-gray-200 flex justify-end gap-4">
+          <div className="bg-gray-50 p-6 border-t border-gray-200 flex justify-end gap-4 relative">
+            {processingState && (
+              <div className="absolute left-6 top-1/2 -translate-y-1/2 flex items-center gap-3 text-blue-700 font-medium text-sm animate-pulse">
+                <Loader2 className="w-5 h-5 animate-spin" />
+                {processingState}
+              </div>
+            )}
             <button 
               onClick={() => { setAnalysis(null); setEditedAnalysis(null); setFile(null); }}
               className="px-6 py-2.5 rounded-xl font-bold text-gray-600 hover:bg-gray-200 transition-colors"
@@ -366,10 +397,10 @@ export default function DocumentAnalysis() {
             <button 
               onClick={confirmAnalysis}
               disabled={isConfirming}
-              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded-xl shadow-sm transition-colors"
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded-xl shadow-sm transition-colors disabled:opacity-75 disabled:cursor-not-allowed"
             >
               {isConfirming ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle className="w-5 h-5" />}
-              Confirm & Save
+              {isConfirming ? 'Processing...' : 'Confirm & Save'}
             </button>
           </div>
         </div>

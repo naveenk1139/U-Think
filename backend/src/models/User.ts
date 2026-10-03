@@ -91,6 +91,7 @@ export interface IUser extends Document {
   preferredCourse?: string[];
   preferredLocation?: string[];
   profileCompletion?: number;
+  profileUpdatedAt?: Date;
   academicProfile?: IAcademicProfile;
   intelligenceProfile?: IStudentIntelligence;
   preferredLanguage?: string;
@@ -201,6 +202,7 @@ const UserSchema = new Schema<IUser>(
     preferredCourse: [{ type: String }],
     preferredLocation: [{ type: String }],
     profileCompletion: { type: Number, default: 0 },
+    profileUpdatedAt: { type: Date, default: Date.now },
     academicProfile: {
       tenthPercentage: { type: Number },
       twelfthPercentage: { type: Number },
@@ -291,6 +293,23 @@ UserSchema.pre<IUser>('save', async function (next) {
       const salt = await bcrypt.genSalt(10);
       this.password = await bcrypt.hash(this.password, salt);
     }
+  }
+
+  // Check if profile-affecting fields were modified
+  if (
+    this.isModified('stream') ||
+    this.isModified('educationLevel') ||
+    this.isModified('interests') ||
+    this.isModified('skills') ||
+    this.isModified('academicProfile') ||
+    this.isModified('intelligenceProfile') ||
+    this.isModified('preferredCareer') ||
+    this.isModified('preferredLocation') ||
+    this.isModified('careerGoal') ||
+    this.isModified('careerAspiration') ||
+    this.isModified('targetExam')
+  ) {
+    this.profileUpdatedAt = new Date();
   }
 
   // Calculate Profile Completion

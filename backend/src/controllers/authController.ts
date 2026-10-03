@@ -41,14 +41,18 @@ async function issueOtp(
   if (RATE_LIMIT_ENABLED && existing) {
     if (existing.lockUntil && existing.lockUntil > new Date()) {
       const waitMins = Math.ceil((existing.lockUntil.getTime() - Date.now()) / 60000);
-      throw new Error(`Too many OTP requests. Please try again after ${waitMins} minutes.`);
+      const error: any = new Error(`Too many OTP requests. Please try again after ${waitMins} minutes.`);
+      error.statusCode = 429;
+      throw error;
     }
 
     if (existing.attempts >= MAX_REQUESTS) {
       // Lock for WINDOW_MINUTES
       const lockUntil = new Date(Date.now() + WINDOW_MINUTES * 60 * 1000);
       await OtpStore.updateOne({ _id: existing._id }, { lockUntil, attempts: existing.attempts + 1 });
-      throw new Error(`Too many OTP requests. Please wait before requesting another code.`);
+      const error: any = new Error(`Too many OTP requests. Please wait before requesting another code.`);
+      error.statusCode = 429;
+      throw error;
     }
   }
 

@@ -9,7 +9,7 @@ export const generateGeminiResponse = async (prompt: string): Promise<string> =>
   
   try {
     const response = await generateWithRetry(model, {
-      model: 'gemini-3.8-flash',
+      model: 'gemini-3.5-flash',
       contents: prompt,
     });
     
@@ -165,11 +165,12 @@ export const analyzeDocument = async (filePath: string, mimeType: string): Promi
   }
 
   const prompt = `You are an expert AI extracting structured information from an educational document (e.g. marksheet, certificate).
-Only extract information explicitly visible in the document. Never guess or fabricate information.
-If a field is unreadable or missing, return null.
-For 'documentType', choose from: TENTH_MARKSHEET, TWELFTH_MARKSHEET, DIPLOMA_MARKSHEET, EDUCATIONAL_CERTIFICATE, UNKNOWN.
-For each extracted field, provide a 'confidence' score between 0.0 and 1.0 (e.g., 0.95 for very clear text, 0.4 for blurry text).
-If you cannot identify the document type confidently, use UNKNOWN.
+CRITICAL RULES:
+1. ONLY extract information explicitly visible in the document. NEVER guess, fabricate, or use generic placeholders (like John Doe or Physics/Chemistry if they are not written).
+2. For subjects, extract the EXACT subject names exactly as printed on the document (e.g., if it says 'FIRST LANGUAGE: KANNADA', extract that). Do NOT default to generic subjects.
+3. For 'documentType', accurately identify it based on the board/certificate text. If it is an SSLC or Secondary School document, choose TENTH_MARKSHEET. If it is PUC or Pre-University, choose TWELFTH_MARKSHEET. Choose from: TENTH_MARKSHEET, TWELFTH_MARKSHEET, DIPLOMA_MARKSHEET, EDUCATIONAL_CERTIFICATE, UNKNOWN.
+4. If a field is unreadable or missing, return null. DO NOT invent data.
+5. For each extracted field, provide a 'confidence' score between 0.0 and 1.0 (e.g., 0.95 for very clear text, 0.4 for blurry text).
 
 Return valid JSON exactly matching this schema:
 {
@@ -213,7 +214,7 @@ Return valid JSON exactly matching this schema:
     }
 
     const response = await generateWithRetry(model, {
-      model: 'gemini-3.8-flash',
+      model: 'gemini-3.5-flash',
       contents: [
         {
           role: 'user',
@@ -234,44 +235,26 @@ Return valid JSON exactly matching this schema:
     }
 
     try {
-      return JSON.parse(response.text);
+      let cleanText = response.text.trim();
+      if (cleanText.startsWith('```json')) {
+        cleanText = cleanText.replace(/^```json/, '').replace(/```$/, '').trim();
+      } else if (cleanText.startsWith('```')) {
+        cleanText = cleanText.replace(/^```/, '').replace(/```$/, '').trim();
+      }
+      return JSON.parse(cleanText);
     } catch (err) {
       console.error('Failed to parse Gemini output as JSON:', response.text);
       throw new Error('Invalid JSON structure returned by AI');
     }
   } catch (err: any) {
-    const isOverloaded = 
-      err?.status === 503 || 
-      err?.code === 503 || 
-      err?.message?.includes('503') || 
-      err?.message?.includes('504') ||
-      err?.error?.code === 503 ||
-      err?.error?.status === 'UNAVAILABLE';
-
-    console.warn("?? Gemini API Error in analyzeDocument:", err?.message || err);
+    // Check for API Quota limit specifically
+    const errString = String(err?.message || err);
+    if (err?.status === 429 || err?.code === 429 || errString.includes('429') || errString.includes('quota') || errString.includes('RESOURCE_EXHAUSTED')) {
+      throw new Error('Google Gemini API Quota Exceeded (Free Tier Limit reached). Please try again later or configure a new API key in .env.');
+    }
     
-    // In this specific demo/dev environment, we gracefully fall back on any API failure 
-    // to allow the user to continue exploring the UI.
-    console.warn("?? Using fallback mock data for document analysis.");
-    return {
-      documentType: "TWELFTH_MARKSHEET",
-      studentName: "John Doe",
-      rollNumber: "12345678",
-      institution: "Example High School",
-      board: "CBSE",
-      academicYear: "2023",
-      totalMarks: 450,
-      maximumMarks: 500,
-      percentage: 90.00,
-      resultStatus: "PASS",
-      confidence: 0.95,
-      subjects: [
-        { subjectName: "Physics", marksObtained: 90, maximumMarks: 100, grade: "A1", confidence: 0.99 },
-        { subjectName: "Chemistry", marksObtained: 85, maximumMarks: 100, grade: "A2", confidence: 0.98 },
-        { subjectName: "Mathematics", marksObtained: 95, maximumMarks: 100, grade: "A1", confidence: 0.99 },
-        { subjectName: "English", marksObtained: 88, maximumMarks: 100, grade: "A2", confidence: 0.97 },
-        { subjectName: "Computer Science", marksObtained: 92, maximumMarks: 100, grade: "A1", confidence: 0.98 }
-      ]
-    };
+    // The user strictly mandated NO fallback mock data for Document Analysis.
+    // Throw an explicit error to fail gracefully so the frontend can handle it properly.
+    throw new Error(err?.message || 'Failed to analyze document accurately.');
   }
 };

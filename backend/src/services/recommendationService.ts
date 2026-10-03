@@ -40,7 +40,14 @@ function computeMLMatchScore(features: IMLFeatureVector, career: any, user: IUse
     maxPossible += 30; // Interests account for 30%
     const careerInd = career.industry.toLowerCase().trim();
     const hasInterest = features.interest_vector.some(i => i.toLowerCase().trim() === careerInd);
-    if (hasInterest) {
+    
+    const stream = user.stream?.toLowerCase() || user.streamPreference?.toLowerCase() || '';
+    const streamMatches = 
+      (stream.includes('arts') && (careerInd.includes('humanities') || careerInd.includes('media') || careerInd.includes('government'))) ||
+      (stream.includes('commerce') && (careerInd.includes('finance') || careerInd.includes('business'))) ||
+      (stream.includes('science') && (careerInd.includes('technology') || careerInd.includes('healthcare') || careerInd.includes('engineering')));
+
+    if (hasInterest || streamMatches) {
       score += 30;
     }
   }
@@ -85,7 +92,7 @@ export async function generateAllRecommendations(userId: string) {
   const user = await User.findById(userId);
   if (!user) throw new Error('User not found');
 
-  const profileVersion = user.__v || 1;
+  const profileVersion = user.profileUpdatedAt ? user.profileUpdatedAt.getTime() : Date.now();
 
   // Phase 3 & 4
   const stageInfo = detectEducationStage(user);

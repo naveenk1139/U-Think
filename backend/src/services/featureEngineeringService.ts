@@ -81,7 +81,8 @@ export const extractMLFeatures = (user: IUser, stageId: string): IMLFeatureVecto
   let cgpa = profile.cgpa || 0;
   if (!cgpa && user.academicProfile) {
     if (stageId === '10th' && user.academicProfile.tenthPercentage) cgpa = user.academicProfile.tenthPercentage / 9.5;
-    if (stageId === '12th' && user.academicProfile.twelfthPercentage) cgpa = user.academicProfile.twelfthPercentage / 9.5;
+    else if (stageId === '12th' && user.academicProfile.twelfthPercentage) cgpa = user.academicProfile.twelfthPercentage / 9.5;
+    else if (stageId === 'diploma' && user.academicProfile.diplomaPercentage) cgpa = user.academicProfile.diplomaPercentage / 9.5;
   }
   
   let backlogs = profile.backlogs || 0;
@@ -106,23 +107,43 @@ export const extractMLFeatures = (user: IUser, stageId: string): IMLFeatureVecto
   else if (rawGoal.includes('master') || rawGoal.includes('m.tech') || rawGoal.includes('ms')) higher_study_goal_encoded = 2;
   else if (rawGoal.includes('phd') || rawGoal.includes('research')) higher_study_goal_encoded = 3;
 
-  return {
-    academic_score: Number(academic_score.toFixed(2)),
-    cgpa,
-    backlog_count: backlogs,
-    project_count: profile.projectCount || 0,
-    internship_count: profile.internshipCount || 0,
-    certification_count: profile.certificationCount || 0,
-    hackathon_count: profile.hackathonsAttended || 0,
-    career_readiness_score: profile.careerReadinessScore || 0,
-    
-    education_stage_encoded: encodeEducationStage(stageId),
-    semester_encoded: profile.currentSemester || 0,
-    
-    skill_vector,
-    interest_vector: user.interests || [],
-    subject_strength_vector: profile.subjectStrengths || [],
-    subject_weakness_vector: profile.subjectWeaknesses || [],
+    const derivedStrengths = new Set<string>(profile.subjectStrengths?.map(s => s.toLowerCase().trim()) || []);
+    const derivedWeaknesses = new Set<string>(profile.subjectWeaknesses?.map(s => s.toLowerCase().trim()) || []);
+
+    // Dynamically add strengths/weaknesses from Marks Card
+    if (user.academicProfile && user.academicProfile.subjects) {
+      user.academicProfile.subjects.forEach(sub => {
+        if (sub.subjectName && sub.marksObtained != null && sub.maximumMarks != null && sub.maximumMarks > 0) {
+          const percentage = (sub.marksObtained / sub.maximumMarks) * 100;
+          const subName = sub.subjectName.toLowerCase().trim();
+          if (percentage >= 75) {
+            derivedStrengths.add(subName);
+            derivedWeaknesses.delete(subName);
+          } else if (percentage < 60) {
+            derivedWeaknesses.add(subName);
+            derivedStrengths.delete(subName);
+          }
+        }
+      });
+    }
+
+    return {
+      academic_score: Number(academic_score.toFixed(2)),
+      cgpa,
+      backlog_count: backlogs,
+      project_count: profile.projectCount || 0,
+      internship_count: profile.internshipCount || 0,
+      certification_count: profile.certificationCount || 0,
+      hackathon_count: profile.hackathonsAttended || 0,
+      career_readiness_score: profile.careerReadinessScore || 0,
+      
+      education_stage_encoded: encodeEducationStage(stageId),
+      semester_encoded: profile.currentSemester || 0,
+      
+      skill_vector,
+      interest_vector: user.interests || [],
+      subject_strength_vector: Array.from(derivedStrengths),
+      subject_weakness_vector: Array.from(derivedWeaknesses),
     
     budget_preference,
     location_preference_count: (user.preferredLocation || []).length,

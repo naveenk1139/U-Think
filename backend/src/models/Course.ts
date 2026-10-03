@@ -3,11 +3,13 @@ import mongoose, { Document, Schema } from 'mongoose';
 export interface ICourse extends Document {
   name: string;
   slug: string;
-  type?: string;
+  type?: string; // 'Course', 'Combination', 'Specialization', 'Branch', 'Trade'
   category?: string;
   subCategory?: string;
   level?: string;
-  stream?: string;
+  stream?: string; // Legacy/slug ref
+  streamId?: mongoose.Types.ObjectId; // Proper reference to Stream
+  parentId?: mongoose.Types.ObjectId; // Self-referential for hierarchical courses
   combination?: string;
   description?: string;
   overview?: string;
@@ -51,6 +53,8 @@ const CourseSchema: Schema = new Schema({
   subCategory: { type: String },
   level: { type: String },
   stream: { type: String },
+  streamId: { type: Schema.Types.ObjectId, ref: 'Stream' },
+  parentId: { type: Schema.Types.ObjectId, ref: 'Course' },
   combination: { type: String },
   description: { type: String },
   overview: { type: String },
@@ -87,5 +91,7 @@ const CourseSchema: Schema = new Schema({
 CourseSchema.index({ category: 1 });
 CourseSchema.index({ slug: 1 });
 CourseSchema.index({ name: 1 });
+CourseSchema.index({ streamId: 1 });
+CourseSchema.index({ parentId: 1 });
 
 export default mongoose.model<ICourse>('Course', CourseSchema);

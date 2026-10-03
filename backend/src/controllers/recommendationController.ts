@@ -32,11 +32,18 @@ export const getUserRecommendations = async (req: AuthRequest, res: Response) =>
 
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ error: 'User not found' });
+    const currentProfileVersion = user.profileUpdatedAt ? user.profileUpdatedAt.getTime() : 0;
 
     const filter: any = { studentId: userId, status: 'Active' };
     if (type) filter.recommendationType = type;
 
-    const recommendations = await Recommendation.find(filter).populate('entityId').sort({ matchScore: -1 });
+    let recommendations = await Recommendation.find(filter).populate('entityId').sort({ matchScore: -1 });
+
+    // If recommendations exist but are based on an outdated profile, or if there are none, regenerate them
+    if (recommendations.length === 0 || (recommendations[0] && recommendations[0].profileVersion < currentProfileVersion)) {
+      await generateAllRecommendations(userId);
+      recommendations = await Recommendation.find(filter).populate('entityId').sort({ matchScore: -1 });
+    }
 
     // Generate explanations dynamically via the Presentation Layer
     const explainedRecommendations = await Promise.all(

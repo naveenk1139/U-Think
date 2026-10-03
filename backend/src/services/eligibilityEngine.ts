@@ -70,12 +70,34 @@ export const checkEligibility = async (
 
       // Rule B: Specific Subjects Required
       if (rule.specificSubjectsRequired && rule.specificSubjectsRequired.length > 0) {
-        const studentStrengths = profile.subjectStrengths?.map(s => s.toLowerCase()) || [];
+        const studentStrengths = new Set(profile.subjectStrengths?.map(s => s.toLowerCase().trim()) || []);
+        
+        // Dynamically add strengths from Marks Card
+        if (user.academicProfile && user.academicProfile.subjects) {
+          user.academicProfile.subjects.forEach(sub => {
+            if (sub.subjectName && sub.marksObtained != null && sub.maximumMarks != null && sub.maximumMarks > 0) {
+              const percentage = (sub.marksObtained / sub.maximumMarks) * 100;
+              if (percentage >= 60) { // 60% minimum to be considered eligible for a subject prerequisite
+                studentStrengths.add(sub.subjectName.toLowerCase().trim());
+              }
+            }
+          });
+        }
         
         for (const reqSubject of rule.specificSubjectsRequired) {
-          if (!studentStrengths.includes(reqSubject.toLowerCase())) {
+          // Also check for partial matches like 'math' vs 'mathematics'
+          const reqSub = reqSubject.toLowerCase().trim();
+          let hasSubject = false;
+          for (const s of studentStrengths) {
+            if (s.includes(reqSub) || reqSub.includes(s)) {
+              hasSubject = true;
+              break;
+            }
+          }
+
+          if (!hasSubject) {
             passedAll = false;
-            result.missingFactors.push(`Requires background in ${reqSubject}.`);
+            result.missingFactors.push(`Requires background in ${reqSubject} (minimum 60% marks).`);
           } else {
             result.matchedFactors.push(`Has required background in ${reqSubject}.`);
           }

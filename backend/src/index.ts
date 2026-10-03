@@ -145,7 +145,7 @@ app.use(mongoSanitize());
 // Rate Limiting (Phase 17: Security)
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 200, // limit each IP to 200 requests per windowMs
+  max: 5000, // limit each IP to 5000 requests per windowMs
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Too many requests, please try again later.' }
