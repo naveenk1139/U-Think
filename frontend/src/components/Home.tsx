@@ -185,7 +185,7 @@ export default function Home({ onNavigate, onOpenCounselor }: any) {
               {colleges.length > 0 ? colleges.map((college, idx) => (
                 <div key={idx} className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow flex flex-col">
                   <div className="h-32 bg-gray-200 w-full relative">
-                    {college.image ? <img src={college.image} className="w-full h-full object-cover"/> : <div className="w-full h-full bg-blue-50 flex items-center justify-center"><Building2 className="w-8 h-8 text-blue-200"/></div>}
+                    {college.image ? <img loading="lazy" decoding="async" src={college.image} className="w-full h-full object-cover"/> : <div className="w-full h-full bg-blue-50 flex items-center justify-center"><Building2 className="w-8 h-8 text-blue-200"/></div>}
                     <button className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/80 backdrop-blur flex items-center justify-center text-gray-500 hover:text-rose-500 shadow-sm transition-colors"><Heart className="w-4 h-4"/></button>
                   </div>
                   <div className="p-4 flex flex-col flex-1">

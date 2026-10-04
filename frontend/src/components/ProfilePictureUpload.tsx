@@ -75,7 +75,7 @@ export function ProfilePictureUpload({ currentPhotoURL, onPhotoUpdated, size = '
 
   return (
     <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
-      <img 
+      <img loading="lazy" decoding="async" 
         src={currentPhotoURL && currentPhotoURL.startsWith('/uploads') ? `${import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? 'http://localhost:5000' : '')}${currentPhotoURL}` : (currentPhotoURL || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=250")} 
         alt="Profile" 
         className={size === 'lg' ? "w-24 h-24 rounded-full border-4 border-blue-50 shadow-md object-cover" : "w-12 h-12 rounded-full border-2 border-blue-50 shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none object-cover"}

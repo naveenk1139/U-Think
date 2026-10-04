@@ -76,12 +76,13 @@ router.get('/graph', async (req: Request, res: Response, next: NextFunction) => 
 // Route: /api/education-paths/node/:type/:id
 // Method: GET
 // Description: Get dependencies (parents) and downstream options (children) for a single node
-router.get('/node/:type/:id', async (req: Request, res: Response, next: NextFunction) => {
+router.get('/node/:type/:id', requireAuth, async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const { type, id } = req.params;
+    const user = await User.findById(req.user?.id).lean();
 
     // Use the robust buildNodeContext to fetch explicit & implicit edges
-    const context = await buildNodeContext(type, id);
+    const context = await buildNodeContext(type, id, user);
 
     if (!context) {
        return res.status(404).json({ success: false, error: 'Node not found' });

@@ -10,7 +10,6 @@ export default function MyRoadmap() {
   const [roadmaps, setRoadmaps] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedStep, setSelectedStep] = useState<any | null>(null);
 
   useEffect(() => {
     if (!currentUser) return;
@@ -18,14 +17,13 @@ export default function MyRoadmap() {
     const fetchRoadmap = async () => {
       try {
         setLoading(true);
-        // Ask for regeneration/re-evaluation
+        // Force evaluation to ensure we use the latest profile/marks data
         const genRes = await axios.post('/student-roadmap/generate', { studentId: currentUser.id });
         setRoadmaps([genRes.data]);
       } catch (genErr: any) {
         if (genErr.response?.data?.error === 'INCOMPLETE_PROFILE') {
           setError('INCOMPLETE_PROFILE');
         } else {
-           // Fallback if generation fails but they have an old one
            const res = await axios.get('/student-roadmap/my-roadmaps');
            if (res.data && res.data.length > 0) setRoadmaps(res.data);
         }
@@ -37,288 +35,228 @@ export default function MyRoadmap() {
     fetchRoadmap();
   }, [currentUser]);
 
+  // Group steps into 4 Stages based on sequence
+  const stages = [
+    { id: 'Q1', title: 'Foundation', steps: [] as any[], color: 'text-yellow-400', accent: 'bg-yellow-400' },
+    { id: 'Q2', title: 'Preparation', steps: [] as any[], color: 'text-orange-500', accent: 'bg-orange-500' },
+    { id: 'Q3', title: 'Specialization', steps: [] as any[], color: 'text-purple-400', accent: 'bg-purple-400' },
+    { id: 'Q4', title: 'Career Launch', steps: [] as any[], color: 'text-emerald-400', accent: 'bg-emerald-400' },
+  ];
+
+  if (!loading && roadmaps.length > 0 && roadmaps[0].steps && Array.isArray(roadmaps[0].steps)) {
+    roadmaps[0].steps.forEach((step: any, index: number) => {
+      if (step.type === 'Foundation') stages[0].steps.push(step);
+      else if (step.type === 'Exam' || (step.type === 'Skill' && index < 4)) stages[1].steps.push(step);
+      else if (step.type === 'Degree' || step.type === 'Project' || step.type === 'Skill') stages[2].steps.push(step);
+      else stages[3].steps.push(step);
+    });
+    
+    // Fallback if some stages are empty due to step types
+    if (stages[3].steps.length === 0 && stages[2].steps.length > 1) {
+        const lastStep = stages[2].steps.pop();
+        if (lastStep) stages[3].steps.push(lastStep);
+    }
+  }
+
+  const currentYear = new Date().getFullYear();
+
   if (!currentUser) return <div className="p-8 text-center text-slate-500">Please log in to view your roadmap.</div>;
-  if (loading) return (
-    <div className="p-16 text-center max-w-lg mx-auto mt-10 space-y-6">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-indigo-600 mx-auto"></div>
-      <div className="text-slate-600 font-medium">
-        <p className="mb-2 text-lg text-slate-800">Analyzing your profile...</p>
-        <div className="text-sm space-y-1 text-left inline-block w-48">
-          <p>✓ Academic profile</p>
-          <p>✓ Interests & Skills</p>
-          <p>✓ Career goals</p>
-          <p>✓ Eligibility mapping</p>
-        </div>
-        <p className="mt-4 text-xs">Generating personalized roadmap...</p>
-      </div>
-    </div>
-  );
 
   if (error === 'INCOMPLETE_PROFILE') {
     return (
-      <div className="max-w-2xl mx-auto p-8 mt-12 bg-white rounded-3xl border border-rose-100 shadow-xl text-center">
-        <div className="w-16 h-16 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4">
-          <AlertCircle className="w-8 h-8" />
-        </div>
-        <h2 className="text-2xl font-bold text-slate-800 mb-2">Complete Your Profile</h2>
-        <p className="text-slate-600 mb-6">We need more information to generate an accurate personalized roadmap.</p>
-        
-        <div className="bg-slate-50 rounded-xl p-4 mb-6 inline-block text-left w-64">
-          <p className="text-xs font-bold text-slate-500 uppercase mb-2">Profile Completion: {currentUser.profileCompletion || 0}%</p>
-          <div className="w-full bg-slate-200 rounded-full h-2 mb-4">
-            <div className="bg-rose-500 h-2 rounded-full" style={{ width: `${currentUser.profileCompletion || 0}%` }}></div>
+      <div className="min-h-screen bg-[#111111] p-8 flex items-center justify-center">
+        <div className="max-w-2xl w-full p-8 bg-[#1a1a1a] rounded-3xl border border-rose-900/50 shadow-2xl text-center">
+          <div className="w-16 h-16 bg-rose-500/10 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4">
+            <AlertCircle className="w-8 h-8" />
           </div>
-          <ul className="text-sm text-slate-700 space-y-1">
-            <li>• Career Goals</li>
-            <li>• Academic Information</li>
-            <li>• Skills & Interests</li>
-          </ul>
+          <h2 className="text-2xl font-bold text-white mb-2">Complete Your Profile</h2>
+          <p className="text-gray-400 mb-6">We need your latest academic details and career goals to generate an accurate roadmap.</p>
+          
+          <div className="bg-[#222222] rounded-xl p-4 mb-6 inline-block text-left w-64 border border-gray-800">
+            <p className="text-xs font-bold text-gray-400 uppercase mb-2">Profile Completion: {currentUser.profileCompletion || 0}%</p>
+            <div className="w-full bg-gray-800 rounded-full h-2 mb-4">
+              <div className="bg-rose-500 h-2 rounded-full" style={{ width: `${currentUser.profileCompletion || 0}%` }}></div>
+            </div>
+            <ul className="text-sm text-gray-400 space-y-1">
+              <li>• Career Goals</li>
+              <li>• Academic Information</li>
+              <li>• Skills & Interests</li>
+            </ul>
+          </div>
+          
+          <button onClick={() => navigate('/profile')} className="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 rounded-xl transition-colors">
+            Update Profile
+          </button>
         </div>
-        
-        <button onClick={() => navigate('/profile')} className="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 rounded-xl transition-colors">
-          Complete Profile
-        </button>
       </div>
     );
   }
 
-  if (roadmaps.length === 0) return (
-    <div className="p-8 max-w-4xl mx-auto text-center mt-20">
-      <h2 className="text-2xl font-bold text-slate-800">No Roadmaps Found</h2>
-      <p className="text-slate-600 mt-2">Go to the U-Think Education Tree, find a Career, and save it to generate your roadmap!</p>
+  if (!loading && roadmaps.length === 0) return (
+    <div className="min-h-screen bg-[#111111] flex flex-col items-center justify-center p-8 text-center">
+      <h2 className="text-2xl font-bold text-white">No Roadmaps Found</h2>
+      <p className="text-gray-400 mt-2">Go to the U-Think Education Tree, find a Career, and save it to generate your roadmap!</p>
     </div>
   );
 
-  const activeRoadmap = roadmaps[0];
+  const activeRoadmap = roadmaps[0] || {};
 
   return (
-    <div className="max-w-6xl mx-auto p-6 mt-6 pb-24">
-      <div className="bg-gradient-to-r from-indigo-900 via-purple-900 to-indigo-900 rounded-3xl p-8 text-white shadow-xl mb-12 relative overflow-hidden flex flex-col md:flex-row items-center justify-between">
-        <div className="absolute top-0 right-0 p-12 opacity-10 pointer-events-none">
-          <Target className="w-64 h-64" />
-        </div>
-        <div className="relative z-10 w-full md:w-2/3">
-          <span className="bg-indigo-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-sm">
-            Personalized Roadmap
-          </span>
-          <h1 className="text-3xl md:text-5xl font-extrabold mt-4 mb-2 leading-tight">Goal: {activeRoadmap.targetCareerName}</h1>
-          <p className="text-indigo-200 mb-6 text-lg">Current Stage: <span className="font-semibold text-white">{activeRoadmap.currentPhase}</span></p>
-          
-          <div className="w-full bg-slate-800/50 rounded-full h-4 mb-2 overflow-hidden backdrop-blur-sm border border-slate-700">
-            <div className="bg-gradient-to-r from-emerald-400 to-teal-400 h-4 rounded-full transition-all duration-1000 ease-out" style={{ width: `${activeRoadmap.overallProgress}%` }}></div>
-          </div>
-          <div className="flex justify-between text-xs text-indigo-300 font-bold px-1">
-            <span>START</span>
-            <span>{activeRoadmap.overallProgress}% COMPLETED</span>
-            <span>GOAL</span>
-          </div>
-        </div>
+    <div className="min-h-screen bg-[#111111] text-gray-200 p-6 md:p-12 font-sans overflow-x-hidden">
+      
+      {/* Header Section */}
+      <div className="max-w-7xl mx-auto mb-16 text-center relative z-10">
+        <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-4 tracking-tight">
+          Personalized Education & Career Roadmap
+        </h1>
+        {loading ? (
+           <div className="h-6 w-96 bg-gray-800 rounded mx-auto mt-4 animate-pulse"></div>
+        ) : (
+          <p className="text-xl text-gray-400 max-w-3xl mx-auto mb-8">
+            Dynamically generated for <span className="text-white font-semibold">{currentUser.name}</span> targeting <span className="text-white font-semibold">{activeRoadmap.targetCareerName}</span>.
+          </p>
+        )}
         
-        {/* Mobile Skill Gaps Summary */}
-        <div className="w-full md:w-1/3 mt-8 md:mt-0 md:ml-8 relative z-10">
-            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/20">
-                <h3 className="font-bold text-white flex items-center gap-2 mb-3">
-                    <Zap className="w-4 h-4 text-amber-400" />
-                    Top Skill Gaps
-                </h3>
-                {activeRoadmap.skillGaps && activeRoadmap.skillGaps.length > 0 ? (
-                    <div className="space-y-2">
-                        {activeRoadmap.skillGaps.slice(0, 3).map((gap: any, i: number) => (
-                            <div key={i} className="text-sm flex justify-between items-center border-b border-white/10 pb-2 last:border-0 last:pb-0">
-                                <span className="text-indigo-100">{gap.skillName}</span>
-                                <span className="text-xs bg-amber-400/20 text-amber-200 px-2 py-0.5 rounded border border-amber-400/30">Target: {gap.requiredLevel}</span>
-                            </div>
-                        ))}
-                    </div>
-                ) : (
-                    <p className="text-sm text-indigo-200">You have no critical skill gaps!</p>
-                )}
-            </div>
-        </div>
+        {!loading && activeRoadmap.skillGaps && activeRoadmap.skillGaps.length > 0 && (
+          <div className="inline-block bg-[#1a1a1a] border border-gray-800 rounded-2xl p-4 text-left">
+             <div className="flex items-center gap-2 mb-2 text-yellow-400 font-bold text-sm uppercase tracking-wider">
+               <Zap className="w-4 h-4" /> Top Skill Gaps Identified
+             </div>
+             <div className="flex gap-4 flex-wrap justify-center">
+               {activeRoadmap.skillGaps.slice(0,3).map((gap: any, i: number) => (
+                 <div key={i} className="text-xs bg-[#222222] px-3 py-1.5 rounded-lg border border-gray-700">
+                   <span className="text-gray-300">{gap.skillName}</span>
+                   <span className="text-yellow-500 ml-2 border-l border-gray-700 pl-2">Req: {gap.requiredLevel}</span>
+                 </div>
+               ))}
+             </div>
+          </div>
+        )}
       </div>
 
-      <div className="flex flex-col md:flex-row gap-8">
+      {/* Roadmap Visualization */}
+      <div className="max-w-[1400px] mx-auto relative">
         
-        {/* Left Side: The Visual Roadmap */}
-        <div className="w-full md:w-2/3">
-          <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-2 mb-10">
-            <Map className="w-6 h-6 text-indigo-600" />
-            Your Journey
-          </h2>
-          
-          <div className="relative">
-            {/* The continuous line */}
-            <div className="absolute left-6 md:left-1/2 top-0 bottom-0 w-1 bg-slate-200 transform md:-translate-x-1/2 rounded-full z-0"></div>
-            
-            <div className="space-y-12">
-              {activeRoadmap.steps && activeRoadmap.steps.map((step: any, index: number) => {
-                const Icon = getStepIcon(step.type);
-                const isCompleted = step.status === 'COMPLETED';
-                const isCurrent = step.status === 'CURRENT' || step.status === 'IN_PROGRESS';
-                const isNext = step.status === 'NEXT';
-                const isLocked = step.status === 'LOCKED';
+        {/* Horizontal Dashed Line (Top) */}
+        <div className="absolute top-10 left-0 w-full border-t-2 border-dashed border-gray-600/50 z-0 hidden md:block"></div>
+        <div className="absolute top-10 left-0 w-full h-0.5 bg-gradient-to-r from-yellow-400 via-orange-500 to-emerald-400 opacity-20 z-0 hidden md:block"></div>
+
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 relative z-10">
+          {stages.map((stage, sIndex) => (
+            <div key={stage.id} className="flex flex-col relative">
+              
+              {/* Stage Header */}
+              <div className="flex gap-4 items-baseline mb-8">
+                <div className={`text-5xl md:text-6xl font-black ${stage.color} tracking-tighter`}>
+                  {stage.id}
+                </div>
+                <div className="flex flex-col">
+                  <span className={`text-xl font-bold ${stage.color}`}>{currentYear + sIndex}</span>
+                  <span className="text-sm font-bold text-gray-400 uppercase tracking-widest">{stage.title}</span>
+                </div>
+              </div>
+              
+              {/* Vertical Decorative Lines & Steps Container */}
+              <div className="flex relative pl-4 md:pl-0 flex-grow">
+                {/* Vertical Lines */}
+                <div className="flex gap-1.5 mr-6 flex-shrink-0 h-full py-2">
+                  <div className={`w-1 h-3/4 ${stage.accent} rounded-full opacity-80 mt-8`}></div>
+                  <div className="w-1 h-full bg-blue-500 rounded-full opacity-60"></div>
+                  <div className={`w-1 h-2/3 ${sIndex % 2 === 0 ? 'bg-emerald-500' : 'bg-rose-500'} rounded-full opacity-70 mt-16`}></div>
+                  <div className="w-1 h-4/5 bg-purple-500 rounded-full opacity-50 mt-4"></div>
+                </div>
                 
-                // Determine left or right alignment for desktop
-                const isEven = index % 2 === 0;
-                
-                let statusColor = 'bg-slate-100 text-slate-500 border-slate-200';
-                let iconColor = 'bg-slate-200 text-slate-400';
-                if (isCompleted) {
-                    statusColor = 'bg-emerald-50 text-emerald-700 border-emerald-200';
-                    iconColor = 'bg-emerald-500 text-white';
-                } else if (isCurrent) {
-                    statusColor = 'bg-indigo-50 text-indigo-700 border-indigo-200 shadow-lg shadow-indigo-100';
-                    iconColor = 'bg-indigo-600 text-white ring-4 ring-indigo-100';
-                } else if (isNext) {
-                    statusColor = 'bg-amber-50 text-amber-700 border-amber-200';
-                    iconColor = 'bg-amber-400 text-white';
-                }
-                
-                return (
-                  <div key={step.stepId} className={`relative z-10 flex items-center ${isEven ? 'md:flex-row-reverse' : 'md:flex-row'} flex-row`}>
-                    
-                    {/* Center Icon */}
-                    <div className="absolute left-6 md:left-1/2 transform -translate-x-1/2 flex items-center justify-center">
-                        <div className={`w-12 h-12 rounded-full flex items-center justify-center shadow-md transition-all duration-300 ${iconColor} ${isCurrent ? 'scale-110' : ''}`}>
-                            {isCompleted ? <CheckCircle className="w-6 h-6" /> : isLocked ? <CheckCircle className="w-6 h-6 opacity-50" /> : <Icon className="w-5 h-5" />}
+                {/* Steps Stack */}
+                <div className="flex flex-col gap-5 w-full pt-4">
+                  {loading ? (
+                    <div className="space-y-4">
+                      {[1, 2, 3].map(i => (
+                        <div key={i} className="bg-[#222222] rounded-lg p-5 border-l-4 border-gray-700 h-32 animate-pulse flex flex-col justify-between">
+                          <div className="h-6 w-3/4 bg-gray-700 rounded mb-4"></div>
+                          <div className="h-4 w-full bg-gray-700 rounded mb-2"></div>
+                          <div className="h-4 w-5/6 bg-gray-700 rounded"></div>
                         </div>
+                      ))}
                     </div>
+                  ) : stage.steps.map((step, idx) => {
+                    const isCompleted = step.status === 'COMPLETED';
+                    const isCurrent = step.status === 'CURRENT' || step.status === 'IN_PROGRESS';
                     
-                    {/* Content Card */}
-                    <div className={`w-full md:w-1/2 ${isEven ? 'md:pr-12 pl-16 md:pl-0' : 'md:pl-12 pl-16'}`}>
-                        <div 
-                            onClick={() => setSelectedStep(step)}
-                            className={`p-6 rounded-2xl border-2 transition-all cursor-pointer hover:-translate-y-1 hover:shadow-xl ${statusColor} ${isLocked ? 'opacity-70' : ''} bg-white group`}
-                        >
-                            <div className="flex justify-between items-start mb-3">
-                                <span className={`text-xs font-bold px-2.5 py-1 rounded-md uppercase tracking-wide ${isCompleted ? 'bg-emerald-100 text-emerald-800' : isCurrent ? 'bg-indigo-100 text-indigo-800' : isNext ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-600'}`}>
-                                    {step.status === 'IN_PROGRESS' ? 'CURRENT' : step.status}
-                                </span>
-                                {step.estimatedDuration && (
-                                    <span className="text-xs font-medium text-slate-500 flex items-center gap-1 bg-slate-50 px-2 py-1 rounded-md border border-slate-100">
-                                        <Clock className="w-3 h-3" />
-                                        {step.estimatedDuration}
-                                    </span>
-                                )}
-                            </div>
-                            
-                            <h3 className={`text-xl font-bold mb-2 group-hover:text-indigo-600 transition-colors ${isCompleted ? 'text-slate-800' : 'text-slate-700'}`}>
-                                {step.title}
-                            </h3>
-                            
-                            <p className="text-slate-600 text-sm mb-4 line-clamp-2">{step.description}</p>
-                            
-                            <div className="flex items-center text-indigo-600 text-sm font-semibold group-hover:gap-2 transition-all gap-1">
-                                View Details <ArrowRight className="w-4 h-4" />
-                            </div>
-                        </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-        
-        {/* Right Side: Step Details Panel (Sticky) */}
-        <div className="w-full md:w-1/3">
-            <div className="sticky top-24">
-                {selectedStep ? (
-                    <div className="bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden animate-in fade-in slide-in-from-right-4 duration-300">
-                        <div className={`p-6 text-white ${selectedStep.status === 'COMPLETED' ? 'bg-emerald-600' : selectedStep.status === 'CURRENT' || selectedStep.status === 'IN_PROGRESS' ? 'bg-indigo-600' : 'bg-slate-800'}`}>
-                            <div className="flex justify-between items-start">
-                                <span className="bg-white/20 text-white text-xs font-bold px-2 py-1 rounded uppercase tracking-wider backdrop-blur-sm">
-                                    {selectedStep.type}
-                                </span>
-                                <button onClick={() => setSelectedStep(null)} className="text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-full p-1 transition-colors">
-                                    <X className="w-5 h-5" />
-                                </button>
-                            </div>
-                            <h3 className="text-2xl font-bold mt-4">{selectedStep.title}</h3>
+                    return (
+                      <div 
+                        key={step.stepId} 
+                        className={`bg-[#222222] rounded-lg p-5 border-l-4 transition-transform hover:-translate-y-1 hover:shadow-2xl ${
+                          isCompleted ? 'border-l-gray-500 opacity-70' : 
+                          isCurrent ? `border-l-${stage.color.split('-')[1]}-500 shadow-[0_0_15px_rgba(255,255,255,0.05)] bg-[#2a2a2a]` : 
+                          `border-l-gray-700`
+                        }`}
+                      >
+                        <div className="flex justify-between items-start mb-2">
+                          <h3 className={`font-bold text-lg leading-tight ${isCurrent ? 'text-white' : 'text-gray-200'}`}>
+                            {step.title}
+                          </h3>
+                          {isCompleted && <CheckCircle className="w-4 h-4 text-emerald-500 flex-shrink-0 ml-2" />}
                         </div>
                         
-                        <div className="p-6 space-y-6 max-h-[60vh] overflow-y-auto">
-                            <div>
-                                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Description</h4>
-                                <p className="text-slate-700 text-sm">{selectedStep.description}</p>
+                        <p className="text-xs text-gray-400 mb-4 line-clamp-3 leading-relaxed">
+                          {step.description}
+                        </p>
+                        
+                        {step.recommendedExams && step.recommendedExams.length > 0 && (
+                          <div className="mb-3">
+                            <span className="text-[10px] font-bold text-gray-500 uppercase block mb-1">Target Exams:</span>
+                            <div className="flex flex-wrap gap-1">
+                              {step.recommendedExams.map((exam: string, i: number) => (
+                                <span key={i} className="text-[10px] bg-[#111111] border border-gray-700 text-gray-300 px-2 py-0.5 rounded">
+                                  {exam}
+                                </span>
+                              ))}
                             </div>
-                            
-                            {selectedStep.whyRecommended && (
-                                <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-4">
-                                    <h4 className="text-xs font-bold text-indigo-800 uppercase tracking-wider mb-2 flex items-center gap-1">
-                                        <Star className="w-3 h-3" /> Why Recommended
-                                    </h4>
-                                    <p className="text-indigo-900 text-sm">{selectedStep.whyRecommended}</p>
-                                </div>
-                            )}
-
-                            {selectedStep.requiredSkills && selectedStep.requiredSkills.length > 0 && (
-                                <div>
-                                    <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Required Skills</h4>
-                                    <div className="flex flex-wrap gap-2">
-                                        {selectedStep.requiredSkills.map((skill: string, i: number) => (
-                                            <span key={i} className="bg-slate-100 text-slate-700 border border-slate-200 px-3 py-1 rounded-full text-xs font-medium">
-                                                {skill}
-                                            </span>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-
-                            {selectedStep.recommendedExams && selectedStep.recommendedExams.length > 0 && (
-                                <div>
-                                    <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-1">
-                                        <FileText className="w-3 h-3" /> Target Exams
-                                    </h4>
-                                    <div className="space-y-2">
-                                        {selectedStep.recommendedExams.map((exam: string, i: number) => (
-                                            <div key={i} className="bg-white border border-slate-200 p-3 rounded-lg flex items-center justify-between group cursor-pointer hover:border-indigo-300">
-                                                <span className="font-semibold text-sm text-slate-800">{exam}</span>
-                                                <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-indigo-500" />
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                            
-                            {selectedStep.recommendedCourses && selectedStep.recommendedCourses.length > 0 && (
-                                <div>
-                                    <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-1">
-                                        <GraduationCap className="w-3 h-3" /> Related Degrees
-                                    </h4>
-                                    <div className="space-y-2">
-                                        {selectedStep.recommendedCourses.map((course: string, i: number) => (
-                                            <div key={i} className="bg-white border border-slate-200 p-3 rounded-lg flex items-center justify-between group cursor-pointer hover:border-indigo-300">
-                                                <span className="font-semibold text-sm text-slate-800">{course}</span>
-                                                <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-indigo-500" />
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
+                          </div>
+                        )}
+                        
+                        {step.requiredSkills && step.requiredSkills.length > 0 && (
+                          <div className="mb-3">
+                            <span className="text-[10px] font-bold text-gray-500 uppercase block mb-1">Skills:</span>
+                            <div className="flex flex-wrap gap-1">
+                              {step.requiredSkills.slice(0,3).map((skill: string, i: number) => (
+                                <span key={i} className="text-[10px] bg-[#333333] text-gray-300 px-2 py-0.5 rounded">
+                                  {skill}
+                                </span>
+                              ))}
+                              {step.requiredSkills.length > 3 && <span className="text-[10px] text-gray-500 px-1">+{step.requiredSkills.length - 3}</span>}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {step.recommendedCourses && step.recommendedCourses.length > 0 && (
+                          <div className="mb-3">
+                            <span className="text-[10px] font-bold text-gray-500 uppercase block mb-1">Degrees:</span>
+                            <div className="flex flex-wrap gap-1">
+                              {step.recommendedCourses.slice(0,2).map((course: string, i: number) => (
+                                <span key={i} className="text-[10px] bg-[#111111] border border-gray-700 text-gray-300 px-2 py-0.5 rounded line-clamp-1">
+                                  {course}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                  
+                  {stage.steps.length === 0 && !loading && (
+                    <div className="bg-[#1a1a1a] border border-gray-800 border-dashed rounded-lg p-5 text-center text-gray-500 text-sm">
+                      No milestones for this stage.
                     </div>
-                ) : (
-                    <div className="bg-slate-50 border border-slate-200 border-dashed rounded-3xl p-12 text-center h-full flex flex-col items-center justify-center text-slate-400">
-                        <Map className="w-12 h-12 mb-4 text-slate-300" />
-                        <p>Click on any milestone in your roadmap to view detailed recommendations and requirements.</p>
-                    </div>
-                )}
+                  )}
+                </div>
+              </div>
             </div>
+          ))}
         </div>
       </div>
     </div>
   );
 }
 
-function getStepIcon(type: string) {
-  switch (type) {
-    case 'Foundation': return BookOpen;
-    case 'Exam': return Clock;
-    case 'Degree': return GraduationCap;
-    case 'Skill': return Zap;
-    case 'Career': return Briefcase;
-    case 'Project': return Target;
-    default: return CheckCircle;
-  }
-}

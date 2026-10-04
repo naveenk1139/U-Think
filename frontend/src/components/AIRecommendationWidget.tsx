@@ -6,7 +6,7 @@ import KnowledgeGraphView from './KnowledgeGraphView';
 interface IRecommendation {
   _id: string;
   entityType: string;
-  entityId: string;
+  entityId: any;
   matchScore: number;
   recommendationLabel: string;
   presentation?: {
@@ -21,7 +21,7 @@ export default function AIRecommendationWidget() {
   const [recommendations, setRecommendations] = useState<IRecommendation[]>([]);
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
-  const [selectedGraphTarget, setSelectedGraphTarget] = useState<{type: string, id: string} | null>(null);
+  const [selectedGraphTarget, setSelectedGraphTarget] = useState<{type: string, id: string, score?: number} | null>(null);
 
   const handleFeedback = async (id: string, action: 'accept' | 'dismiss') => {
     try {
@@ -149,7 +149,7 @@ export default function AIRecommendationWidget() {
               </button>
               <div className="flex-1"></div>
               <button 
-                onClick={() => setSelectedGraphTarget({ type: rec.entityType, id: rec.entityId || 'fallback_id' })}
+                onClick={() => setSelectedGraphTarget({ type: rec.entityType, id: (typeof rec.entityId === 'object' && rec.entityId !== null ? rec.entityId._id : rec.entityId) || 'fallback_id', score: rec.matchPercentage })}
                 className="text-[10px] font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 transition-colors"
               >
                 Explore Path <ArrowRight className="w-3 h-3" />
@@ -163,6 +163,7 @@ export default function AIRecommendationWidget() {
         <KnowledgeGraphView 
           targetType={selectedGraphTarget.type}
           targetId={selectedGraphTarget.id}
+          matchScore={selectedGraphTarget.score}
           onClose={() => setSelectedGraphTarget(null)}
         />
       )}

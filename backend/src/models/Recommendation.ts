@@ -23,6 +23,8 @@ export interface IRecommendation extends Document {
   profileVersion: number;
   status: 'Active' | 'Dismissed' | 'Accepted' | 'Expired';
   recommendationLabel: 'VERIFIED MATCH' | 'PARTIAL MATCH' | 'REQUIRES ACTION' | 'INFORMATION REQUIRED' | 'DATA UNVERIFIED';
+  presentation?: any;
+  presentationLanguage?: string;
   expiresAt?: Date;
   createdAt: Date;
   updatedAt: Date;
@@ -95,6 +97,8 @@ const RecommendationSchema = new Schema<IRecommendation>({
     enum: ['VERIFIED MATCH', 'PARTIAL MATCH', 'REQUIRES ACTION', 'INFORMATION REQUIRED', 'DATA UNVERIFIED'],
     required: true
   },
+  presentation: { type: Schema.Types.Mixed },
+  presentationLanguage: { type: String },
   expiresAt: { type: Date }
 }, {
   timestamps: true

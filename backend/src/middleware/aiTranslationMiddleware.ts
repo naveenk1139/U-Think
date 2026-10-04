@@ -4,6 +4,7 @@ import crypto from 'crypto';
 
 // Simple in-memory cache for translations (In a real app, use Redis or MongoDB)
 const translationCache: Record<string, string> = {};
+let translationDisabledUntil = 0;
 
 /**
  * Middleware that intercepts JSON responses and translates string values if a target language is requested.
@@ -13,6 +14,10 @@ export const aiTranslationMiddleware = async (req: Request, res: Response, next:
   
   if (!targetLang || targetLang === 'en') {
     return next();
+  }
+
+  if (Date.now() < translationDisabledUntil) {
+    return next(); // Circuit breaker active, skip translation entirely
   }
 
   // Intercept res.json
@@ -71,8 +76,12 @@ export const aiTranslationMiddleware = async (req: Request, res: Response, next:
           translationCache[cacheKey] = JSON.stringify(translatedObj);
           
           return originalJson.call(this, translatedObj);
-        } catch (error) {
-          console.error(`[i18n] Translation failed, falling back to original. Error:`, error);
+        } catch (error: any) {
+          console.error(`[i18n] Translation failed, falling back to original. Error:`, error.message);
+          if (error.message?.includes('429') || error.message?.includes('quota') || error.message?.includes('fetch failed')) {
+             console.warn('[i18n] Rate limit or network error hit. Disabling translations for 60 seconds.');
+             translationDisabledUntil = Date.now() + 60000;
+          }
           return originalJson.call(this, body); // Fallback to original
         }
       })();

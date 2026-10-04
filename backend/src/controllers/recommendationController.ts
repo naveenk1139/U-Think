@@ -39,23 +39,33 @@ export const getUserRecommendations = async (req: AuthRequest, res: Response) =>
 
     let recommendations = await Recommendation.find(filter).populate('entityId').sort({ matchScore: -1 });
 
-    // If recommendations exist but are based on an outdated profile, or if there are none, regenerate them
-    if (recommendations.length === 0 || (recommendations[0] && recommendations[0].profileVersion < currentProfileVersion)) {
+    // If recommendations exist but are based on an outdated profile, regenerate them in background
+    if (recommendations.length > 0 && (recommendations[0].profileVersion < currentProfileVersion)) {
+      // Profile changed. Return existing immediately for fast UI, but recalculate in background.
+      generateAllRecommendations(userId)
+        .then(() => console.log(`Background recommendations generated for ${userId}`))
+        .catch(err => console.error('Background recommendation generation failed', err));
+    } else if (recommendations.length === 0) {
+      // No recommendations exist at all, must block to generate
       await generateAllRecommendations(userId);
       recommendations = await Recommendation.find(filter).populate('entityId').sort({ matchScore: -1 });
     }
 
-    // Generate explanations dynamically via the Presentation Layer
+    // Generate explanations dynamically via the Presentation Layer ONLY if not already cached
     const explainedRecommendations = await Promise.all(
-      recommendations.map(async (rec) => {
+      recommendations.map(async (rec: any) => {
         try {
-          const presentation = await explainRecommendation(rec._id.toString(), user.preferredLanguage || 'en');
-          return {
-            ...rec.toJSON(),
-            presentation
-          };
-        } catch (err) {
+          const prefLang = user.preferredLanguage || 'en';
+          if (rec.presentation && rec.presentationLanguage === prefLang) {
+             return rec.toJSON();
+          }
+          const presentation = await explainRecommendation(rec._id.toString(), prefLang);
+          rec.presentation = presentation;
+          rec.presentationLanguage = prefLang;
+          await rec.save();
           return rec.toJSON();
+        } catch (err) {
+          return rec.toJSON ? rec.toJSON() : rec;
         }
       })
     );

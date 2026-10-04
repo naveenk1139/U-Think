@@ -103,7 +103,7 @@ export default function TopBar() {
       {/* Logo Area */}
       <div className="flex items-center gap-6">
         <div className="flex items-center gap-3 cursor-pointer shrink-0" onClick={() => navigate('/')}>
-          <img 
+          <img loading="lazy" decoding="async" 
             src="/logo.png" 
             alt="U-Think Logo" 
             className="h-10 w-auto object-contain"
@@ -214,7 +214,7 @@ export default function TopBar() {
           >
             <div className="w-9 h-9 rounded-full overflow-hidden bg-blue-600 shrink-0 border border-blue-500">
               {currentUser?.photoURL ? (
-                <img src={currentUser.photoURL} alt="Profile" className="w-full h-full object-cover" />
+                <img loading="lazy" decoding="async" src={currentUser.photoURL} alt="Profile" className="w-full h-full object-cover" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-white font-bold text-sm">
                   {(currentUser?.displayName || currentUser?.name || 'N').charAt(0).toUpperCase()}

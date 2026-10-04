@@ -357,5 +357,12 @@ UserSchema.set('toJSON', {
   },
 });
 
+// Add performance indexes for frequently queried fields
+UserSchema.index({ role: 1 });
+UserSchema.index({ stream: 1 });
+UserSchema.index({ city: 1 });
+UserSchema.index({ 'intelligenceProfile.educationStage': 1 });
+UserSchema.index({ 'intelligenceProfile.careerReadinessScore': -1 });
+
 export const User = mongoose.models.User || mongoose.model<IUser>('User', UserSchema);
 export default User;

@@ -31,7 +31,7 @@ export const getRelatedCourses = async (streamId: string, limit: number = 4): Pr
     // A more sophisticated app might use a query param on the courses endpoint
     // For now we assume we can fetch all courses and filter, or a real endpoint would do this
     const response = await axios.get(`${API_URL}/courses`);
-    const allCourses: CourseDetailData[] = response.data;
+    const allCourses: CourseDetailData[] = response.data.data || response.data;
     const related = allCourses
       .filter(c => c.streamId === streamId)
       .slice(0, limit);

@@ -164,7 +164,7 @@ export default function SavedJobs() {
               <div className="p-5 flex gap-4">
                 <div className="w-12 h-12 rounded-xl bg-background border border-border flex items-center justify-center shrink-0 overflow-hidden text-lg font-bold text-text-muted">
                   {job.companyLogo ? (
-                    <img src={job.companyLogo} alt={job.company} className="w-full h-full object-contain p-1" />
+                    <img loading="lazy" decoding="async" src={job.companyLogo} alt={job.company} className="w-full h-full object-contain p-1" />
                   ) : (
                     <div className="w-full h-full bg-slate-900 text-white flex items-center justify-center font-serif">{(job.company || '?').substring(0, 3)}</div>
                   )}

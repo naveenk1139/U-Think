@@ -278,7 +278,7 @@ const ScienceStreamDetail: React.FC = () => {
                   const careerArr = Array.from(careers).slice(0, 4);
 
                   // Extract short abbreviation (like PCM)
-                  const abbr = combo.name.split(' ')[0];
+                  const abbr = combo.name ? combo.name.split(' ')[0] : 'S';
 
                   // Determine color scheme based on common combinations
                   let colorScheme = { bg: 'bg-blue-50', text: 'text-[#2563EB]' };

@@ -302,7 +302,7 @@ export default function MentorshipProgram() {
                       type="text"
                       value={inputText}
                       onChange={e => setInputText(e.target.value)}
-                      placeholder={`Ask ${selectedMentor.name.split(' ')[0]} for advice...`}
+                      placeholder={`Ask ${selectedMentor?.name ? selectedMentor.name.split(' ')[0] : 'Mentor'} for advice...`}
                       className="flex-1 px-4 py-3 bg-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-shadow"
                     />
                     <button

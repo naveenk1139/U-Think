@@ -76,5 +76,9 @@ const StudentRoadmapSchema = new Schema<IStudentRoadmap>({
   timestamps: true
 });
 
+// Performance Indexes
+StudentRoadmapSchema.index({ studentId: 1, isActive: 1 });
+StudentRoadmapSchema.index({ 'skillGaps.skillName': 1 });
+
 export const StudentRoadmap = mongoose.models.StudentRoadmap || mongoose.model<IStudentRoadmap>('StudentRoadmap', StudentRoadmapSchema);
 export default StudentRoadmap;

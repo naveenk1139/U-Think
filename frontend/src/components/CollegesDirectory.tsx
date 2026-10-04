@@ -667,7 +667,7 @@ export default function CollegesDirectory() {
                   >
                     {/* Left: Image */}
                     <Link to={`/colleges/${college.slug || college.sourceId}`} className="w-full sm:w-[220px] h-[200px] sm:h-auto relative shrink-0 block">
-                      <img 
+                      <img loading="lazy" decoding="async" 
                         src={college.image || "https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=1000&auto=format&fit=crop"} 
                         alt={college.name} 
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 

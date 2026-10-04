@@ -34,9 +34,12 @@ const ProfessionalCourses: React.FC = () => {
         setCategories(response.data);
         if (response.data.length > 0) {
           setActiveCategory(response.data[0]);
+        } else {
+          setLoading(false); // No categories found, stop loading
         }
       } catch (error) {
         console.error('Failed to fetch categories', error);
+        setLoading(false); // Error occurred, stop loading
       }
     };
     fetchCategories();
@@ -48,8 +51,15 @@ const ProfessionalCourses: React.FC = () => {
     const fetchCourses = async () => {
       setLoading(true);
       try {
-        const response = await api.get(`/api/courses/categories/${activeCategory._id}`);
-        setCourses(response.data);
+        const response = await api.get(`/api/courses/categories/${activeCategory._id}?page=1&limit=20`);
+        const data = response.data;
+        if (data && Array.isArray(data.data)) {
+           setCourses(data.data);
+        } else if (Array.isArray(data)) {
+           setCourses(data);
+        } else {
+           setCourses([]);
+        }
       } catch (error) {
         console.error('Failed to fetch courses', error);
       } finally {

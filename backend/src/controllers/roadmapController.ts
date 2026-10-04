@@ -17,11 +17,32 @@ export const generateRoadmap = async (req: Request, res: Response) => {
     const existingRoadmap = await StudentRoadmap.findOne({ studentId, isActive: true });
     
     const profileLastUpdated = student.updatedAt || new Date(0);
-    if (existingRoadmap && existingRoadmap.generatedAt > profileLastUpdated) {
+    
+    // Also check if any new assessment results were generated
+    const latestAssessment = await import('../models/AssessmentResult.js').then(m => m.default.findOne({ userId: studentId }).sort({ createdAt: -1 }));
+    const assessmentLastUpdated = latestAssessment ? (latestAssessment.createdAt || new Date(0)) : new Date(0);
+    
+    const latestDataUpdate = profileLastUpdated > assessmentLastUpdated ? profileLastUpdated : assessmentLastUpdated;
+
+    if (existingRoadmap && !req.body.forceRefresh) {
+      if (existingRoadmap.generatedAt > latestDataUpdate) {
         // Profile hasn't changed since roadmap was generated. Return existing.
         return res.status(200).json(existingRoadmap);
+      } else {
+        // Profile has changed. Return existing immediately for fast UI, but recalculate in background.
+        analyzeProfileAndGenerateRoadmap(studentId)
+          .then(() => {
+            // In a real app, you would notify the client via WebSockets here (e.g., io.to(studentId).emit('roadmapUpdated'))
+            console.log(`Background roadmap update completed for student ${studentId}`);
+          })
+          .catch(err => {
+            console.error('Background roadmap generation failed', err);
+          });
+        return res.status(200).json(existingRoadmap);
+      }
     }
 
+    // No existing roadmap, must block and generate
     const newRoadmap = await analyzeProfileAndGenerateRoadmap(studentId);
     res.status(201).json(newRoadmap);
 

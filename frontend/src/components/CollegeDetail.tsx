@@ -130,13 +130,13 @@ export default function CollegeDetail() {
         {/* Header Section */}
         <div className="bg-card rounded-3xl overflow-hidden border border-border shadow-sm mb-8">
           <div className="h-48 md:h-64 lg:h-80 w-full relative">
-            <img src={college.image || 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&q=80'} alt={college.name} className="w-full h-full object-cover" />
+            <img loading="lazy" decoding="async" src={college.image || 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&q=80'} alt={college.name} className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-transparent"></div>
             
             <div className="absolute bottom-6 left-6 right-6 lg:left-10 lg:right-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
               <div className="flex items-center gap-6">
                 <div className="w-24 h-24 md:w-32 md:h-32 bg-white rounded-2xl p-2 shadow-xl shrink-0 hidden sm:block">
-                  <img src={college.logo || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(college.name) + '&background=0D8ABC&color=fff'} alt={`${college.name} logo`} className="w-full h-full object-contain rounded-xl" />
+                  <img loading="lazy" decoding="async" src={college.logo || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(college.name) + '&background=0D8ABC&color=fff'} alt={`${college.name} logo`} className="w-full h-full object-contain rounded-xl" />
                 </div>
                 <div className="text-white">
                   <div className="flex flex-wrap items-center gap-2 mb-3">

@@ -55,6 +55,11 @@ export default function StudentDashboard() {
   const [nextActions, setNextActions] = useState<any[]>([]);
   const [deadlines, setDeadlines] = useState<any[]>([]);
   
+  const [loadingStats, setLoadingStats] = useState(true);
+  const [loadingActions, setLoadingActions] = useState(true);
+  const [loadingDeadlines, setLoadingDeadlines] = useState(true);
+  const [loadingDocs, setLoadingDocs] = useState(true);
+
   const { notifications } = useNotifications();
   
   const [careerDNA, setCareerDNA] = useState<any>(currentUser?.settings?.careerDNA || null);
@@ -75,34 +80,47 @@ export default function StudentDashboard() {
     // Fetch actual saved counts and stats
     const token = localStorage.getItem('uthink_token');
     if (token) {
+      setLoadingStats(true);
       api.get('/api/profile/dashboard-stats')
       .then(res => {
         if (!res.data.error) setDashboardStats(res.data);
       })
-      .catch(console.error);
+      .catch(console.error)
+      .finally(() => setLoadingStats(false));
 
       // Fetch user documents
+      setLoadingDocs(true);
       api.get('/api/documents')
       .then(res => {
         if (Array.isArray(res.data)) setDocuments(res.data);
       })
-      .catch(console.error);
+      .catch(console.error)
+      .finally(() => setLoadingDocs(false));
 
       // Fetch Next Best Actions
+      setLoadingActions(true);
       api.get('/api/profile/next-best-actions')
       .then(res => {
         if (Array.isArray(res.data)) setNextActions(res.data);
       })
-      .catch(console.error);
+      .catch(console.error)
+      .finally(() => setLoadingActions(false));
 
       // Fetch upcoming Deadlines
+      setLoadingDeadlines(true);
       api.get('/api/deadlines')
       .then(res => {
         if (res.data?.success && Array.isArray(res.data.deadlines)) {
           setDeadlines(res.data.deadlines);
         }
       })
-      .catch(console.error);
+      .catch(console.error)
+      .finally(() => setLoadingDeadlines(false));
+    } else {
+      setLoadingStats(false);
+      setLoadingDocs(false);
+      setLoadingActions(false);
+      setLoadingDeadlines(false);
     }
   }, []);
 
@@ -197,7 +215,11 @@ export default function StudentDashboard() {
                <div key={i} className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm flex flex-col justify-center hover:-translate-y-0.5 transition-transform cursor-pointer" onClick={() => navigate(stat.label.includes('Saved') ? '/saved-jobs' : (stat.label.includes('Colleges') ? '/colleges' : '/pathways/after-10th'))}>
                  <div className="flex items-center gap-3 mb-2">
                    <div className={`w-10 h-10 rounded-xl ${stat.bg} ${stat.color} flex items-center justify-center shrink-0`}><stat.icon className="w-4 h-4"/></div>
-                   <div className="text-2xl font-black text-gray-900 leading-none">{stat.value}</div>
+                   {loadingStats ? (
+                     <div className="h-8 w-16 bg-gray-200 animate-pulse rounded"></div>
+                   ) : (
+                     <div className="text-2xl font-black text-gray-900 leading-none">{stat.value}</div>
+                   )}
                  </div>
                  <div className="text-[11px] font-bold text-gray-700">{stat.label}</div>
                  <div className="text-[9px] font-semibold text-gray-400 mt-0.5">{stat.subtext}</div>
@@ -217,7 +239,19 @@ export default function StudentDashboard() {
                </div>
                <div className="p-4 flex-1 space-y-4">
                  
-                 {nextActions.length === 0 ? (
+                 {loadingActions ? (
+                   <div className="space-y-4">
+                     {[1, 2, 3].map((skeleton) => (
+                       <div key={skeleton} className="flex gap-3 animate-pulse">
+                         <div className="w-6 h-6 rounded-full bg-gray-200 shrink-0"></div>
+                         <div className="flex-1 space-y-2">
+                           <div className="h-3 bg-gray-200 rounded w-3/4"></div>
+                           {skeleton === 1 && <div className="h-3 bg-gray-200 rounded w-full"></div>}
+                         </div>
+                       </div>
+                     ))}
+                   </div>
+                 ) : nextActions.length === 0 ? (
                    <div className="text-xs text-gray-500 italic">No urgent actions pending.</div>
                  ) : (
                    nextActions.map((action, index) => (
@@ -408,7 +442,18 @@ export default function StudentDashboard() {
                  </div>
                </div>
                
-               {documents.length === 0 ? (
+               {loadingDocs ? (
+                 <div className="flex flex-col h-full justify-between space-y-4">
+                   <div className="space-y-3 animate-pulse">
+                     <div className="bg-gray-100 rounded-lg h-12 w-full"></div>
+                     <div className="bg-gray-100 rounded-lg h-12 w-full"></div>
+                   </div>
+                   <div className="flex gap-2 animate-pulse">
+                     <div className="flex-1 bg-gray-200 h-8 rounded-lg"></div>
+                     <div className="flex-1 bg-gray-200 h-8 rounded-lg"></div>
+                   </div>
+                 </div>
+               ) : documents.length === 0 ? (
                  <div className="flex flex-col h-full justify-between">
                    <p className="text-[11px] font-medium text-gray-600 leading-relaxed mb-4">
                      Upload your marksheet to automatically build your academic profile.
@@ -511,7 +556,19 @@ export default function StudentDashboard() {
               <button onClick={() => navigate('/exams')} className="text-[10px] font-bold text-blue-600 hover:underline">View All →</button>
             </div>
             <div className="space-y-4">
-              {deadlines.length === 0 ? (
+              {loadingDeadlines ? (
+                <div className="space-y-3">
+                  {[1, 2, 3].map((skel) => (
+                    <div key={skel} className="flex gap-3 animate-pulse">
+                      <div className="w-10 h-10 rounded-lg bg-gray-200 shrink-0"></div>
+                      <div className="flex-1 space-y-2 py-1">
+                        <div className="h-3 bg-gray-200 rounded w-3/4"></div>
+                        <div className="h-2 bg-gray-200 rounded w-1/2"></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : deadlines.length === 0 ? (
                 <div className="text-xs text-gray-500 italic">No upcoming deadlines found.</div>
               ) : (
                 deadlines.slice(0, 4).map((dl, idx) => {

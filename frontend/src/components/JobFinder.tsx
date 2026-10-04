@@ -525,7 +525,7 @@ export default function JobFinder({ initialRole }: { initialRole?: string | null
                 {/* Logo */}
                 <div className="w-14 h-14 rounded-xl bg-background border border-border flex items-center justify-center shrink-0 overflow-hidden text-xl font-bold text-text-muted">
                   {job.companyLogo ? (
-                    <img src={job.companyLogo} alt={job.company} className="w-full h-full object-contain p-2" />
+                    <img loading="lazy" decoding="async" src={job.companyLogo} alt={job.company} className="w-full h-full object-contain p-2" />
                   ) : (
                     <div className="w-full h-full bg-slate-900 text-white flex items-center justify-center font-serif">{job.company.substring(0, 3)}</div>
                   )}

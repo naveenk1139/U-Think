@@ -71,5 +71,10 @@ const JobSchema: Schema = new Schema({
 // Indexing for search
 JobSchema.index({ title: 'text', company: 'text', description: 'text', skills: 'text', category: 'text' });
 JobSchema.index({ source: 1, sourceJobId: 1 }, { unique: true });
+JobSchema.index({ status: 1 });
+JobSchema.index({ location: 1 });
+JobSchema.index({ workMode: 1 });
+JobSchema.index({ experienceLevel: 1 });
+JobSchema.index({ postedAt: -1 });
 
 export default mongoose.model<IJob>('Job', JobSchema);

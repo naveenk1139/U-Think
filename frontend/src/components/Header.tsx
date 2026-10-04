@@ -51,7 +51,7 @@ export default function Header({ onOpenCounselor }: HeaderProps) {
 
           {/* Logo */}
           <div className="flex items-center cursor-pointer" onClick={() => goTo('/')}>
-            <img 
+            <img loading="lazy" decoding="async" 
               src="/logo.png" 
               alt="U THINK Logo" 
               className="h-16 w-auto object-contain drop-shadow-sm shadow-black/5 dark:shadow-none shadow-black/5 dark:shadow-none hover:scale-105 transition-transform duration-300"
@@ -96,7 +96,7 @@ export default function Header({ onOpenCounselor }: HeaderProps) {
             {currentUser && <NotificationDropdown />}
             {currentUser ? (
               <div className="hidden sm:flex items-center gap-3 pr-2 border-r border-border shrink-0">
-                <img
+                <img loading="lazy" decoding="async"
                   onClick={() => goTo('/dashboard')}
                   src={avatarSrc}
                   alt="Profile"

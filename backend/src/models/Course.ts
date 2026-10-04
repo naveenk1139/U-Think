@@ -89,7 +89,6 @@ const CourseSchema: Schema = new Schema({
 }, { timestamps: true });
 
 CourseSchema.index({ category: 1 });
-CourseSchema.index({ slug: 1 });
 CourseSchema.index({ name: 1 });
 CourseSchema.index({ streamId: 1 });
 CourseSchema.index({ parentId: 1 });

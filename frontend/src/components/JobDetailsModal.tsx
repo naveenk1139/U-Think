@@ -26,7 +26,7 @@ export default function JobDetailsModal({ job, isSaved, onToggleSave, onClose }:
           <div className="flex gap-4 sm:gap-6 items-start">
             <div className="w-16 h-16 sm:w-20 sm:h-20 bg-card rounded-2xl flex items-center justify-center text-text-muted font-bold text-3xl shadow-lg shrink-0 overflow-hidden">
                {job.companyLogo ? (
-                 <img src={job.companyLogo} alt={job.company} className="w-full h-full object-cover" />
+                 <img loading="lazy" decoding="async" src={job.companyLogo} alt={job.company} className="w-full h-full object-cover" />
                ) : (
                  job.company.charAt(0)
                )}
