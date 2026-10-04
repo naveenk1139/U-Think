@@ -1,63 +1,19 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import mongoose from 'mongoose';
+import User from '../models/User.js';
+import { protect, AuthRequest } from '../middleware/authMiddleware.js';
 
 const router = Router();
 
-// Mongoose model getter or schema definition
-const getUserModel = (): mongoose.Model<any> => {
-  const existing = mongoose.models.User as mongoose.Model<any> | undefined;
-  if (existing) {
-    return existing;
-  }
-  const UserSchema = new mongoose.Schema(
-    {
-      uid: { type: String, required: true, unique: true, index: true },
-      email: { type: String },
-      displayName: { type: String },
-      photoURL: { type: String },
-      bio: { type: String, default: '' },
-      streamPreference: { type: String, default: '' },
-      lastLogin: { type: Date, default: Date.now },
-    },
-    { timestamps: true }
-  );
-  return mongoose.model('User', UserSchema) as mongoose.Model<any>;
-};
-
-// Sync user from Firebase auth to MongoDB
-router.post('/sync', async (req: Request, res: Response, next: NextFunction) => {
+// Get user profile (authenticated identity)
+router.get('/:id', protect, async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const { uid, email, displayName, photoURL } = req.body;
-    if (!uid) {
-      res.status(400).json({ error: 'User UID is required.' });
-      return;
+    const userId = req.params.id;
+    if (userId !== req.user?.id && req.user?.role !== 'admin') {
+       res.status(403).json({ error: 'Forbidden' });
+       return;
     }
 
-    const User = getUserModel();
-    const user = await User.findOneAndUpdate(
-      { uid },
-      {
-        uid,
-        email,
-        displayName,
-        photoURL,
-        lastLogin: new Date(),
-      },
-      { upsert: true, new: true }
-    );
-
-    res.json(user);
-  } catch (err) {
-    next(err);
-  }
-});
-
-// Get user profile by UID
-router.get('/:uid', async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const { uid } = req.params;
-    const User = getUserModel();
-    const user = await User.findOne({ uid });
+    const user = await User.findById(userId).select('-password');
     if (!user) {
       res.status(404).json({ error: 'User not found.' });
       return;
@@ -68,23 +24,26 @@ router.get('/:uid', async (req: Request, res: Response, next: NextFunction) => {
   }
 });
 
-// Update user profile fields
-router.patch('/:uid', async (req: Request, res: Response, next: NextFunction) => {
+// Update user profile fields (authenticated identity)
+router.patch('/:id', protect, async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const { uid } = req.params;
-    const { bio, displayName, photoURL, streamPreference } = req.body;
-    const User = getUserModel();
+    const userId = req.params.id;
+    if (userId !== req.user?.id && req.user?.role !== 'admin') {
+       res.status(403).json({ error: 'Forbidden' });
+       return;
+    }
 
-    const user = await User.findOneAndUpdate(
-      { uid },
-      {
-        ...(bio !== undefined && { bio }),
-        ...(displayName !== undefined && { displayName }),
-        ...(photoURL !== undefined && { photoURL }),
-        ...(streamPreference !== undefined && { streamPreference }),
-      },
+    const updates = req.body;
+    // Don't allow password or role updates through this generic route
+    delete updates.password;
+    delete updates.role;
+    delete updates._id;
+
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { $set: updates },
       { new: true }
-    );
+    ).select('-password');
 
     if (!user) {
       res.status(404).json({ error: 'User not found.' });

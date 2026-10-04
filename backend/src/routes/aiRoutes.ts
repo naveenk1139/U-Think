@@ -5,8 +5,10 @@ import Conversation from '../models/Conversation.js';
 import Message from '../models/Message.js';
 import User from '../models/User.js';
 import { uThinkTools, executeTool, buildSystemInstruction } from '../services/aiService.js';
+import { protect } from '../middleware/authMiddleware.js';
 
 const router = Router();
+router.use(protect);
 
 // Evaluate Aptitude Test results using Gemini AI
 router.post('/aptitude/evaluate', async (req: Request, res: Response, next: NextFunction) => {
@@ -55,19 +57,8 @@ router.post('/aptitude/evaluate', async (req: Request, res: Response, next: Next
     let resultData: any = {};
     
     if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === 'your_gemini_api_key_here') {
-      resultData = {
-        recommendedStream: 'Polytechnic Diploma in Tech & Engineering',
-        recommendedStreamId: 'diploma',
-        whyThisFits: 'Your answers indicate a strong preference for hands-on, practical learning rather than purely theoretical academics. A diploma will allow you to enter the workforce sooner with specialized skills.',
-        detailedAnalysis: 'This is a simulated analysis because the Gemini API Key is not configured in the backend. Based on your responses, we highly recommend the Polytechnic / Diploma stream.',
-        suggestedCareers: ['Junior Engineer', 'Technical Supervisor', 'Site Coordinator'],
-        actionPlan: [
-            'Look out for the state polytechnic entrance exam (POLYCET) notifications usually released in March/April.',
-            'Research top polytechnic colleges in your state.',
-            'Review previous years exam papers.'
-        ],
-        motivationalMessage: 'Your practical mindset is your greatest asset. Build the future with your own hands!'
-      };
+      res.status(503).json({ error: 'AI Service is currently unavailable. Please configure the GEMINI_API_KEY.' });
+      return;
     } else {
       const response = await generateWithRetry(model, {
         model: 'gemini-3.5-flash',
@@ -144,8 +135,8 @@ router.post('/advisor/chat', async (req: Request, res: Response, next: NextFunct
     let responseText = '';
     
     if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === 'your_gemini_api_key_here') {
-      // Provide a mock response for testing
-      responseText = "This is a **simulated response** because the real Gemini API key is not configured in the backend `.env` file.\n\nTo get actual AI career guidance, please obtain a free API key from Google AI Studio and update the backend configuration. In the meantime, I can tell you that for ITI and Polytechnic, practical skills are highly valued!";
+      res.status(503).json({ error: 'AI Service is currently unavailable. Please configure the GEMINI_API_KEY.' });
+      return;
     } else {
       const response = await generateWithRetry(model, {
         model: 'gemini-3.5-flash',
@@ -192,10 +183,8 @@ Respond strictly in valid JSON format like this (no markdown block, just JSON):
     let scores = {};
     
     if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === 'your_gemini_api_key_here') {
-      // Mock scores if API key is not set
-      colleges.forEach((c: any) => {
-        scores[c._id as keyof typeof scores] = { score: 85, rationale: 'Mock AI recommendation (API Key missing).' };
-      });
+      res.status(503).json({ error: 'AI Service is currently unavailable. Please configure the GEMINI_API_KEY.' });
+      return;
     } else {
       const response = await generateWithRetry(model, {
         model: 'gemini-3.5-flash',
@@ -277,8 +266,7 @@ router.post('/chat/stream', async (req: Request, res: Response, next: NextFuncti
     res.setHeader('Connection', 'keep-alive');
 
     if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === 'your_gemini_api_key_here') {
-      res.write(`data: {"text":"I am a simulated AI. Please add a valid GEMINI_API_KEY to the backend."}\n\n`);
-      res.write(`data: {"done": true, "conversationId": "${convId}"}\n\n`);
+      res.write(`data: {"error": "AI Service is currently unavailable. Please configure the GEMINI_API_KEY."}\n\n`);
       res.end();
       return;
     }

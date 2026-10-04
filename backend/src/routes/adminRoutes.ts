@@ -45,11 +45,9 @@ const MOCK_COORDS: Record<string, { lat: number; lng: number }> = {
   'vijayanagara': { lat: 15.3333, lng: 76.4667 }
 };
 
-// Mock authentication middleware for admin
-const adminAuth = (req: Request, res: Response, next: Function) => {
-  // In a real app, verify admin token here
-  next();
-};
+import { protect, requireRole } from '../middleware/authMiddleware.js';
+
+const adminAuth = [protect, requireRole('admin')];
 
 /**
  * Executes the ingestion pipeline asynchronously.

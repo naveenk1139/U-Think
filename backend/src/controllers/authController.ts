@@ -7,7 +7,11 @@ import { AuthRequest } from '../middleware/authMiddleware.js';
 import { generateOtp, sendOtpEmail } from '../services/emailService.js';
 import { sendOtpSms } from '../services/smsService.js';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'uthink_jwt_secret_key_2026_super_secure';
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  console.error("FATAL ERROR: JWT_SECRET environment variable is missing.");
+  process.exit(1);
+}
 
 /**
  * Generate JWT Token helper
@@ -25,9 +29,6 @@ async function issueOtp(
   type: 'login' | 'register' | 'forgot_password',
   extras?: { pendingPayload?: any }
 ): Promise<void> {
-  console.log(`\nOTP generation started`);
-  console.log(`Destination: ${mobileNumber ? mobileNumber + ' (SMS)' : email + ' (Email)'}`);
-  
   const otp = generateOtp();
   const emailLower = email.toLowerCase();
 
@@ -209,6 +210,14 @@ export const verifyOtp = async (req: Request, res: Response, next: NextFunction)
 
     const isMatch = await bcrypt.compare(otp.trim(), record.otp);
     if (!isMatch) {
+      // Use pendingPayload or another field to track verify failures since attempts is used for generation
+      const verifyFailures = (record as any).verifyFailures ? (record as any).verifyFailures + 1 : 1;
+      if (verifyFailures >= 3) {
+        await OtpStore.deleteOne({ _id: record._id });
+        res.status(400).json({ error: 'Too many invalid attempts. Your OTP has been invalidated. Please request a new one.' });
+        return;
+      }
+      await OtpStore.updateOne({ _id: record._id }, { $set: { verifyFailures } });
       res.status(400).json({ error: 'Invalid verification code. Please check the code and try again.' });
       return;
     }

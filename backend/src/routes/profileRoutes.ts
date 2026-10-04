@@ -8,12 +8,14 @@ import fs from 'fs';
 import { generateCareerDNA } from '../services/studentTwinService.js';
 import { generateNextBestActions } from '../services/nextBestActionEngine.js';
 
+import { UPLOAD_DIR } from '../config/uploadConfig.js';
+
 const router = Router();
 
 // Configure multer for local upload
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    const uploadPath = path.join(__dirname, '../../uploads');
+    const uploadPath = UPLOAD_DIR;
     if (!fs.existsSync(uploadPath)) {
       fs.mkdirSync(uploadPath, { recursive: true });
     }

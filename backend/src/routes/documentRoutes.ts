@@ -9,6 +9,8 @@ import { DocumentAnalysis } from '../models/DocumentAnalysis.js';
 import { User } from '../models/User.js';
 import { analyzeDocument } from '../services/geminiService.js';
 
+import { DOCUMENTS_DIR } from '../config/uploadConfig.js';
+
 const router = Router();
 
 const __filename = fileURLToPath(import.meta.url);
@@ -17,7 +19,7 @@ const __dirname = path.dirname(__filename);
 // Configure multer for local upload
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    const uploadPath = path.join(__dirname, '../../uploads/documents');
+    const uploadPath = DOCUMENTS_DIR;
     if (!fs.existsSync(uploadPath)) {
       fs.mkdirSync(uploadPath, { recursive: true });
     }

@@ -88,6 +88,7 @@ import { getPathwayTree, getPathwayStats, getFilteredPathways } from './controll
 // Middleware
 import { errorHandler } from './middleware/errorHandler.js';
 import { cacheMiddleware } from './middleware/cacheMiddleware.js';
+import { protect } from './middleware/authMiddleware.js';
 
 dotenv.config();
 
@@ -107,16 +108,40 @@ export const io = new Server(server, {
   }
 });
 
+import jwt from 'jsonwebtoken';
+
+io.use((socket, next) => {
+  const token = socket.handshake.auth.token;
+  if (!token) {
+    return next(new Error('Authentication error: No token provided'));
+  }
+  try {
+    const JWT_SECRET = process.env.JWT_SECRET;
+    if (!JWT_SECRET) throw new Error("JWT_SECRET missing");
+    
+    const decoded = jwt.verify(token, JWT_SECRET) as { id: string; email: string; name: string };
+    // Attach user to socket
+    (socket as any).user = decoded;
+    next();
+  } catch (err) {
+    return next(new Error('Authentication error: Invalid token'));
+  }
+});
+
 io.on('connection', (socket) => {
-  console.log('User connected to socket:', socket.id);
+  const user = (socket as any).user;
   
   socket.on('join_room', (userId: string) => {
+    // Only allow user to join their own room
+    if (userId !== user.id) {
+      console.warn(`User ${user.id} attempted to join room ${userId} without permission.`);
+      return;
+    }
     socket.join(userId);
-    console.log(`User ${userId} joined personal notification room`);
   });
 
   socket.on('disconnect', () => {
-    console.log('User disconnected from socket:', socket.id);
+    // Silent disconnect to avoid log spam
   });
 });
 
@@ -161,8 +186,16 @@ app.use((req, _res, next) => {
 // Dynamic AI Translation Layer (Phase 11: Multilingual AI)
 app.use(aiTranslationMiddleware);
 
-// Serve uploads directory
-app.use('/uploads', express.static(path.join(__dirname, '../../uploads')));
+// Securely serve uploads via authenticated route
+app.use('/uploads', protect, (req, res, next) => {
+  const filePath = path.join(__dirname, '../../uploads', req.path);
+  // Optional: Add specific checks (e.g. user ID in filename) here
+  res.sendFile(filePath, (err) => {
+    if (err) {
+      res.status(404).end();
+    }
+  });
+});
 
 // ─── Routes ──────────────────────────────────────────────────────
 app.get('/', (_req, res) => {
