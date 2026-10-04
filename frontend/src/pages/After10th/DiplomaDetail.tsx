@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { shareToWhatsApp } from '../../utils/shareUtils';
 import { getPathwayBySlug, PathwayData } from '../../api/pathwayApi';
 import { 
   ArrowLeft, Clock, GraduationCap, Share2, Heart, Wrench, Building2, 
@@ -70,20 +71,9 @@ const DiplomaDetail: React.FC = () => {
     setIsSaved(!isSaved);
   };
 
-  const handleShare = async () => {
-    try {
-      if (navigator.share) {
-        await navigator.share({
-          title: 'Diploma (Polytechnic) - U-THINK',
-          url: window.location.href,
-        });
-      } else {
-        await navigator.clipboard.writeText(window.location.href);
-        alert('Link copied to clipboard!');
-      }
-    } catch (err) {
-      console.log('Share error:', err);
-    }
+
+  const handleShare = () => {
+    shareToWhatsApp('Diploma (Polytechnic) - U-THINK');
   };
 
   if (loading) {

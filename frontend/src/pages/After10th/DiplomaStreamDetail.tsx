@@ -131,7 +131,11 @@ export default function DiplomaStreamDetail() {
             <button className="flex-1 lg:flex-none flex items-center justify-center gap-2 bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 px-5 py-2.5 rounded-xl font-bold text-xs transition-colors shadow-sm">
               <Bookmark className="w-4 h-4 text-gray-400" /> Save Stream
             </button>
-            <button className="flex items-center justify-center w-10 h-10 bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 rounded-xl transition-colors shadow-sm shrink-0">
+            <button onClick={() => {
+              import('../../utils/shareUtils').then(({ shareToWhatsApp }) => {
+                shareToWhatsApp(stream ? `${stream.name} - U-THINK` : 'U-THINK Stream');
+              });
+            }} className="flex items-center justify-center w-10 h-10 bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 rounded-xl transition-colors shadow-sm shrink-0">
               <Share2 className="w-4 h-4" />
             </button>
           </div>

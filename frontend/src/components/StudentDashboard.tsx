@@ -137,7 +137,9 @@ export default function StudentDashboard() {
                      <div className="flex items-center gap-1.5 text-[10px] font-bold text-gray-500 uppercase mb-1">
                        <MapPin className="w-3.5 h-3.5 text-blue-500" /> Location
                      </div>
-                     <div className="text-sm font-bold text-gray-900">Karnataka</div>
+                     <div className={`text-sm font-bold ${currentUser?.preferredLocation?.[0] ? 'text-gray-900' : 'text-gray-500 italic'}`}>
+                       {currentUser?.preferredLocation?.[0] || 'Not selected'}
+                     </div>
                    </div>
                    <div>
                      <div className="flex items-center gap-1.5 text-[10px] font-bold text-gray-500 uppercase mb-1">
@@ -149,7 +151,9 @@ export default function StudentDashboard() {
                      <div className="flex items-center gap-1.5 text-[10px] font-bold text-gray-500 uppercase mb-1">
                        <Target className="w-3.5 h-3.5 text-emerald-500" /> Career Goal
                      </div>
-                     <div className="text-sm font-bold text-gray-500 italic">Not selected</div>
+                     <div className={`text-sm font-bold ${currentUser?.preferredCareer?.[0] ? 'text-gray-900' : 'text-gray-500 italic'}`}>
+                       {currentUser?.preferredCareer?.[0] || 'Not selected'}
+                     </div>
                    </div>
                    <div className="ml-auto flex items-center">
                      <button onClick={() => navigate('/settings')} className="text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors flex items-center gap-1">

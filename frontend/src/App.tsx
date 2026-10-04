@@ -3,35 +3,34 @@ import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-
 import { LegalModal } from './components/LegalModal';
 import Sidebar from './components/Sidebar';
 import TopBar from './components/TopBar';
-import Home from './components/Home';
-import AptitudeQuiz from './AptitudeQuiz';
-import JobFinder from './components/JobFinder';
-import SavedJobs from './components/SavedJobs';
-import PathwaysExplorer from './pages/Pathways/PathwaysExplorer';
-import MentorshipProgram from './components/MentorshipProgram';
+const Home = React.lazy(() => import('./components/Home'));
+const AptitudeQuiz = React.lazy(() => import('./AptitudeQuiz'));
+const JobFinder = React.lazy(() => import('./components/JobFinder'));
+const SavedJobs = React.lazy(() => import('./components/SavedJobs'));
+const PathwaysExplorer = React.lazy(() => import('./pages/Pathways/PathwaysExplorer'));
+const MentorshipProgram = React.lazy(() => import('./components/MentorshipProgram'));
+const ExamsDirectory = React.lazy(() => import('./components/ExamsDirectory'));
+const ExamDetail = React.lazy(() => import('./components/ExamDetail'));
+const DegreeDetail = React.lazy(() => import('./components/DegreeDetail'));
+const BranchDetail = React.lazy(() => import('./components/BranchDetail'));
+const ProfessionalCourses = React.lazy(() => import('./components/ProfessionalCourses'));
+const CollegesDirectory = React.lazy(() => import('./components/CollegesDirectory'));
+const CollegeDetail = React.lazy(() => import('./components/CollegeDetail'));
+const StudentDashboard = React.lazy(() => import('./components/StudentDashboard'));
+const SpecializationDetailView = React.lazy(() => import('./components/SpecializationDetailView'));
+const DocumentAnalysis = React.lazy(() => import('./components/DocumentAnalysis'));
+const Login = React.lazy(() => import('./components/Login').then(m => ({ default: m.Login })));
+const ForgotPassword = React.lazy(() => import('./components/ForgotPassword').then(m => ({ default: m.ForgotPassword })));
+const EmployerDashboard = React.lazy(() => import('./components/Dashboards').then(m => ({ default: m.EmployerDashboard })));
+const AdminDashboard = React.lazy(() => import('./components/Dashboards').then(m => ({ default: m.AdminDashboard })));
+const CollegeDashboard = React.lazy(() => import('./components/Dashboards').then(m => ({ default: m.CollegeDashboard })));
+const ApplicationTracker = React.lazy(() => import('./components/ApplicationTracker'));
+const AdminJobPanel = React.lazy(() => import('./components/AdminJobPanel'));
+const AdminDataHealth = React.lazy(() => import('./components/AdminDataHealth'));
+const Settings = React.lazy(() => import('./components/Settings'));
+const Deadlines = React.lazy(() => import('./pages/Deadlines'));
 import AICounselorModal from './components/AICounselorModal';
-import ExamsDirectory from './components/ExamsDirectory';
-import ExamDetail from './components/ExamDetail';
-import DegreeDetail from './components/DegreeDetail';
-import BranchDetail from './components/BranchDetail';
-
-import ProfessionalCourses from './components/ProfessionalCourses';
-
-import CollegesDirectory from './components/CollegesDirectory';
-import CollegeDetail from './components/CollegeDetail';
-import StudentDashboard from './components/StudentDashboard';
-import SpecializationDetailView from './components/SpecializationDetailView';
-import DocumentAnalysis from './components/DocumentAnalysis';
-import { Login } from './components/Login';
-import { ForgotPassword } from './components/ForgotPassword';
-import { EmployerDashboard, AdminDashboard, CollegeDashboard } from './components/Dashboards';
-import ApplicationTracker from './components/ApplicationTracker';
-import AdminJobPanel from './components/AdminJobPanel';
-import AdminDataHealth from './components/AdminDataHealth';
-
 import { AuthReminderModal } from './components/AuthReminderModal';
-import Settings from './components/Settings';
-import Deadlines from './pages/Deadlines';
 import { useAuth } from './contexts/AuthContext';
 import { Compass, Sparkles, Target } from 'lucide-react';
 
@@ -158,6 +157,7 @@ function AppShell() {
 
         {/* Routed Pages */}
         <div className="bg-card/40 rounded-3xl min-h-[500px]">
+          <React.Suspense fallback={<div className="flex items-center justify-center min-h-[500px]"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
           <Routes>
             <Route path="/" element={<Home onNavigate={(tab: string) => navigate(`/${tab === 'home' ? '' : tab}`)} onOpenCounselor={() => setIsCounselorOpen(true)} />} />
             <Route path="/streams" element={<Navigate to="/pathways/after-10th" replace />} />
@@ -204,6 +204,7 @@ function AppShell() {
             <Route path="/my-roadmap" element={<MyRoadmap />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
+          </React.Suspense>
         </div>
       </main>
       </div>
@@ -291,12 +292,14 @@ function AppShell() {
 // ─── Root App with Router-aware Login handling ────────────────────
 export default function App() {
   return (
-    <Routes>
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/signup" element={<LoginPage mode="signup" />} />
-      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-      <Route path="/*" element={<AppShell />} />
-    </Routes>
+    <React.Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<LoginPage mode="signup" />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/*" element={<AppShell />} />
+      </Routes>
+    </React.Suspense>
   );
 }
 

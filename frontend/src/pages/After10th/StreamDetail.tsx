@@ -146,7 +146,11 @@ const StreamDetail: React.FC = () => {
               <button className="flex-1 flex items-center justify-center gap-2 bg-white border border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-3 rounded-xl font-bold text-sm transition-colors">
                 <Heart className="w-4 h-4" /> Save Stream
               </button>
-              <button className="shrink-0 flex items-center justify-center gap-2 bg-white border border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-3 rounded-xl font-bold text-sm transition-colors" title="Share">
+              <button onClick={() => {
+                import('../../utils/shareUtils').then(({ shareToWhatsApp }) => {
+                  shareToWhatsApp(stream ? `${stream.name} Stream - U-THINK` : 'U-THINK Pathway');
+                });
+              }} className="shrink-0 flex items-center justify-center gap-2 bg-white border border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-3 rounded-xl font-bold text-sm transition-colors" title="Share">
                 <Share2 className="w-4 h-4" />
               </button>
             </div>

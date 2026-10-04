@@ -122,7 +122,10 @@ export default function ExamsDirectory({ initialTab = 'exams' }: ExamsDirectoryP
   }, [search, edLevel, stream, category, state, activeTab, setSearchParams]);
 
   useEffect(() => {
-    fetchData();
+    const timeoutId = setTimeout(() => {
+      fetchData();
+    }, 300);
+    return () => clearTimeout(timeoutId);
   }, [fetchData]);
 
   // AI Recommendations

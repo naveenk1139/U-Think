@@ -5,10 +5,16 @@ export interface IRoadmapStep {
   title: string;
   type: string; // e.g., 'Foundation', 'Eligibility', 'Exam', 'Degree', 'Skill', 'Project', 'Career'
   description: string;
-  status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
+  status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'LOCKED' | 'OPTIONAL' | 'RECOMMENDED' | 'NOT_APPLICABLE' | 'CURRENT' | 'NEXT';
   completedAt?: Date;
   estimatedDuration?: string;
   resources?: string[];
+  whyRecommended?: string;
+  requiredSkills?: string[];
+  recommendedCourses?: string[];
+  recommendedExams?: string[];
+  relatedColleges?: string[];
+  eligibility?: string;
 }
 
 export interface ISkillGap {
@@ -36,10 +42,16 @@ const RoadmapStepSchema = new Schema<IRoadmapStep>({
   title: { type: String, required: true },
   type: { type: String, required: true },
   description: { type: String, required: true },
-  status: { type: String, enum: ['PENDING', 'IN_PROGRESS', 'COMPLETED'], default: 'PENDING' },
+  status: { type: String, enum: ['PENDING', 'IN_PROGRESS', 'COMPLETED', 'LOCKED', 'OPTIONAL', 'RECOMMENDED', 'NOT_APPLICABLE', 'CURRENT', 'NEXT'], default: 'PENDING' },
   completedAt: { type: Date },
   estimatedDuration: { type: String },
-  resources: [{ type: String }]
+  resources: [{ type: String }],
+  whyRecommended: { type: String },
+  requiredSkills: [{ type: String }],
+  recommendedCourses: [{ type: String }],
+  recommendedExams: [{ type: String }],
+  relatedColleges: [{ type: String }],
+  eligibility: { type: String }
 });
 
 const SkillGapSchema = new Schema<ISkillGap>({

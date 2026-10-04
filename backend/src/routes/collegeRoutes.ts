@@ -304,7 +304,12 @@ router.get('/', async (req: Request, res: Response) => {
     }
     
     if (category && category !== 'All') filter.categories = { $in: String(category).split(',').map(c => c.trim()) };
-    if (type && type !== 'All') filter.type = { $in: String(type).split(',').map(t => new RegExp(t.trim(), 'i')) };
+    if (type && type !== 'All') {
+       // Avoid regex for type to leverage index. Map exactly or use collation in DB if needed.
+       const types = String(type).split(',').map(t => t.trim());
+       // Common types might just need exact match
+       filter.type = { $in: types };
+    }
     if (req.query.education_level) filter.educationLevels = { $in: String(req.query.education_level).split(',').map(e => e.trim()) };
     if (ownership) filter.ownership = String(ownership);
     
@@ -346,6 +351,7 @@ router.get('/', async (req: Request, res: Response) => {
     console.log('Filter:', JSON.stringify(filter));
 
     let colleges = await College.find(filter)
+      .select('_id name slug district city type ownership categories educationLevels logoUrl imageUrl nirfRank fees placement status website')
       .populate('districtRef', 'name slug')
       .populate('talukRef', 'name slug')
       .populate('cityRef', 'name slug')

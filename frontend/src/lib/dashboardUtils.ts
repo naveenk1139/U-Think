@@ -2,12 +2,13 @@ export const calculateProfileCompletion = (user: any) => {
   if (!user) return { percentage: 0, missingFields: [] };
   
   const fields = [
-    { key: 'displayName', weight: 15, label: 'Name' },
-    { key: 'email', weight: 15, label: 'Email' },
+    { key: 'displayName', weight: 10, label: 'Name' },
+    { key: 'email', weight: 10, label: 'Email' },
     { key: 'educationLevel', weight: 20, label: 'Education Level' },
     { key: 'stream', weight: 20, label: 'Stream' },
     { key: 'interests', weight: 15, label: 'Interests', isArray: true },
-    { key: 'careerGoal', weight: 15, label: 'Career Goal' }
+    { key: 'preferredCareer', weight: 15, label: 'Career Goal', isArray: true },
+    { key: 'preferredLocation', weight: 10, label: 'Location', isArray: true }
   ];
 
   let completedWeight = 0;

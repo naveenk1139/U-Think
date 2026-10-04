@@ -206,33 +206,33 @@ export default function CollegesDirectory() {
     return arr.filter(item => lowerNames.includes(item.name?.toLowerCase())).reduce((sum, item) => sum + item.count, 0);
   };
 
-  const educationLevels = [
+  const educationLevels = React.useMemo(() => [
     { label: 'After 10th (PUC, Diploma, ITI)', value: 'AFTER_10TH,PUC,DIPLOMA,ITI', count: getCountByExact(filterOptionsData?.educationLevels, ['AFTER_10TH', 'PUC', 'DIPLOMA', 'ITI']) },
     { label: 'After 12th (UG)', value: 'UNDERGRADUATE', count: getCountByExact(filterOptionsData?.educationLevels, ['UNDERGRADUATE']) },
     { label: 'Postgraduate (PG)', value: 'POSTGRADUATE', count: getCountByExact(filterOptionsData?.educationLevels, ['POSTGRADUATE']) },
     { label: 'Professional (Medical, Law etc.)', value: 'PROFESSIONAL', count: getCountByExact(filterOptionsData?.educationLevels, ['PROFESSIONAL']) },
     { label: 'Research (PhD)', value: 'RESEARCH', count: getCountByExact(filterOptionsData?.educationLevels, ['RESEARCH']) }
-  ];
+  ], [filterOptionsData]);
 
-  const institutionTypes = [
+  const institutionTypes = React.useMemo(() => [
     { label: 'University', value: 'University', count: getCount(filterOptionsData?.types, 'University') },
     { label: 'Government College', value: 'Government', count: getCount(filterOptionsData?.types, 'Government') },
     { label: 'Private College', value: 'Private', count: getCount(filterOptionsData?.types, 'Private') },
     { label: 'Autonomous', value: 'Autonomous', count: getCount(filterOptionsData?.types, 'Autonomous') }
-  ];
+  ], [filterOptionsData]);
 
-  const courseCategories = [
+  const courseCategories = React.useMemo(() => [
     { label: 'Engineering', value: 'Engineering', count: getCount(filterOptionsData?.categories, 'Engineering') },
     { label: 'Medical', value: 'Medical', count: getCount(filterOptionsData?.categories, 'Medical') },
     { label: 'Nursing', value: 'Nursing', count: getCount(filterOptionsData?.categories, 'Nursing') },
     { label: 'Pharmacy', value: 'Pharmacy', count: getCount(filterOptionsData?.categories, 'Pharmacy') },
     { label: 'Management', value: 'Management', count: getCount(filterOptionsData?.categories, 'Management') }
-  ];
+  ], [filterOptionsData]);
 
-  const topDistricts = districtStatsList.slice(0, 5).map((d: any) => ({
+  const topDistricts = React.useMemo(() => districtStatsList.slice(0, 5).map((d: any) => ({
     name: d.district,
     count: d.institutionCount
-  }));
+  })), [districtStatsList]);
 
   const handlePillClick = (tab: string) => {
     if (tab === 'All') {

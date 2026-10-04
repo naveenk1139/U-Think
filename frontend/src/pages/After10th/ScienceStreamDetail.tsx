@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { shareToWhatsApp } from '../../utils/shareUtils';
 import { getStreamDetails, StreamData } from '../../api/pathwayApi';
 import { 
   ArrowLeft, Clock, GraduationCap, Target, Briefcase, Share2, 
@@ -36,20 +37,9 @@ const ScienceStreamDetail: React.FC = () => {
     fetchDetail();
   }, [streamSlug]);
 
-  const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: stream ? `${stream.name} Stream - U-THINK` : 'U-THINK Pathway',
-          url: window.location.href
-        });
-      } catch (err) {
-        console.log('Error sharing:', err);
-      }
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      alert('Link copied to clipboard!');
-    }
+
+  const handleShare = () => {
+    shareToWhatsApp(stream ? `${stream.name} Stream - U-THINK` : 'U-THINK Pathway');
   };
 
   const handleSave = () => {

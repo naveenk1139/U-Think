@@ -126,7 +126,11 @@ const PathwayDetail: React.FC = () => {
                 <button className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-white border border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-700 px-6 py-3 rounded-xl font-bold text-sm transition-colors">
                   <Heart className="w-4 h-4" /> Save
                 </button>
-                <button className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-white border border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-700 px-6 py-3 rounded-xl font-bold text-sm transition-colors">
+                <button onClick={() => {
+                  import('../../utils/shareUtils').then(({ shareToWhatsApp }) => {
+                    shareToWhatsApp(pathway ? `${pathway.name} - U-THINK` : 'U-THINK Pathway');
+                  });
+                }} className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-white border border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-700 px-6 py-3 rounded-xl font-bold text-sm transition-colors">
                   <Share2 className="w-4 h-4" />
                 </button>
               </div>

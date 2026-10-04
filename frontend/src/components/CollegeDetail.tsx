@@ -433,7 +433,11 @@ export default function CollegeDetail() {
                 </div>
               )}
 
-              <button className="w-full mt-6 py-3 bg-background border border-border text-text-primary font-bold rounded-xl hover:bg-card transition-colors flex items-center justify-center gap-2 text-sm shadow-sm">
+              <button onClick={() => {
+                import('../utils/shareUtils').then(({ shareToWhatsApp }) => {
+                  shareToWhatsApp(college ? `${college.name} - U-THINK` : 'U-THINK College');
+                });
+              }} className="w-full mt-6 py-3 bg-background border border-border text-text-primary font-bold rounded-xl hover:bg-card transition-colors flex items-center justify-center gap-2 text-sm shadow-sm">
                 <Share2 className="w-4 h-4" /> Share College
               </button>
             </div>

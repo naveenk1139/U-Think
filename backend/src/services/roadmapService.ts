@@ -9,8 +9,6 @@ export const analyzeProfileAndGenerateRoadmap = async (userId: string) => {
   const user = await User.findById(userId);
   if (!user) throw new Error('User not found');
 
-  // If profile completion is very low, we might not want to generate a roadmap.
-  // We'll let the controller handle that or we just generate a baseline one.
   if (user.profileCompletion !== undefined && user.profileCompletion < 30) {
     throw new Error('INCOMPLETE_PROFILE');
   }
@@ -22,35 +20,33 @@ export const analyzeProfileAndGenerateRoadmap = async (userId: string) => {
   let targetCareerId = null;
   let targetCareerName = '';
   let requiredSkills: string[] = [];
+  let targetCareerDoc: any = null;
 
-  // Try from user profile first
   if (user.careerGoal) {
-    const career = await Career.findOne({ name: { $regex: new RegExp(user.careerGoal, 'i') } });
-    if (career) {
-      targetCareerId = career._id;
-      targetCareerName = career.name;
-      requiredSkills = career.skills || [];
+    targetCareerDoc = await Career.findOne({ name: { $regex: new RegExp(user.careerGoal, 'i') } });
+    if (targetCareerDoc) {
+      targetCareerId = targetCareerDoc._id;
+      targetCareerName = targetCareerDoc.name;
+      requiredSkills = targetCareerDoc.skills || [];
     }
   }
 
-  // Fallback to aptitude
   if (!targetCareerId && aptitude && aptitude.topMatches && aptitude.topMatches.length > 0) {
     const topMatch = aptitude.topMatches[0];
     targetCareerId = topMatch.careerId;
     targetCareerName = topMatch.careerName;
-    const career = await Career.findById(targetCareerId);
-    if (career) {
-      requiredSkills = career.skills || [];
+    targetCareerDoc = await Career.findById(targetCareerId);
+    if (targetCareerDoc) {
+      requiredSkills = targetCareerDoc.skills || [];
     }
   }
 
-  // Absolute fallback
   if (!targetCareerId) {
-    const defaultCareer = await Career.findOne();
-    if (defaultCareer) {
-      targetCareerId = defaultCareer._id;
-      targetCareerName = defaultCareer.name;
-      requiredSkills = defaultCareer.skills || [];
+    targetCareerDoc = await Career.findOne();
+    if (targetCareerDoc) {
+      targetCareerId = targetCareerDoc._id;
+      targetCareerName = targetCareerDoc.name;
+      requiredSkills = targetCareerDoc.skills || [];
     } else {
       throw new Error('No career targets available in database');
     }
@@ -67,85 +63,125 @@ export const analyzeProfileAndGenerateRoadmap = async (userId: string) => {
         skillName: reqSkill,
         currentLevel: hasSkill ? hasSkill.skillLevel : 'None',
         requiredLevel: 'Advanced',
-        gapDescription: `Required for ${targetCareerName}. You need to develop this skill.`
+        gapDescription: `Required for ${targetCareerName}.`
       });
     }
   });
 
   // 5. Build Personalized Roadmap Steps based on Education Stage
   const steps: IRoadmapStep[] = [];
-  const educationStage = user.intelligenceProfile?.educationStage?.toLowerCase() || user.educationLevel?.toLowerCase() || '10th';
+  const eduStageRaw = user.intelligenceProfile?.educationStage?.toLowerCase() || user.educationLevel?.toLowerCase() || '10th';
   let stepIdCounter = 1;
 
-  if (educationStage.includes('10') || educationStage.includes('high school')) {
-    steps.push({
-      stepId: `step_${stepIdCounter++}`,
-      title: '12th / PUC / Diploma',
-      type: 'Foundation',
-      description: `Complete higher secondary education (Science/Commerce/Arts) aligned with ${targetCareerName}.`,
-      status: 'IN_PROGRESS'
-    });
-    steps.push({
-      stepId: `step_${stepIdCounter++}`,
-      title: 'Entrance Examinations',
-      type: 'Exam',
-      description: 'Prepare and appear for relevant national/state-level entrance exams.',
-      status: 'PENDING'
-    });
-  } else if (educationStage.includes('12') || educationStage.includes('puc') || educationStage.includes('diploma')) {
-    steps.push({
-      stepId: `step_${stepIdCounter++}`,
-      title: 'Entrance Examinations',
-      type: 'Exam',
-      description: 'Prepare and appear for relevant national/state-level entrance exams.',
-      status: 'IN_PROGRESS'
-    });
+  const isUG = eduStageRaw.includes('ug') || eduStageRaw.includes('bachelor') || eduStageRaw.includes('undergrad') || eduStageRaw.includes('degree') || eduStageRaw.includes('engineering') || eduStageRaw.includes('be') || eduStageRaw.includes('btech');
+  const is12th = eduStageRaw.includes('12') || eduStageRaw.includes('puc') || eduStageRaw.includes('diploma');
+  const is10th = eduStageRaw.includes('10') || eduStageRaw.includes('high school');
+
+  // 10th Stage
+  steps.push({
+    stepId: `step_${stepIdCounter++}`,
+    title: '10th Standard',
+    type: 'Foundation',
+    description: 'Secondary School Education.',
+    status: (is12th || isUG) ? 'COMPLETED' : 'CURRENT',
+    whyRecommended: 'Foundation for all higher education paths.',
+  });
+
+  // 12th / PUC Stage
+  steps.push({
+    stepId: `step_${stepIdCounter++}`,
+    title: user.stream ? `12th / PUC (${user.stream})` : '12th / PUC / Diploma',
+    type: 'Foundation',
+    description: `Higher secondary education aligned with ${targetCareerName}.`,
+    status: isUG ? 'COMPLETED' : (is12th ? 'CURRENT' : 'NEXT'),
+    whyRecommended: `Required to pursue a degree related to ${targetCareerName}.`,
+  });
+
+  // Entrance Exam
+  let recommendedExams: string[] = [];
+  if (targetCareerDoc && targetCareerDoc.industry) {
+      if (targetCareerDoc.industry.toLowerCase().includes('engineering') || targetCareerDoc.industry.toLowerCase().includes('technology')) recommendedExams = ['JEE Main', 'KCET', 'COMEDK'];
+      if (targetCareerDoc.industry.toLowerCase().includes('healthcare') || targetCareerDoc.industry.toLowerCase().includes('medicine')) recommendedExams = ['NEET'];
+      if (targetCareerDoc.industry.toLowerCase().includes('law')) recommendedExams = ['CLAT', 'LSAT'];
+      if (targetCareerDoc.industry.toLowerCase().includes('design')) recommendedExams = ['NID DAT', 'UCEED'];
+  }
+  
+  if (recommendedExams.length > 0) {
+      steps.push({
+        stepId: `step_${stepIdCounter++}`,
+        title: 'Entrance Examinations',
+        type: 'Exam',
+        description: `Prepare for ${recommendedExams.join(', ')}.`,
+        status: isUG ? 'COMPLETED' : (is12th ? 'NEXT' : 'RECOMMENDED'),
+        whyRecommended: 'Crucial for getting admission into top colleges.',
+        recommendedExams,
+        estimatedDuration: '6-12 Months'
+      });
   }
 
-  // Degree
+  // Undergraduate Degree
+  const userCourseName = user.course || 'Undergraduate Degree';
   steps.push({
     stepId: `step_${stepIdCounter++}`,
-    title: 'Undergraduate Degree',
+    title: isUG ? `${userCourseName}` : (targetCareerDoc.relatedDegrees?.[0] || 'Undergraduate Degree'),
     type: 'Degree',
-    description: `Enroll in a relevant Bachelor's degree program focusing on core fundamentals for ${targetCareerName}.`,
-    status: educationStage.includes('ug') || educationStage.includes('bachelor') ? 'IN_PROGRESS' : 'PENDING'
+    description: `Enroll in a Bachelor's degree program focusing on core fundamentals for ${targetCareerName}.`,
+    status: isUG ? 'CURRENT' : 'RECOMMENDED',
+    whyRecommended: `Minimum educational qualification required for most ${targetCareerName} roles.`,
+    recommendedCourses: targetCareerDoc.relatedDegrees || [],
+    estimatedDuration: '3-4 Years'
   });
 
-  // Skills
-  steps.push({
-    stepId: `step_${stepIdCounter++}`,
-    title: 'Specialization & Upskilling',
-    type: 'Skill',
-    description: `Master industry-required skills: ${skillGaps.map(g => g.skillName).join(', ')}.`,
-    status: 'PENDING'
-  });
+  // Skills & Certifications
+  if (skillGaps.length > 0) {
+      steps.push({
+        stepId: `step_${stepIdCounter++}`,
+        title: 'Skill Development & Certifications',
+        type: 'Skill',
+        description: `Master industry-required skills.`,
+        status: isUG ? 'NEXT' : 'RECOMMENDED',
+        whyRecommended: 'Bridging the skill gap makes you highly employable.',
+        requiredSkills: skillGaps.map(g => g.skillName),
+        estimatedDuration: '3-6 Months'
+      });
+  }
 
+  // Projects & Internships
   steps.push({
     stepId: `step_${stepIdCounter++}`,
-    title: 'Internships & Projects',
+    title: 'Projects & Internships',
     type: 'Project',
-    description: 'Apply your skills in real-world scenarios through internships and capstone projects.',
-    status: 'PENDING'
+    description: 'Apply your skills in real-world scenarios through capstone projects and internships.',
+    status: 'RECOMMENDED',
+    whyRecommended: 'Practical experience is highly valued by recruiters.',
+    estimatedDuration: '3-6 Months'
   });
 
+  // Career Goal
   steps.push({
     stepId: `step_${stepIdCounter++}`,
-    title: `Launch Career: ${targetCareerName}`,
+    title: `Target: ${targetCareerName}`,
     type: 'Career',
-    description: 'Apply for roles and begin your professional journey.',
-    status: 'PENDING'
+    description: `Launch your career as a ${targetCareerName}.`,
+    status: 'LOCKED',
+    whyRecommended: 'Your primary career objective.',
+    requiredSkills: requiredSkills
   });
 
   // 6. Deactivate old roadmaps
   await StudentRoadmap.updateMany({ studentId: userId, isActive: true }, { $set: { isActive: false } });
+
+  let completedSteps = steps.filter(s => s.status === 'COMPLETED').length;
+  let overallProgress = Math.round((completedSteps / steps.length) * 100);
+  if (isUG && overallProgress < 60) overallProgress = 60;
 
   // 7. Create New Roadmap
   const newRoadmap = await StudentRoadmap.create({
     studentId: userId,
     targetCareerId,
     targetCareerName,
-    currentPhase: steps.find(s => s.status === 'IN_PROGRESS')?.title || 'Foundation',
-    overallProgress: educationStage.includes('ug') ? 60 : educationStage.includes('12') ? 30 : 10,
+    currentPhase: steps.find(s => s.status === 'CURRENT' || s.status === 'IN_PROGRESS')?.title || 'Foundation',
+    overallProgress,
     skillGaps: skillGaps.slice(0, 5), // Top 5 gaps
     steps,
     isActive: true,

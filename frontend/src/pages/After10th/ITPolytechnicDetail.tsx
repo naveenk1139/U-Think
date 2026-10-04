@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { shareToWhatsApp } from '../../utils/shareUtils';
 import { getPathwayBySlug, PathwayData } from '../../api/pathwayApi';
 import { 
   ArrowLeft, Clock, GraduationCap, Share2, Heart, Wrench, Building2, 
@@ -56,16 +57,9 @@ export default function ITPolytechnicDetail() {
     setIsSaved(!isSaved);
   };
 
+
   const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: 'IT / Polytechnic Pathway',
-        url: window.location.href,
-      }).catch(console.error);
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      alert('Link copied to clipboard!');
-    }
+    shareToWhatsApp('IT / Polytechnic Pathway - U-THINK');
   };
 
   if (loading) {

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { shareToWhatsApp } from '../../utils/shareUtils';
 import { getStreamDetails, StreamData, SubjectCombinationData } from '../../api/pathwayApi';
 import { 
   ArrowLeft, Clock, GraduationCap, Target, Briefcase, Share2, 
@@ -38,20 +39,9 @@ const CombinationDetail: React.FC = () => {
     fetchDetail();
   }, [streamSlug, comboSlug]);
 
-  const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: combo ? `${combo.name} - U-THINK` : 'U-THINK Pathway',
-          url: window.location.href
-        });
-      } catch (err) {
-        console.log('Error sharing:', err);
-      }
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      alert('Link copied to clipboard!');
-    }
+
+  const handleShare = () => {
+    shareToWhatsApp(combo ? `${combo.name} - U-THINK` : 'U-THINK Pathway');
   };
 
   if (loading) {

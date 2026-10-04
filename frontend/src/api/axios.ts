@@ -37,4 +37,42 @@ api.interceptors.response.use(
   }
 );
 
+const cache = new Map<string, { timestamp: number; data: any; promise?: Promise<any> }>();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+const originalGet = api.get;
+
+api.get = async <T = any, R = any, D = any>(url: string, config?: any): Promise<any> => {
+  if (config?.headers?.['x-no-cache']) {
+    return originalGet.call(api, url, config);
+  }
+
+  const token = localStorage.getItem('uthink_token') || '';
+  const cacheKey = url + (config?.params ? JSON.stringify(config.params) : '') + token;
+  const cached = cache.get(cacheKey);
+  const now = Date.now();
+
+  if (cached && (now - cached.timestamp < CACHE_TTL) && !cached.promise) {
+    return Promise.resolve({ data: cached.data, status: 200, statusText: 'OK', headers: {}, config: config || {} });
+  }
+
+  if (cached && cached.promise) {
+    const res = await cached.promise;
+    return { data: res, status: 200, statusText: 'OK', headers: {}, config: config || {} };
+  }
+
+  const requestPromise = originalGet.call(api, url, config).then((response: any) => {
+    cache.set(cacheKey, { timestamp: Date.now(), data: response.data });
+    return response.data;
+  }).catch((error: any) => {
+    cache.delete(cacheKey);
+    throw error;
+  });
+
+  cache.set(cacheKey, { timestamp: now, data: null, promise: requestPromise });
+
+  const data = await requestPromise;
+  return { data, status: 200, statusText: 'OK', headers: {}, config: config || {} };
+};
+
 export default api;
