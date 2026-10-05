@@ -923,19 +923,19 @@ export const SupportAboutSettings = () => {
     <div>
       <PanelSection title="Help & Support">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <a href="#" className="flex items-center gap-3 p-4 bg-background border border-border rounded-xl hover:bg-background-secondary transition-colors">
+          <a href="#" onClick={(e) => e.preventDefault()} className="flex items-center gap-3 p-4 bg-background border border-border rounded-xl hover:bg-background-secondary transition-colors">
             <HelpCircle className="w-5 h-5 text-blue-500" />
             <span className="text-sm font-bold text-text-primary">Help Center</span>
           </a>
-          <a href="#" className="flex items-center gap-3 p-4 bg-background border border-border rounded-xl hover:bg-background-secondary transition-colors">
+          <a href="#" onClick={(e) => e.preventDefault()} className="flex items-center gap-3 p-4 bg-background border border-border rounded-xl hover:bg-background-secondary transition-colors">
             <FileText className="w-5 h-5 text-emerald-500" />
             <span className="text-sm font-bold text-text-primary">FAQs</span>
           </a>
-          <a href="#" className="flex items-center gap-3 p-4 bg-background border border-border rounded-xl hover:bg-background-secondary transition-colors">
+          <a href="#" onClick={(e) => e.preventDefault()} className="flex items-center gap-3 p-4 bg-background border border-border rounded-xl hover:bg-background-secondary transition-colors">
             <MessageSquare className="w-5 h-5 text-purple-500" />
             <span className="text-sm font-bold text-text-primary">Contact Support</span>
           </a>
-          <a href="#" className="flex items-center gap-3 p-4 bg-background border border-border rounded-xl hover:bg-background-secondary transition-colors">
+          <a href="#" onClick={(e) => e.preventDefault()} className="flex items-center gap-3 p-4 bg-background border border-border rounded-xl hover:bg-background-secondary transition-colors">
             <AlertCircle className="w-5 h-5 text-rose-500" />
             <span className="text-sm font-bold text-text-primary">Report a Problem</span>
           </a>
@@ -954,8 +954,8 @@ export const SupportAboutSettings = () => {
           </div>
           <div className="h-px bg-background-secondary" />
           <div className="flex gap-4 text-xs font-bold text-primary">
-            <a href="#" className="hover:underline">Terms & Conditions</a>
-            <a href="#" className="hover:underline">Privacy Policy</a>
+            <a href="#" onClick={(e) => e.preventDefault()} className="hover:underline">Terms & Conditions</a>
+            <a href="#" onClick={(e) => e.preventDefault()} className="hover:underline">Privacy Policy</a>
           </div>
         </div>
       </PanelSection>

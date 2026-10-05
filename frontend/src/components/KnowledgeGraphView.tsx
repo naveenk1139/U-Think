@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Network, X, Maximize, ZoomIn, ZoomOut, Search, Filter, ChevronRight, Info } from 'lucide-react';
 import api from '../api/axios';
 import ForceGraph2D from 'react-force-graph-2d';
@@ -28,6 +29,7 @@ export default function KnowledgeGraphView({ targetType, targetId, matchScore, o
   
   const graphRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   const loadNodeContext = useCallback(async (type: string, id: string, existingData: any, isInitial = false) => {
     try {
@@ -154,6 +156,25 @@ export default function KnowledgeGraphView({ targetType, targetId, matchScore, o
     } else {
       document.exitFullscreen();
       setIsFullscreen(false);
+    }
+  };
+
+  const handleNavigateToEntity = () => {
+    if (!selectedNode || !selectedNode.data) return;
+    const { type, data } = selectedNode;
+    
+    const id = data.slug || data.canonical_slug || data._id;
+    
+    switch (type) {
+      case 'College': navigate(`/colleges/${id}`); onClose(); break;
+      case 'Exam': navigate(`/exams/${id}`); onClose(); break;
+      case 'Degree': navigate(`/degrees/${id}`); onClose(); break;
+      case 'Course': 
+      case 'Branch': navigate(`/branches/${id}`); onClose(); break;
+      case 'Pathway':
+      case 'Stream': navigate(`/pathways-and-streams`); onClose(); break;
+      case 'Job': navigate(`/jobs`); onClose(); break;
+      default: alert(`Direct navigation for ${type} is not supported yet.`);
     }
   };
 
@@ -477,7 +498,13 @@ export default function KnowledgeGraphView({ targetType, targetId, matchScore, o
                      </div>
                   )}
                   
-                  <div className="pt-4 border-t border-slate-100">
+                  <div className="pt-4 border-t border-slate-100 flex gap-2 flex-col">
+                    <button 
+                      onClick={handleNavigateToEntity}
+                      className="w-full py-2 bg-[#2B3B94] text-white rounded-lg text-xs font-bold hover:bg-blue-800 transition-colors"
+                    >
+                      View Full Details
+                    </button>
                     <button 
                       onClick={() => {
                         graphRef.current?.centerAt(selectedNode.x, selectedNode.y, 1000);

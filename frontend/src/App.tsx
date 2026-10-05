@@ -36,6 +36,7 @@ import { Compass, Sparkles, Target } from 'lucide-react';
 
 import AccessibilityOverlay from './components/AccessibilityOverlay';
 import MyRoadmap from './pages/Roadmap/MyRoadmap';
+import NotFound from './pages/NotFound';
 
 // ─── Route-aware layout shell ────────────────────────────────────
 function AppShell() {
@@ -202,7 +203,7 @@ function AppShell() {
             <Route path="/admin/data-health" element={<AdminDataHealth />} />
             <Route path="/college-dashboard" element={<CollegeDashboard />} />
             <Route path="/my-roadmap" element={<MyRoadmap />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
+            <Route path="*" element={<NotFound />} />
           </Routes>
           </React.Suspense>
         </div>

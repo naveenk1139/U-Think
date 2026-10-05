@@ -479,8 +479,8 @@ export const Login: React.FC<LoginProps> = ({ onNavigate, initialMode = 'login' 
       </div>
 
       <div className="mt-10 flex gap-6 text-xs font-semibold text-text-muted">
-        <a href="#" className="hover:text-text-primary transition-colors">Privacy Policy</a>
-        <a href="#" className="hover:text-text-primary transition-colors">Terms of Service</a>
+        <a href="#" onClick={(e) => e.preventDefault()} className="hover:text-text-primary transition-colors">Privacy Policy</a>
+        <a href="#" onClick={(e) => e.preventDefault()} className="hover:text-text-primary transition-colors">Terms of Service</a>
       </div>
     </div>
   );
