@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { getSavedJobs } from '../api/jobs';
 import { Briefcase, Clock, CheckCircle, XCircle, ChevronRight, Loader, IndianRupee } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import api from '../api/axios';
 
 export default function ApplicationTracker() {
   const { currentUser } = useAuth();
@@ -18,13 +19,7 @@ export default function ApplicationTracker() {
           const res = await getSavedJobs();
           setSavedJobs(res.data || []);
         } else {
-          const token = typeof (currentUser as any)?.getIdToken === 'function' 
-            ? await (currentUser as any)?.getIdToken() 
-            : localStorage.getItem('token');
-          const res = await fetch('/api/scholarships/applications', {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          const data = await res.json();
+          const { data } = await api.get('/api/scholarships/applications');
           if (data.success) {
             setScholarships(data.applications || []);
           }

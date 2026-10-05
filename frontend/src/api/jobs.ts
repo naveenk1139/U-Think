@@ -1,6 +1,4 @@
-import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+import api from './axios';
 
 export interface JobSearchParams {
   query?: string;
@@ -15,44 +13,26 @@ export interface JobSearchParams {
 }
 
 export const searchJobs = async (params: JobSearchParams) => {
-  const response = await axios.get(`${API_URL}/jobs/search`, {
-    params
-  });
+  const response = await api.get('/api/jobs/search', { params });
   return response.data;
 };
 
 export const getProviderStatuses = async () => {
-  const response = await axios.get(`${API_URL}/jobs/providers`);
+  const response = await api.get('/api/jobs/providers');
   return response.data;
 };
 
 export const getJobRecommendations = async () => {
-  const token = localStorage.getItem('token');
-  if (!token) throw new Error('No authentication token found');
-
-  const response = await axios.get(`${API_URL}/jobs/recommendations`, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
+  const response = await api.get('/api/jobs/recommendations');
   return response.data;
 };
 
 export const saveJobStatus = async (jobId: string, status: string, notes?: string) => {
-  const token = localStorage.getItem('token');
-  if (!token) throw new Error('No authentication token found');
-
-  const response = await axios.post(`${API_URL}/jobs/saved/${jobId}`, 
-    { status, notes },
-    { headers: { Authorization: `Bearer ${token}` } }
-  );
+  const response = await api.post(`/api/jobs/saved/${jobId}`, { status, notes });
   return response.data;
 };
 
 export const getSavedJobs = async () => {
-  const token = localStorage.getItem('token');
-  if (!token) throw new Error('No authentication token found');
-
-  const response = await axios.get(`${API_URL}/jobs/saved`, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
+  const response = await api.get('/api/jobs/saved');
   return response.data;
 };

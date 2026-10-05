@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import api from './api/axios';
 import { AICareerQuestion, AssessmentResult } from './types';
+import { useAuth } from './contexts/AuthContext';
 
 // Icons
 import {
@@ -39,6 +40,7 @@ const EDUCATION_LEVELS = [
 
 export default function CareerAssessment() {
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
   const [step, setStep] = useState<'EDUCATION' | 'INTRO' | 'QUIZ' | 'ANALYZING' | 'RESULT'>('EDUCATION');
   
   const [educationLevel, setEducationLevel] = useState<string>('');
@@ -50,9 +52,6 @@ export default function CareerAssessment() {
 
   const [result, setResult] = useState<AssessmentResult | null>(null);
 
-  // Hardcoded for demo, normally from auth context
-  const userId = 'user-123'; 
-
   const handleContinueToAssessment = () => {
     if (educationLevel) {
       setStep('INTRO');
@@ -60,10 +59,14 @@ export default function CareerAssessment() {
   };
 
   const startAssessment = async () => {
+    if (!currentUser?.id) {
+      alert('Please log in to start the assessment.');
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const res = await api.post('/api/assessment/start', {
-        userId,
         educationLevel
       });
       setAttemptId(res.data.attemptId);

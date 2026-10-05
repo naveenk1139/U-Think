@@ -1,12 +1,11 @@
 import express from 'express';
 import { jobService } from '../services/JobService';
 import { jobMatchService } from '../services/JobMatchService';
-import { protect } from '../middleware/authMiddleware';
+import { protect, optionalAuth } from '../middleware/authMiddleware';
 import User from '../models/User';
 import SavedJob from '../models/SavedJob';
 import JobAlert from '../models/JobAlert';
 import Job from '../models/Job';
-import { IUser } from '../models/User';
 import { generateGeminiResponse } from '../services/aiService.js';
 
 const router = express.Router();
@@ -17,7 +16,7 @@ router.get('/providers', (req, res) => {
 });
 
 // Get jobs (search)
-router.get('/search', async (req, res) => {
+router.get('/search', optionalAuth, async (req, res) => {
   try {
     const { query, location, category, jobType, experience, minSalary, source, page, limit } = req.query;
     
@@ -50,15 +49,14 @@ router.get('/search', async (req, res) => {
       
     const total = await Job.countDocuments(filter);
 
-    // Mock a user profile for the AI match (in a real app, use req.user)
-    const mockUser = {
-      skills: ['Python', 'Django', 'React', 'Git', 'SQL'],
-      preferredLocation: 'Bengaluru',
-      experienceLevel: 'Fresher'
-    } as any;
+    const authUserId = (req as any).user?.id;
+    const user = authUserId
+      ? await User.findById(authUserId).select('skills intelligenceProfile preferredLocation experienceLevel educationLevel careerGoal careerAspiration preferredCareer')
+      : null;
 
     const data = jobs.map(job => {
-      const matchAnalysis = jobMatchService.calculateMatch(mockUser, job as any);
+      if (!user) return { ...job, matchAnalysis: null };
+      const matchAnalysis = jobMatchService.calculateMatch(user as any, job as any);
       return { ...job, matchAnalysis };
     });
 
@@ -75,11 +73,24 @@ router.get('/recommendations', protect, async (req, res) => {
     const user = await User.findById((req as any).user.id);
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
 
-    // We can run a search based on user's preferred location or skills
-    // For demo purposes, we will run a generic search and then match
+    const userSkills = Array.isArray((user as any).skills) ? (user as any).skills : [];
+    const preferredLocations = Array.isArray((user as any).preferredLocation)
+      ? (user as any).preferredLocation
+      : ((user as any).preferredLocation ? [(user as any).preferredLocation] : []);
+    const preferredLocation = preferredLocations.find((loc: string) => typeof loc === 'string' && loc.trim().length > 0);
+
+    if (userSkills.length === 0 && !preferredLocation) {
+      return res.json({
+        success: true,
+        count: 0,
+        data: [],
+        message: 'Complete your skills/profile to calculate a personalized match.'
+      });
+    }
+
     const jobs = await jobService.searchJobs({
-       query: (user as any).skills?.join(' ') || 'Developer',
-       location: (user as any).preferredLocation || 'India'
+      ...(userSkills.length > 0 ? { query: userSkills.join(' ') } : {}),
+      ...(preferredLocation ? { location: preferredLocation } : {})
     });
 
     const matchedJobs = jobs.map(job => {

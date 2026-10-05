@@ -1,18 +1,27 @@
-import { Router, Request, Response, NextFunction } from 'express';
-import mongoose from 'mongoose';
+import { Router, Response, NextFunction } from 'express';
 import AssessmentQuestion from '../models/AssessmentQuestion';
 import AssessmentAttempt from '../models/AssessmentAttempt';
 import CareerProfile from '../models/CareerProfile';
 import AssessmentResult from '../models/AssessmentResult';
+import { protect, AuthRequest } from '../middleware/authMiddleware';
 
 const router = Router();
+router.use(protect);
+
+const toPlainRecord = (value: any): Record<string, number> => {
+  if (!value) return {};
+  if (value instanceof Map) return Object.fromEntries(value.entries());
+  if (typeof value.toObject === 'function') return value.toObject();
+  return value;
+};
 
 // Start a new assessment
-router.post('/start', async (req: Request, res: Response, next: NextFunction) => {
+router.post('/start', async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const { userId, educationLevel } = req.body;
+    const userId = req.user?.id;
+    const { educationLevel } = req.body;
     if (!userId || !educationLevel) {
-      res.status(400).json({ error: 'userId and educationLevel are required.' });
+      res.status(400).json({ error: 'educationLevel is required.' });
       return;
     }
 
@@ -27,7 +36,12 @@ router.post('/start', async (req: Request, res: Response, next: NextFunction) =>
     // Fetch the first question
     const firstQuestion = await AssessmentQuestion.findOne({
       targetEducationLevels: educationLevel
-    }).lean();
+    }).sort({ _id: 1 }).lean();
+
+    if (!firstQuestion) {
+      res.status(404).json({ error: 'No assessment questions found for this education level.' });
+      return;
+    }
 
     res.status(201).json({ attemptId: attempt._id, nextQuestion: firstQuestion });
   } catch (err) {
@@ -36,8 +50,9 @@ router.post('/start', async (req: Request, res: Response, next: NextFunction) =>
 });
 
 // Submit an answer
-router.post('/answer', async (req: Request, res: Response, next: NextFunction) => {
+router.post('/answer', async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
+    const userId = req.user?.id;
     const { attemptId, questionId, choiceText } = req.body;
     if (!attemptId || !questionId || !choiceText) {
       res.status(400).json({ error: 'attemptId, questionId, and choiceText are required.' });
@@ -47,6 +62,10 @@ router.post('/answer', async (req: Request, res: Response, next: NextFunction) =
     const attempt = await AssessmentAttempt.findById(attemptId);
     if (!attempt) {
       res.status(404).json({ error: 'Attempt not found.' });
+      return;
+    }
+    if (!userId || attempt.userId !== userId) {
+      res.status(403).json({ error: 'Forbidden.' });
       return;
     }
 
@@ -63,12 +82,19 @@ router.post('/answer', async (req: Request, res: Response, next: NextFunction) =
     }
 
     // Accumulate scores
-    const currentScoresMap = attempt.currentScores as any as Map<string, number>;
-    const weightsMap = selectedOption.dimensionWeights as any as Map<string, number>;
-    
-    weightsMap.forEach((val, key) => {
-      const existing = currentScoresMap.get(key) || 0;
-      currentScoresMap.set(key, existing + val);
+    const currentScoresMap = attempt.currentScores as any;
+    const weightsRecord = toPlainRecord(selectedOption.dimensionWeights);
+
+    Object.entries(weightsRecord).forEach(([key, val]) => {
+      const existing = typeof currentScoresMap.get === 'function'
+        ? Number(currentScoresMap.get(key) || 0)
+        : Number(currentScoresMap[key] || 0);
+      const nextVal = existing + Number(val || 0);
+      if (typeof currentScoresMap.set === 'function') {
+        currentScoresMap.set(key, nextVal);
+      } else {
+        currentScoresMap[key] = nextVal;
+      }
     });
 
     // Add answer
@@ -76,7 +102,7 @@ router.post('/answer', async (req: Request, res: Response, next: NextFunction) =
       questionId: question._id as any as string,
       questionText: question.questionText,
       choiceText,
-      dimensionWeights: Object.fromEntries(weightsMap.entries())
+      dimensionWeights: weightsRecord
     });
 
     // Simple Adaptive Logic: If they have answered less than 5 questions, give another one
@@ -87,7 +113,7 @@ router.post('/answer', async (req: Request, res: Response, next: NextFunction) =
       const nextQuestion = await AssessmentQuestion.findOne({
         _id: { $nin: answeredIds },
         targetEducationLevels: attempt.educationLevel
-      }).lean();
+      }).sort({ _id: 1 }).lean();
 
       if (nextQuestion) {
         await attempt.save();
@@ -101,14 +127,14 @@ router.post('/answer', async (req: Request, res: Response, next: NextFunction) =
     await attempt.save();
 
     // Calculate Results
-    const currentScores = attempt.currentScores ? Object.fromEntries((attempt.currentScores as any).entries()) : {};
+    const currentScores = toPlainRecord(attempt.currentScores);
     const profiles = await CareerProfile.find({
       targetEducationLevels: attempt.educationLevel
     });
 
     // Calculate match scores using cosine similarity or weighted average
     const topMatches = profiles.map(profile => {
-      const reqDims = Object.fromEntries((profile.requiredDimensions as any).entries());
+      const reqDims = toPlainRecord(profile.requiredDimensions);
       let matchScore = 0;
       let totalReq = 0;
       let rationaleArr: string[] = [];
@@ -133,9 +159,6 @@ router.post('/answer', async (req: Request, res: Response, next: NextFunction) =
       });
 
       matchScore = totalReq > 0 ? Math.round(matchScore / totalReq) : 0;
-
-      // Ensure a base score so it doesn't look totally wrong if dimensions don't overlap much
-      if(matchScore < 40) matchScore = 40 + Math.floor(Math.random() * 20); 
 
       return {
         careerId: profile._id as any as string,
@@ -169,11 +192,16 @@ router.post('/answer', async (req: Request, res: Response, next: NextFunction) =
 });
 
 // Fetch result
-router.get('/result/:resultId', async (req: Request, res: Response, next: NextFunction) => {
+router.get('/result/:resultId', async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
+    const userId = req.user?.id;
     const result = await AssessmentResult.findById(req.params.resultId).populate('topMatches.careerId');
     if (!result) {
       res.status(404).json({ error: 'Result not found.' });
+      return;
+    }
+    if (!userId || result.userId !== userId) {
+      res.status(403).json({ error: 'Forbidden.' });
       return;
     }
     res.json(result);
@@ -183,9 +211,15 @@ router.get('/result/:resultId', async (req: Request, res: Response, next: NextFu
 });
 
 // Get user history
-router.get('/history/:userId', async (req: Request, res: Response, next: NextFunction) => {
+router.get('/history/:userId', async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const results = await AssessmentResult.find({ userId: req.params.userId })
+    const userId = req.user?.id;
+    if (!userId || req.params.userId !== userId) {
+      res.status(403).json({ error: 'Forbidden.' });
+      return;
+    }
+
+    const results = await AssessmentResult.find({ userId })
       .sort({ createdAt: -1 })
       .populate('topMatches.careerId');
     res.json(results);
