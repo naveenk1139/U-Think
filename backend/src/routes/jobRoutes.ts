@@ -89,7 +89,7 @@ router.get('/recommendations', protect, async (req, res) => {
     }
 
     const jobs = await jobService.searchJobs({
-      ...(userSkills.length > 0 ? { query: userSkills.join(' ') } : {}),
+      query: userSkills.length > 0 ? userSkills.join(' ') : '',
       ...(preferredLocation ? { location: preferredLocation } : {})
     });
 

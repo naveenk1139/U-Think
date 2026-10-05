@@ -20,7 +20,7 @@ export const generateRoadmap = async (req: Request, res: Response) => {
     
     // Also check if any new assessment results were generated
     const latestAssessment = await import('../models/AssessmentResult.js').then(m => m.default.findOne({ userId: studentId }).sort({ createdAt: -1 }));
-    const assessmentLastUpdated = latestAssessment ? (latestAssessment.createdAt || new Date(0)) : new Date(0);
+    const assessmentLastUpdated = latestAssessment ? ((latestAssessment as any).createdAt || new Date(0)) : new Date(0);
     
     const latestDataUpdate = profileLastUpdated > assessmentLastUpdated ? profileLastUpdated : assessmentLastUpdated;
 
@@ -63,5 +63,42 @@ export const getMyRoadmaps = async (req: Request, res: Response) => {
     res.json(roadmaps);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch roadmaps' });
+  }
+};
+
+export const updateStepStatus = async (req: Request, res: Response) => {
+  try {
+    const studentId = (req as any).user?.id || req.body.studentId;
+    const { stepId, status, payload } = req.body;
+    
+    if (!studentId || !stepId || !status) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    // Phase 9: Trigger Adaptive Roadmap Engine
+    const { processEventAndReevaluate } = await import('../services/nextBestActionEngine.js');
+    
+    if (status === 'COMPLETED') {
+      await processEventAndReevaluate(studentId, 'STEP_COMPLETED', { stepId });
+    } else if (status === 'FAILED') {
+      // Dynamic insertion of Remedial Action
+      await processEventAndReevaluate(studentId, 'TEST_FAILED', { topic: payload?.topic || 'Recent Assessment' });
+    } else {
+      // Just update standard status
+      const roadmap = await StudentRoadmap.findOne({ studentId, isActive: true });
+      if (roadmap) {
+        const step = roadmap.steps.find((s: IRoadmapStep) => s.stepId === stepId);
+        if (step) {
+          step.status = status;
+          roadmap.lastUpdated = new Date();
+          await roadmap.save();
+        }
+      }
+    }
+
+    res.status(200).json({ success: true, message: 'Step updated successfully' });
+  } catch (error) {
+    console.error('Error updating step status:', error);
+    res.status(500).json({ error: 'Failed to update step status' });
   }
 };

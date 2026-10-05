@@ -70,6 +70,8 @@ export interface IUser extends Document {
   isEmailVerified: boolean;
   failedLoginAttempts: number;
   lockUntil?: Date;
+  profileVersion: number;
+  recommendationVersion: number;
   
   // New profile fields
   mobile?: string;
@@ -203,6 +205,8 @@ const UserSchema = new Schema<IUser>(
     preferredLocation: [{ type: String }],
     profileCompletion: { type: Number, default: 0 },
     profileUpdatedAt: { type: Date, default: Date.now },
+    profileVersion: { type: Number, default: 1 },
+    recommendationVersion: { type: Number, default: 0 },
     academicProfile: {
       tenthPercentage: { type: Number },
       twelfthPercentage: { type: Number },
@@ -310,6 +314,7 @@ UserSchema.pre<IUser>('save', async function (next) {
     this.isModified('targetExam')
   ) {
     this.profileUpdatedAt = new Date();
+    this.profileVersion = (this.profileVersion || 1) + 1;
   }
 
   // Calculate Profile Completion

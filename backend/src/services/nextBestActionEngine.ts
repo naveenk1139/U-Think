@@ -1,10 +1,12 @@
 import { User, IUser } from '../models/User.js';
 import Exam from '../models/Exam.js';
 import Recommendation from '../models/Recommendation.js';
+import StudentRoadmap, { IRoadmapStep } from '../models/StudentRoadmap.js';
+import { StudentActivity } from '../models/StudentActivity.js';
 
 export interface INextBestAction {
   id: string;
-  type: 'URGENT_DEADLINE' | 'PROFILE_INCOMPLETE' | 'SKILL_GAP' | 'RECOMMENDATION_REVIEW' | 'PATHWAY_EXPLORATION';
+  type: 'URGENT_DEADLINE' | 'PROFILE_INCOMPLETE' | 'SKILL_GAP' | 'RECOMMENDATION_REVIEW' | 'PATHWAY_EXPLORATION' | 'ROADMAP_STEP' | 'REMEDIAL_ACTION';
   title: string;
   description: string;
   actionText: string;
@@ -115,9 +117,84 @@ export const generateNextBestActions = async (userId: string): Promise<INextBest
     });
   }
 
+  // 4. Roadmap Integration
+  const activeRoadmap = await StudentRoadmap.findOne({ studentId: user._id, isActive: true });
+  if (activeRoadmap) {
+    const currentStep = activeRoadmap.steps.find((s: IRoadmapStep) => s.status === 'CURRENT' || s.status === 'IN_PROGRESS');
+    if (currentStep) {
+      actions.push({
+        id: `nba_roadmap_${currentStep.stepId}`,
+        type: 'ROADMAP_STEP',
+        title: `Next Roadmap Step: ${currentStep.title}`,
+        description: currentStep.description,
+        actionText: 'Continue Roadmap',
+        actionUrl: '/dashboard/roadmap',
+        priority: 90
+      });
+    }
+  }
+
   // Sort by priority descending
   actions.sort((a, b) => b.priority - a.priority);
 
   // Return Top 3 Actions
   return actions.slice(0, 3);
+};
+
+/**
+ * Re-evaluates the roadmap based on an event (e.g., task completed, test failed).
+ * Dynamically inserts remedial steps if necessary.
+ */
+export const processEventAndReevaluate = async (studentId: string, eventType: string, payload: any) => {
+  const roadmap = await StudentRoadmap.findOne({ studentId, isActive: true });
+  if (!roadmap) return;
+
+  if (eventType === 'TEST_FAILED') {
+    // Dynamically insert a remedial step
+    const remedialStep: IRoadmapStep = {
+      stepId: `remedial-${Date.now()}`,
+      title: `Remedial Review: ${payload.topic || 'Recent Topic'}`,
+      type: 'Skill',
+      description: `Your recent mock test indicated a need to review ${payload.topic}. Please complete the remedial modules.`,
+      status: 'CURRENT',
+    };
+
+    // Mark current steps as PENDING since this takes priority
+    roadmap.steps.forEach((s: any) => {
+      if (s.status === 'CURRENT' || s.status === 'IN_PROGRESS') {
+        s.status = 'PENDING';
+      }
+    });
+
+    // Insert at the beginning of pending steps
+    const firstPendingIndex = roadmap.steps.findIndex((s: any) => s.status === 'PENDING');
+    if (firstPendingIndex >= 0) {
+      roadmap.steps.splice(firstPendingIndex, 0, remedialStep);
+    } else {
+      roadmap.steps.push(remedialStep);
+    }
+
+    roadmap.lastUpdated = new Date();
+    await roadmap.save();
+  } else if (eventType === 'STEP_COMPLETED') {
+    // Mark step as completed
+    const stepIndex = roadmap.steps.findIndex((s: any) => s.stepId === payload.stepId);
+    if (stepIndex !== -1) {
+      roadmap.steps[stepIndex].status = 'COMPLETED';
+      roadmap.steps[stepIndex].completedAt = new Date();
+      
+      // Find next pending and mark it current
+      const nextPending = roadmap.steps.find((s: any) => s.status === 'PENDING');
+      if (nextPending) {
+        nextPending.status = 'CURRENT';
+      }
+
+      // Update overall progress
+      const completedCount = roadmap.steps.filter((s: any) => s.status === 'COMPLETED').length;
+      roadmap.overallProgress = Math.round((completedCount / roadmap.steps.length) * 100);
+
+      roadmap.lastUpdated = new Date();
+      await roadmap.save();
+    }
+  }
 };

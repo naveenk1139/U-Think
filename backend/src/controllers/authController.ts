@@ -6,6 +6,7 @@ import OtpStore from '../models/OtpStore.js';
 import { AuthRequest } from '../middleware/authMiddleware.js';
 import { generateOtp, sendOtpEmail } from '../services/emailService.js';
 import { sendOtpSms } from '../services/smsService.js';
+import { generateAllRecommendations } from '../services/recommendationService.js';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) {
@@ -259,6 +260,14 @@ export const verifyOtp = async (req: Request, res: Response, next: NextFunction)
       user.lastLogin = new Date();
       if (!user.isEmailVerified) user.isEmailVerified = true;
       await user.save();
+
+      // Background AI Recommendation check (Phase 2 Blueprint)
+      if ((user.profileVersion || 1) > (user.recommendationVersion || 0)) {
+        console.log(`[AI Orchestrator] Triggering background recommendation refresh for ${user.email} (Profile v${user.profileVersion} > Rec v${user.recommendationVersion || 0})`);
+        generateAllRecommendations(user._id.toString()).catch(err => {
+          console.error('[AI Orchestrator] Background recommendation failed:', err);
+        });
+      }
 
       const token = generateToken(user._id.toString(), user.email, user.name);
 

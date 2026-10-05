@@ -6,6 +6,7 @@ import Message from '../models/Message.js';
 import User from '../models/User.js';
 import { uThinkTools, executeTool, buildSystemInstruction } from '../services/aiService.js';
 import { protect } from '../middleware/authMiddleware.js';
+import { AIOrchestrator } from '../services/orchestratorService.js';
 
 const router = Router();
 router.use(protect);
@@ -138,15 +139,14 @@ router.post('/advisor/chat', async (req: Request, res: Response, next: NextFunct
       res.status(503).json({ error: 'AI Service is currently unavailable. Please configure the GEMINI_API_KEY.' });
       return;
     } else {
-      const response = await generateWithRetry(model, {
-        model: 'gemini-3.5-flash',
-        contents: prompt,
-      });
-      responseText = response.text || 'I am sorry, I am currently unable to answer. Please try again.';
+      const lastMessage = messages[messages.length - 1].text;
+      const orchestratorResult = await AIOrchestrator.processStudentQuery((req as any).user.id, lastMessage, messages);
+      responseText = orchestratorResult.response;
     }
 
     res.json({
       text: responseText,
+      intent: 'GENERAL_ADVICE', // Handled by orchestrator internally now
     });
   } catch (err) {
     next(err);

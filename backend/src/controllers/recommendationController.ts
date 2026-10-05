@@ -143,6 +143,24 @@ export const updateRecommendationFeedback = async (req: AuthRequest, res: Respon
         console.error("Continuous Personalization Error:", mlErr);
         // Fail silently for ML tuning so we don't break the user flow
       }
+
+      // Record detailed feedback for analytics and explicit context
+      const { RecommendationFeedback } = await import('../models/RecommendationFeedback.js');
+      try {
+        await RecommendationFeedback.findOneAndUpdate(
+          { studentId: userId, recommendationId: id },
+          { 
+            $set: {
+              entityId: recommendation.entityId,
+              entityType: recommendation.entityType,
+              feedbackType: action === 'accept' ? 'INTERESTED' : 'NOT_INTERESTED'
+            }
+          },
+          { upsert: true }
+        );
+      } catch (fbErr) {
+        console.error("Feedback Recording Error:", fbErr);
+      }
     }
     
     await recommendation.save();

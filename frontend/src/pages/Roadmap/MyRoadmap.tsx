@@ -202,6 +202,48 @@ export default function MyRoadmap() {
                           {step.description}
                         </p>
                         
+                        {isCurrent && (
+                          <div className="flex gap-2 mt-3 mb-4">
+                            <button
+                              onClick={async () => {
+                                try {
+                                  await axios.put('/student-roadmap/step/status', {
+                                    stepId: step.stepId,
+                                    status: 'COMPLETED'
+                                  });
+                                  // Refresh roadmap to get new next-best-action
+                                  const res = await axios.get('/student-roadmap/my-roadmaps');
+                                  if (res.data && res.data.length > 0) setRoadmaps(res.data);
+                                } catch (e) {
+                                  console.error(e);
+                                }
+                              }}
+                              className="text-[10px] font-bold bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white px-3 py-1.5 rounded transition-colors"
+                            >
+                              Mark Completed
+                            </button>
+                            <button
+                              onClick={async () => {
+                                try {
+                                  await axios.put('/student-roadmap/step/status', {
+                                    stepId: step.stepId,
+                                    status: 'FAILED',
+                                    payload: { topic: step.title }
+                                  });
+                                  // Refresh roadmap to get remedial steps
+                                  const res = await axios.get('/student-roadmap/my-roadmaps');
+                                  if (res.data && res.data.length > 0) setRoadmaps(res.data);
+                                } catch (e) {
+                                  console.error(e);
+                                }
+                              }}
+                              className="text-[10px] font-bold bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white px-3 py-1.5 rounded transition-colors"
+                            >
+                              Report Issue / Failure
+                            </button>
+                          </div>
+                        )}
+                        
                         {step.recommendedExams && step.recommendedExams.length > 0 && (
                           <div className="mb-3">
                             <span className="text-[10px] font-bold text-gray-500 uppercase block mb-1">Target Exams:</span>

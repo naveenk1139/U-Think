@@ -68,105 +68,85 @@ export const analyzeProfileAndGenerateRoadmap = async (userId: string) => {
     }
   });
 
-  // 5. Build Personalized Roadmap Steps based on Education Stage
-  const steps: IRoadmapStep[] = [];
   const eduStageRaw = user.intelligenceProfile?.educationStage?.toLowerCase() || user.educationLevel?.toLowerCase() || '10th';
-  let stepIdCounter = 1;
-
   const isUG = eduStageRaw.includes('ug') || eduStageRaw.includes('bachelor') || eduStageRaw.includes('undergrad') || eduStageRaw.includes('degree') || eduStageRaw.includes('engineering') || eduStageRaw.includes('be') || eduStageRaw.includes('btech');
-  const is12th = eduStageRaw.includes('12') || eduStageRaw.includes('puc') || eduStageRaw.includes('diploma');
-  const is10th = eduStageRaw.includes('10') || eduStageRaw.includes('high school');
 
-  // 10th Stage
-  steps.push({
-    stepId: `step_${stepIdCounter++}`,
-    title: '10th Standard',
-    type: 'Foundation',
-    description: 'Secondary School Education.',
-    status: (is12th || isUG) ? 'COMPLETED' : 'CURRENT',
-    whyRecommended: 'Foundation for all higher education paths.',
-  });
+  // 5. RAG / LLM Layer: Generate Personalized Roadmap
+  const prompt = `You are an expert U-THINK AI Career & Education Mentor.
+Create a highly personalized, step-by-step roadmap for a student.
 
-  // 12th / PUC Stage
-  steps.push({
-    stepId: `step_${stepIdCounter++}`,
-    title: user.stream ? `12th / PUC (${user.stream})` : '12th / PUC / Diploma',
-    type: 'Foundation',
-    description: `Higher secondary education aligned with ${targetCareerName}.`,
-    status: isUG ? 'COMPLETED' : (is12th ? 'CURRENT' : 'NEXT'),
-    whyRecommended: `Required to pursue a degree related to ${targetCareerName}.`,
-  });
+STUDENT CONTEXT:
+Education Stage: ${eduStageRaw}
+Target Career: ${targetCareerName}
+Identified Skill Gaps: ${skillGaps.map(g => g.skillName).join(', ')}
+Industry: ${targetCareerDoc?.industry || 'General'}
 
-  // Entrance Exam
-  let recommendedExams: string[] = [];
-  if (targetCareerDoc && targetCareerDoc.industry) {
-      if (targetCareerDoc.industry.toLowerCase().includes('engineering') || targetCareerDoc.industry.toLowerCase().includes('technology')) recommendedExams = ['JEE Main', 'KCET', 'COMEDK'];
-      if (targetCareerDoc.industry.toLowerCase().includes('healthcare') || targetCareerDoc.industry.toLowerCase().includes('medicine')) recommendedExams = ['NEET'];
-      if (targetCareerDoc.industry.toLowerCase().includes('law')) recommendedExams = ['CLAT', 'LSAT'];
-      if (targetCareerDoc.industry.toLowerCase().includes('design')) recommendedExams = ['NID DAT', 'UCEED'];
+Generate a logical progression of steps (minimum 5, maximum 8) to reach the Target Career.
+Use the following format for each step. Return ONLY valid JSON array of step objects, without any markdown wrapping (no \`\`\`json).
+
+[
+  {
+    "stepId": "unique_string_id",
+    "title": "Clear, actionable title",
+    "type": "Foundation" | "Exam" | "Degree" | "Skill" | "Project" | "Career",
+    "description": "Short explanation of what to do",
+    "status": "COMPLETED" | "CURRENT" | "NEXT" | "RECOMMENDED" | "LOCKED",
+    "whyRecommended": "Why this step is vital for the target career",
+    "estimatedDuration": "e.g., 6 Months"
   }
-  
-  if (recommendedExams.length > 0) {
-      steps.push({
-        stepId: `step_${stepIdCounter++}`,
-        title: 'Entrance Examinations',
-        type: 'Exam',
-        description: `Prepare for ${recommendedExams.join(', ')}.`,
-        status: isUG ? 'COMPLETED' : (is12th ? 'NEXT' : 'RECOMMENDED'),
-        whyRecommended: 'Crucial for getting admission into top colleges.',
-        recommendedExams,
-        estimatedDuration: '6-12 Months'
-      });
+]
+
+RULES:
+- Ensure steps naturally flow from the current education stage to the career.
+- The student's current stage should be marked 'CURRENT'.
+- Past stages must be marked 'COMPLETED'.
+- Future stages are 'NEXT', 'RECOMMENDED', or 'LOCKED'.
+- The final step MUST be type: 'Career' targeting ${targetCareerName}.`;
+
+  let steps: IRoadmapStep[] = [];
+  try {
+    const { generateGeminiResponse } = await import('./geminiService.js');
+    const aiResponseStr = await generateGeminiResponse(prompt);
+    
+    // Clean and parse JSON
+    const cleanedJson = aiResponseStr.replace(/```json/gi, '').replace(/```/g, '').trim();
+    const parsedSteps = JSON.parse(cleanedJson);
+    
+    if (Array.isArray(parsedSteps) && parsedSteps.length > 0) {
+      steps = parsedSteps;
+    } else {
+      throw new Error("Invalid format returned by LLM");
+    }
+  } catch (error) {
+    console.error("LLM Roadmap Generation failed, falling back to static rules.", error);
+    // Fallback static steps if LLM fails
+    let stepIdCounter = 1;
+    steps.push({
+      stepId: `step_${stepIdCounter++}`,
+      title: 'Current Education Phase',
+      type: 'Foundation',
+      description: `Complete your current education focusing on fundamentals.`,
+      status: 'CURRENT',
+      whyRecommended: 'Foundation for higher education.',
+    });
+    steps.push({
+      stepId: `step_${stepIdCounter++}`,
+      title: `Skill Building`,
+      type: 'Skill',
+      description: `Master industry-required skills: ${skillGaps.map(g=>g.skillName).join(', ')}`,
+      status: 'NEXT',
+      whyRecommended: 'Bridging the skill gap makes you employable.',
+      estimatedDuration: '6 Months'
+    });
+    steps.push({
+      stepId: `step_${stepIdCounter++}`,
+      title: `Target: ${targetCareerName}`,
+      type: 'Career',
+      description: `Launch your career as a ${targetCareerName}.`,
+      status: 'LOCKED',
+      whyRecommended: 'Your primary career objective.',
+    });
   }
-
-  // Undergraduate Degree
-  const userCourseName = user.course || 'Undergraduate Degree';
-  steps.push({
-    stepId: `step_${stepIdCounter++}`,
-    title: isUG ? `${userCourseName}` : (targetCareerDoc.relatedDegrees?.[0] || 'Undergraduate Degree'),
-    type: 'Degree',
-    description: `Enroll in a Bachelor's degree program focusing on core fundamentals for ${targetCareerName}.`,
-    status: isUG ? 'CURRENT' : 'RECOMMENDED',
-    whyRecommended: `Minimum educational qualification required for most ${targetCareerName} roles.`,
-    recommendedCourses: targetCareerDoc.relatedDegrees || [],
-    estimatedDuration: '3-4 Years'
-  });
-
-  // Skills & Certifications
-  if (skillGaps.length > 0) {
-      steps.push({
-        stepId: `step_${stepIdCounter++}`,
-        title: 'Skill Development & Certifications',
-        type: 'Skill',
-        description: `Master industry-required skills.`,
-        status: isUG ? 'NEXT' : 'RECOMMENDED',
-        whyRecommended: 'Bridging the skill gap makes you highly employable.',
-        requiredSkills: skillGaps.map(g => g.skillName),
-        estimatedDuration: '3-6 Months'
-      });
-  }
-
-  // Projects & Internships
-  steps.push({
-    stepId: `step_${stepIdCounter++}`,
-    title: 'Projects & Internships',
-    type: 'Project',
-    description: 'Apply your skills in real-world scenarios through capstone projects and internships.',
-    status: 'RECOMMENDED',
-    whyRecommended: 'Practical experience is highly valued by recruiters.',
-    estimatedDuration: '3-6 Months'
-  });
-
-  // Career Goal
-  steps.push({
-    stepId: `step_${stepIdCounter++}`,
-    title: `Target: ${targetCareerName}`,
-    type: 'Career',
-    description: `Launch your career as a ${targetCareerName}.`,
-    status: 'LOCKED',
-    whyRecommended: 'Your primary career objective.',
-    requiredSkills: requiredSkills
-  });
 
   // 6. Deactivate old roadmaps
   await StudentRoadmap.updateMany({ studentId: userId, isActive: true }, { $set: { isActive: false } });

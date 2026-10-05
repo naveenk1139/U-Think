@@ -49,8 +49,8 @@ export const buildNodeContext = async (type: string, id: string, user: any = nul
   const children: any[] = [];
 
   // 1. Fetch EXPLICIT Edges from Knowledge Graph Collection
-  const explicitParents = await EducationPathRelation.find({ targetId: coreNode._id, targetType: type }).lean();
-  const explicitChildren = await EducationPathRelation.find({ sourceId: coreNode._id, sourceType: type }).lean();
+  const explicitParents = await EducationPathRelation.find({ targetId: (coreNode as any)._id, targetType: type }).lean();
+  const explicitChildren = await EducationPathRelation.find({ sourceId: (coreNode as any)._id, sourceType: type }).lean();
 
   const filterByEligibility = (edge: any) => {
     if (!user || !user.academicDetails) return true;

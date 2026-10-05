@@ -177,12 +177,37 @@ export async function generateAllRecommendations(userId: string) {
     const careerId = careerRec.updateOne.filter.entityId.toString();
     const context = await buildNodeContext('Career', careerId);
     
-    // Prereqs of Career = Degrees/Pathways
+    // Prereqs of Career = Degrees/Pathways/Courses
     if (context && context.prerequisites) {
       for (const req of context.prerequisites) {
         if (req.sourceType === 'Degree') {
-           // Find Exams that lead to this Degree
+           // 1. Recommend the Degree itself
+           newRecommendations.push({
+             updateOne: {
+               filter: { studentId: user._id, entityId: req.resolvedNode._id, recommendationType: 'degree' },
+               update: {
+                 $set: {
+                   entityType: 'Degree',
+                   reason: 'KNOWLEDGE_GRAPH_PATHWAY',
+                   matchedFactors: [`Required for career: ${careerRec.updateOne.update.$set.matchedFactors[0] || 'Strong Match'}`],
+                   missingFactors: [],
+                   eligibilityStatus: 'Eligible',
+                   matchScore: Math.round(careerRec.updateOne.update.$set.matchScore * 0.95),
+                   confidence: 85,
+                   priority: 'High',
+                   profileVersion: profileVersion,
+                   status: 'Active',
+                   recommendationLabel: 'VERIFIED MATCH',
+                   sourceReferences: [{ sourceName: 'U-Think Knowledge Graph', lastVerifiedAt: new Date(), verificationStatus: 'Verified' }]
+                 }
+               },
+               upsert: true
+             }
+           });
+
+           // 2. Explore further up the graph from the Degree
            const degreeContext = await buildNodeContext('Degree', req.resolvedNode._id.toString());
+           
            if (degreeContext && degreeContext.prerequisites) {
              for (const degreeReq of degreeContext.prerequisites) {
                if (degreeReq.sourceType === 'Exam') {
@@ -194,7 +219,7 @@ export async function generateAllRecommendations(userId: string) {
                        $set: {
                          entityType: 'Exam',
                          reason: 'KNOWLEDGE_GRAPH_PATHWAY',
-                         matchedFactors: [`Leads to recommended career: ${careerRec.updateOne.update.$set.matchedFactors[0] || 'Strong Match'}`],
+                         matchedFactors: [`Leads to degree for career: ${careerRec.updateOne.update.$set.matchedFactors[0] || 'Strong Match'}`],
                          missingFactors: [],
                          eligibilityStatus: 'Eligible',
                          matchScore: Math.round(careerRec.updateOne.update.$set.matchScore * 0.9), // Slightly lower confidence due to depth
@@ -203,11 +228,7 @@ export async function generateAllRecommendations(userId: string) {
                          profileVersion: profileVersion,
                          status: 'Active',
                          recommendationLabel: 'VERIFIED MATCH',
-                         sourceReferences: [{
-                           sourceName: 'U-Think Knowledge Graph',
-                           lastVerifiedAt: new Date(),
-                           verificationStatus: 'Verified'
-                         }]
+                         sourceReferences: [{ sourceName: 'U-Think Knowledge Graph', lastVerifiedAt: new Date(), verificationStatus: 'Verified' }]
                        }
                      },
                      upsert: true
@@ -216,18 +237,124 @@ export async function generateAllRecommendations(userId: string) {
                }
              }
            }
+           
+           // Find Colleges that offer this Degree (downstream from Degree)
+           if (degreeContext && degreeContext.downstream) {
+              for (const degreeDown of degreeContext.downstream) {
+                 if (degreeDown.targetType === 'College') {
+                    // Start with the base career score
+                    let collegeMatchScore = careerRec.updateOne.update.$set.matchScore * 0.9;
+                    const college = degreeDown.resolvedNode;
+                    const userPreferredLocations = user.preferredLocation || [];
+                    const matchedCollegeFactors = [`Offers recommended degree: ${req.resolvedNode.name}`];
+
+                    // Modulate by Location
+                    if (userPreferredLocations.length > 0 && college.location) {
+                      const matchesLoc = userPreferredLocations.some((loc: string) => college.location.toLowerCase().includes(loc.toLowerCase()));
+                      if (matchesLoc) {
+                        collegeMatchScore += 10;
+                        matchedCollegeFactors.push(`Matches preferred location: ${college.location}`);
+                      } else {
+                        collegeMatchScore -= 10;
+                      }
+                    }
+
+                    // Normalize score
+                    collegeMatchScore = Math.min(100, Math.max(0, Math.round(collegeMatchScore)));
+
+                    newRecommendations.push({
+                       updateOne: {
+                         filter: { studentId: user._id, entityId: degreeDown.resolvedNode._id, recommendationType: 'college' },
+                         update: {
+                           $set: {
+                             entityType: 'College',
+                             reason: 'KNOWLEDGE_GRAPH_PATHWAY',
+                             matchedFactors: matchedCollegeFactors,
+                             missingFactors: [],
+                             eligibilityStatus: 'Eligible',
+                             matchScore: collegeMatchScore,
+                             confidence: 75,
+                             priority: collegeMatchScore > 80 ? 'High' : 'Medium',
+                             profileVersion: profileVersion,
+                             status: 'Active',
+                             recommendationLabel: 'VERIFIED MATCH',
+                             sourceReferences: [{ sourceName: 'U-Think Knowledge Graph', lastVerifiedAt: new Date(), verificationStatus: 'Verified' }]
+                           }
+                         },
+                         upsert: true
+                       }
+                     });
+                 }
+              }
+           }
+        }
+        
+        if (req.sourceType === 'Course') {
+           newRecommendations.push({
+             updateOne: {
+               filter: { studentId: user._id, entityId: req.resolvedNode._id, recommendationType: 'course' },
+               update: {
+                 $set: {
+                   entityType: 'Course',
+                   reason: 'KNOWLEDGE_GRAPH_PATHWAY',
+                   matchedFactors: [`Direct path to career: ${careerRec.updateOne.update.$set.matchedFactors[0] || 'Strong Match'}`],
+                   missingFactors: [],
+                   eligibilityStatus: 'Eligible',
+                   matchScore: Math.round(careerRec.updateOne.update.$set.matchScore * 0.95),
+                   confidence: 85,
+                   priority: 'High',
+                   profileVersion: profileVersion,
+                   status: 'Active',
+                   recommendationLabel: 'VERIFIED MATCH',
+                   sourceReferences: [{ sourceName: 'U-Think Knowledge Graph', lastVerifiedAt: new Date(), verificationStatus: 'Verified' }]
+                 }
+               },
+               upsert: true
+             }
+           });
         }
       }
+    }
+    
+    // Check downstream skills missing for this career
+    if (context && context.downstream) {
+       for (const down of context.downstream) {
+          if (down.targetType === 'Skill' && !down.resolvedNode.isVirtual) {
+             newRecommendations.push({
+               updateOne: {
+                 filter: { studentId: user._id, entityId: down.resolvedNode._id, recommendationType: 'skill' },
+                 update: {
+                   $set: {
+                     entityType: 'Skill',
+                     reason: 'SKILL_GAP_ANALYSIS',
+                     matchedFactors: [`Crucial skill for: ${careerRec.updateOne.update.$set.matchedFactors[0] || 'Strong Match'}`],
+                     missingFactors: [],
+                     eligibilityStatus: 'Action Required',
+                     matchScore: Math.round(careerRec.updateOne.update.$set.matchScore * 0.98),
+                     confidence: 90,
+                     priority: 'High',
+                     profileVersion: profileVersion,
+                     status: 'Active',
+                     recommendationLabel: 'REQUIRES ACTION',
+                     sourceReferences: [{ sourceName: 'U-Think Knowledge Graph', lastVerifiedAt: new Date(), verificationStatus: 'Verified' }]
+                   }
+                 },
+                 upsert: true
+               }
+             });
+          }
+       }
     }
   }
 
   // Bulk Write Transaction
+  // Expire old recommendations for this profile version (for all types)
+  await Recommendation.updateMany(
+    { studentId: user._id, profileVersion: { $lt: profileVersion } },
+    { $set: { status: 'Expired' } }
+  );
+
   if (newRecommendations.length > 0) {
-    // Expire old recommendations for this profile version (for all types)
-    await Recommendation.updateMany(
-      { studentId: user._id, profileVersion: { $lt: profileVersion } },
-      { $set: { status: 'Expired' } }
-    );
     await Recommendation.bulkWrite(newRecommendations as any);
   }
 
