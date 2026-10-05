@@ -67,10 +67,18 @@ router.get('/', async (req: Request, res: Response) => {
     }
     const courses = await Course.find(filter).lean().sort({ order: 1 });
     
-    // Dynamically calculate counts of children courses
-    const coursesWithCounts = await Promise.all(courses.map(async (c) => {
-      const count = await Course.countDocuments({ parentId: c._id, active: true });
-      return { ...c, optionCount: count };
+    // Single aggregation query to replace N+1 countDocuments
+    const courseIds = courses.map(c => c._id);
+    const childCounts = await Course.aggregate([
+      { $match: { parentId: { $in: courseIds }, active: true } },
+      { $group: { _id: "$parentId", count: { $sum: 1 } } }
+    ]);
+    const countMap = new Map();
+    childCounts.forEach(c => countMap.set(c._id.toString(), c.count));
+
+    const coursesWithCounts = courses.map(c => ({
+      ...c,
+      optionCount: countMap.get(c._id.toString()) || 0
     }));
     
     res.json({ data: coursesWithCounts });

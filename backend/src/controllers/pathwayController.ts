@@ -29,33 +29,53 @@ export const getPathwayTree = async (req: Request, res: Response, next: NextFunc
            .lean();
            
        if (subjectCombinations.length > 0) {
-           const combinationsWithDetails = await Promise.all(subjectCombinations.map(async (combination) => {
-             // Fetch UG Courses eligible for this combination
-             const ugCourses = await Course.find({ eligibleCombinations: combination._id, active: true }).sort({ order: 1 }).lean();
-             
-             const ugCoursesWithBranches = await Promise.all(ugCourses.map(async (ugCourse) => {
-               // Fetch Branches for UG Course
-               const branches = await Branch.find({ courseId: ugCourse._id, active: true })
-                 .populate({
-                   path: 'relatedCareers',
-                   populate: [{ path: 'skillRefs' }, { path: 'jobRoleRefs' }]
-                 })
-                 .populate('relatedExams')
-                 .populate('higherStudies')
-                 .populate('furtherStudies')
-                 .sort({ order: 1 })
-                 .lean();
-                 
-               const branchesWithDetails = await Promise.all(branches.map(async (branch) => {
-                 const specializations = await mongoose.model('Specialization').find({ branchId: branch._id, active: true }).lean();
-                 const colleges = await mongoose.model('College').find({ offeredBranchesRef: branch._id, active: true }).lean();
-                 return { ...branch, specializations, colleges };
-               }));
-               
-               return { ...ugCourse, branches: branchesWithDetails };
-             }));
-             
-             return { ...combination, ugCourses: ugCoursesWithBranches };
+           const comboIds = subjectCombinations.map((c: any) => c._id);
+           const allUgCourses = await Course.find({ eligibleCombinations: { $in: comboIds }, active: true }).sort({ order: 1 }).lean();
+           const ugCourseIds = allUgCourses.map((c: any) => c._id);
+           
+           const allBranches = await Branch.find({ courseId: { $in: ugCourseIds }, active: true })
+             .populate({
+               path: 'relatedCareers',
+               populate: [{ path: 'skillRefs' }, { path: 'jobRoleRefs' }]
+             })
+             .populate('relatedExams')
+             .populate('higherStudies')
+             .populate('furtherStudies')
+             .sort({ order: 1 })
+             .lean();
+
+           const branchesByCourseId: Record<string, any[]> = {};
+           allBranches.forEach((b: any) => {
+             const cId = b.courseId?.toString();
+             if (cId) {
+               if (!branchesByCourseId[cId]) branchesByCourseId[cId] = [];
+               branchesByCourseId[cId].push(b);
+             }
+           });
+
+           const coursesWithBranches = allUgCourses.map((c: any) => ({
+             ...c,
+             branches: branchesByCourseId[c._id.toString()] || []
+           }));
+
+           const coursesByComboId: Record<string, any[]> = {};
+           coursesWithBranches.forEach((c: any) => {
+             if (c.eligibleCombinations && Array.isArray(c.eligibleCombinations)) {
+               c.eligibleCombinations.forEach((comboId: any) => {
+                 const idStr = comboId.toString();
+                 if (!coursesByComboId[idStr]) coursesByComboId[idStr] = [];
+                 coursesByComboId[idStr].push(c);
+               });
+             } else if (c.eligibleCombinations) {
+                 const idStr = c.eligibleCombinations.toString();
+                 if (!coursesByComboId[idStr]) coursesByComboId[idStr] = [];
+                 coursesByComboId[idStr].push(c);
+             }
+           });
+
+           const combinationsWithDetails = subjectCombinations.map((combination: any) => ({
+             ...combination,
+             ugCourses: coursesByComboId[combination._id.toString()] || []
            }));
            
            return res.json({ ...stream, subjectCombinations: combinationsWithDetails });
@@ -72,25 +92,30 @@ export const getPathwayTree = async (req: Request, res: Response, next: NextFunc
        const courses = await Course.find({ streamId: stream._id, active: true }).sort({ order: 1 }).lean();
        
        if (courses && courses.length > 0) {
-           const coursesWithDetails = await Promise.all(courses.map(async (course) => {
-               const branches = await Branch.find({ courseId: course._id, active: true })
-                   .populate({
-                     path: 'relatedCareers',
-                     populate: [{ path: 'skillRefs' }, { path: 'jobRoleRefs' }]
-                   })
-                   .populate('relatedExams')
-                   .populate('higherStudies')
-                   .populate('furtherStudies')
-                   .sort({ order: 1 })
-                   .lean();
-                   
-               const branchesWithDetails = await Promise.all(branches.map(async (branch) => {
-                   const specializations = await mongoose.model('Specialization').find({ branchId: branch._id, active: true }).lean();
-                   const colleges = await mongoose.model('College').find({ offeredBranchesRef: branch._id, active: true }).lean();
-                   return { ...branch, specializations, colleges };
-               }));
+           const courseIds = courses.map((c: any) => c._id);
+           const allBranches = await Branch.find({ courseId: { $in: courseIds }, active: true })
+               .populate({
+                 path: 'relatedCareers',
+                 populate: [{ path: 'skillRefs' }, { path: 'jobRoleRefs' }]
+               })
+               .populate('relatedExams')
+               .populate('higherStudies')
+               .populate('furtherStudies')
+               .sort({ order: 1 })
+               .lean();
                
-               return { ...course, branches: branchesWithDetails };
+           const branchesByCourseId: Record<string, any[]> = {};
+           allBranches.forEach((b: any) => {
+             const cId = b.courseId?.toString();
+             if (cId) {
+               if (!branchesByCourseId[cId]) branchesByCourseId[cId] = [];
+               branchesByCourseId[cId].push(b);
+             }
+           });
+               
+           const coursesWithDetails = courses.map((course: any) => ({
+               ...course,
+               branches: branchesByCourseId[course._id.toString()] || []
            }));
            
            return res.json({ ...stream, courses: coursesWithDetails });
@@ -108,12 +133,7 @@ export const getPathwayTree = async (req: Request, res: Response, next: NextFunc
            .lean();
            
        if (branches && branches.length > 0) {
-           const branchesWithDetails = await Promise.all(branches.map(async (branch) => {
-               const specializations = await mongoose.model('Specialization').find({ branchId: branch._id, active: true }).lean();
-               const colleges = await mongoose.model('College').find({ offeredBranchesRef: branch._id, active: true }).lean();
-               return { ...branch, specializations, colleges };
-           }));
-           return res.json({ ...stream, branches: branchesWithDetails });
+           return res.json({ ...stream, branches: branches });
        }
        
        return res.json({ ...stream });

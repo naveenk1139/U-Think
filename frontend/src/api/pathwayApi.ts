@@ -159,11 +159,36 @@ export interface PathwayStats {
   jobs: number;
 }
 
-export const getPathwayTree = (levelSlug?: string): Promise<EducationLevelData[]> =>
-  api.get<EducationLevelData[]>('/api/education-catalog', { params: { levelSlug } }).then((r) => r.data);
+const cache = new Map<string, { data: any, timestamp: number }>();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+const getCached = (key: string) => {
+  const item = cache.get(key);
+  if (item && Date.now() - item.timestamp < CACHE_TTL) {
+    return item.data;
+  }
+  return null;
+}
+
+const setCached = (key: string, data: any) => {
+  cache.set(key, { data, timestamp: Date.now() });
+}
+
+export const getPathwayTree = async (levelSlug?: string): Promise<EducationLevelData[]> => {
+  const key = `pathwayTree_${levelSlug || 'all'}`;
+  const cached = getCached(key);
+  if (cached) return cached;
+  const r = await api.get<EducationLevelData[]>('/api/education-catalog', { params: { levelSlug } });
+  setCached(key, r.data);
+  return r.data;
+};
 
 export const getStreamDetails = async (streamId: string): Promise<StreamData> => {
+  const key = `streamDetails_${streamId}`;
+  const cached = getCached(key);
+  if (cached) return cached;
   const response = await api.get(`/api/education-catalog?streamSlug=${streamId}`);
+  setCached(key, response.data);
   return response.data;
 };
 

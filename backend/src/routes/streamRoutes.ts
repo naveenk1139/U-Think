@@ -13,10 +13,18 @@ router.get('/', async (req: Request, res: Response) => {
     }
     const streams = await Stream.find(filter).lean().sort({ order: 1 });
     
-    // Dynamically calculate counts for streams
-    const streamsWithCounts = await Promise.all(streams.map(async (s) => {
-      const count = await Course.countDocuments({ streamId: s._id, parentId: { $exists: false }, active: true });
-      return { ...s, optionCount: count };
+    // Single aggregation query to replace N+1 countDocuments
+    const streamIds = streams.map(s => s._id);
+    const childCounts = await Course.aggregate([
+      { $match: { streamId: { $in: streamIds }, parentId: { $exists: false }, active: true } },
+      { $group: { _id: "$streamId", count: { $sum: 1 } } }
+    ]);
+    const countMap = new Map();
+    childCounts.forEach(c => countMap.set(c._id.toString(), c.count));
+
+    const streamsWithCounts = streams.map(s => ({
+      ...s,
+      optionCount: countMap.get(s._id.toString()) || 0
     }));
     
     res.json({ data: streamsWithCounts });

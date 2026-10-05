@@ -30,17 +30,31 @@ router.get('/categories', async (_req: Request, res: Response, next: NextFunctio
 
     const result: Record<string, { colleges: number; exams: number; jobs: number; mentors: number }> = {};
 
-    await Promise.all(
-      categories.map(async (cat) => {
-        const [colleges, exams, jobs, mentors] = await Promise.all([
-          College ? safeCount(College, { category: cat }) : 0,
-          Exam ? safeCount(Exam, { category: cat }) : 0,
-          Job ? safeCount(Job, { category: cat }) : 0,
-          Mentor ? safeCount(Mentor, { industry: cat }) : 0,
+    categories.forEach(cat => result[cat] = { colleges: 0, exams: 0, jobs: 0, mentors: 0 });
+
+    const fetchGrouped = async (model: mongoose.Model<any>, groupByField: string) => {
+      if (!model) return [];
+      try {
+        return await model.aggregate([
+          { $match: { [groupByField]: { $in: categories } } },
+          { $group: { _id: `$${groupByField}`, count: { $sum: 1 } } }
         ]);
-        result[cat] = { colleges, exams, jobs, mentors };
-      })
-    );
+      } catch (e) {
+        return [];
+      }
+    };
+
+    const [collegeCounts, examCounts, jobCounts, mentorCounts] = await Promise.all([
+      fetchGrouped(College, 'category'),
+      fetchGrouped(Exam, 'category'),
+      fetchGrouped(Job, 'category'),
+      fetchGrouped(Mentor, 'industry')
+    ]);
+
+    collegeCounts.forEach((c: any) => { if (result[c._id]) result[c._id].colleges = c.count; });
+    examCounts.forEach((e: any) => { if (result[e._id]) result[e._id].exams = e.count; });
+    jobCounts.forEach((j: any) => { if (result[j._id]) result[j._id].jobs = j.count; });
+    mentorCounts.forEach((m: any) => { if (result[m._id]) result[m._id].mentors = m.count; });
 
     res.json(result);
   } catch (err) {

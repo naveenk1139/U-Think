@@ -8,6 +8,14 @@ import {
   ArrowLeft
 } from 'lucide-react';
 
+const requestCache = new Map<string, any>();
+const fetchWithCache = async (url: string) => {
+  if (requestCache.has(url)) return requestCache.get(url);
+  const res = await api.get(url);
+  requestCache.set(url, res);
+  return res;
+};
+
 interface Pathway {
   _id: string;
   name: string;
@@ -72,7 +80,7 @@ export default function PathwaysExplorer() {
   const fetchInitialData = async () => {
     try {
       setLoading(true);
-      const pRes = await api.get('/api/pathways');
+      const pRes = await fetchWithCache('/api/pathways');
       const data = pRes.data?.data || pRes.data || [];
       setPathways(data);
       setCurrentOptions(data);
@@ -91,7 +99,7 @@ export default function PathwaysExplorer() {
       if (!selectedPathway) {
         setSelectedPathway(option);
         setCurrentNode(option);
-        const res = await api.get(`/api/streams?pathwayId=${option._id}`);
+        const res = await fetchWithCache(`/api/streams?pathwayId=${option._id}`);
         const data = res.data?.data || [];
         setCurrentOptions(data);
         setNodeType('Stream / Category');
@@ -99,7 +107,7 @@ export default function PathwaysExplorer() {
       } else if (!selectedStream) {
         setSelectedStream(option);
         setCurrentNode(option);
-        const res = await api.get(`/api/courses?streamId=${option._id}&parentId=null`);
+        const res = await fetchWithCache(`/api/courses?streamId=${option._id}&parentId=null`);
         const data = res.data?.data || [];
         setCurrentOptions(data);
         setNodeType('Course');
@@ -108,7 +116,7 @@ export default function PathwaysExplorer() {
         const newPath = [...coursePath, option];
         setCoursePath(newPath);
         setCurrentNode(option);
-        const res = await api.get(`/api/courses?parentId=${option._id}`);
+        const res = await fetchWithCache(`/api/courses?parentId=${option._id}`);
         const data = res.data?.data || [];
         setCurrentOptions(data);
         setIsLeaf(data.length === 0);
@@ -134,13 +142,13 @@ export default function PathwaysExplorer() {
         if (newPath.length > 0) {
           const lastCourse = newPath[newPath.length - 1];
           setCurrentNode(lastCourse);
-          const res = await api.get(`/api/courses?parentId=${lastCourse._id}`);
+          const res = await fetchWithCache(`/api/courses?parentId=${lastCourse._id}`);
           const data = res.data?.data || [];
           setCurrentOptions(data);
           setNodeType(data[0]?.type || 'Specialization');
         } else {
           setCurrentNode(selectedStream);
-          const res = await api.get(`/api/courses?streamId=${selectedStream?._id}&parentId=null`);
+          const res = await fetchWithCache(`/api/courses?streamId=${selectedStream?._id}&parentId=null`);
           const data = res.data?.data || [];
           setCurrentOptions(data);
           setNodeType('Course');
@@ -149,7 +157,7 @@ export default function PathwaysExplorer() {
         setSelectedStream(null);
         setCurrentNode(selectedPathway);
         setIsLeaf(false);
-        const res = await api.get(`/api/streams?pathwayId=${selectedPathway?._id}`);
+        const res = await fetchWithCache(`/api/streams?pathwayId=${selectedPathway?._id}`);
         const data = res.data?.data || [];
         setCurrentOptions(data);
         setNodeType('Stream / Category');
@@ -181,7 +189,7 @@ export default function PathwaysExplorer() {
       setCoursePath([]);
       setIsLeaf(false);
       setCurrentNode(selectedPathway);
-      const res = await api.get(`/api/streams?pathwayId=${selectedPathway._id}`);
+      const res = await fetchWithCache(`/api/streams?pathwayId=${selectedPathway._id}`);
       const data = res.data?.data || [];
       setCurrentOptions(data);
       setNodeType('Stream / Category');
@@ -189,7 +197,7 @@ export default function PathwaysExplorer() {
       setCoursePath([]);
       setIsLeaf(false);
       setCurrentNode(selectedStream);
-      const res = await api.get(`/api/courses?streamId=${selectedStream._id}&parentId=null`);
+      const res = await fetchWithCache(`/api/courses?streamId=${selectedStream._id}&parentId=null`);
       const data = res.data?.data || [];
       setCurrentOptions(data);
       setNodeType('Course');
@@ -199,7 +207,7 @@ export default function PathwaysExplorer() {
       setIsLeaf(false);
       const lastCourse = newPath[newPath.length - 1];
       setCurrentNode(lastCourse);
-      const res = await api.get(`/api/courses?parentId=${lastCourse._id}`);
+      const res = await fetchWithCache(`/api/courses?parentId=${lastCourse._id}`);
       const data = res.data?.data || [];
       setCurrentOptions(data);
       setNodeType(data[0]?.type || 'Specialization');
