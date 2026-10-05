@@ -127,6 +127,17 @@ export default function JobFinder({ initialRole }: { initialRole?: string | null
   };
 
   const [sourceFilter, setSourceFilter] = useState<string | null>(null);
+  const formatPostedAt = (postedAt?: string) => {
+    if (!postedAt) return 'Date not available';
+    const parsed = new Date(postedAt);
+    if (Number.isNaN(parsed.getTime())) return 'Date not available';
+    const diffMs = Date.now() - parsed.getTime();
+    if (diffMs < 0) return parsed.toLocaleDateString();
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    if (diffHours < 24) return `${Math.max(diffHours, 1)} hour${diffHours === 1 ? '' : 's'} ago`;
+    const diffDays = Math.floor(diffHours / 24);
+    return `${diffDays} day${diffDays === 1 ? '' : 's'} ago`;
+  };
 
   const filteredJobs = React.useMemo(() => {
     let result = [...jobs];
@@ -187,21 +198,24 @@ export default function JobFinder({ initialRole }: { initialRole?: string | null
     });
 
     const sortedSkills = Object.keys(skillCounts).sort((a, b) => skillCounts[b] - skillCounts[a]);
-    const topSkill = sortedSkills.length > 0 ? sortedSkills[0] : (query || 'React');
+    const topSkill = sortedSkills.length > 0 ? sortedSkills[0] : (query || 'Not available');
     const topMatchedSkills = sortedSkills.slice(0, 4);
     const skillsToImprove = sortedSkills.slice(4, 7);
 
-    const avgSalary = salaryCount > 0 ? (totalSalary / salaryCount).toFixed(1) : '6.5';
-
-    // AI Match Score dynamic mock based on query match (or just 80-98%)
-    const aiMatchScore = query ? Math.floor(85 + Math.random() * 10) : 92;
+    const avgSalary = salaryCount > 0 ? (totalSalary / salaryCount).toFixed(1) : 'N/A';
+    const scoredJobs = filteredJobs
+      .map((j) => j.matchAnalysis?.score)
+      .filter((score): score is number => typeof score === 'number');
+    const aiMatchScore = scoredJobs.length > 0
+      ? Math.round(scoredJobs.reduce((sum, score) => sum + score, 0) / scoredJobs.length)
+      : null;
 
     return {
       total,
-      addedToday: addedToday > 0 ? addedToday : Math.floor(total * 0.1) || 12,
+      addedToday,
       topSkill,
-      topMatchedSkills: topMatchedSkills.length > 0 ? topMatchedSkills : ['JavaScript', 'React', 'Node.js', 'TypeScript'],
-      skillsToImprove: skillsToImprove.length > 0 ? skillsToImprove : ['Docker', 'AWS', 'GraphQL'],
+      topMatchedSkills,
+      skillsToImprove,
       avgSalary,
       aiMatchScore
     };
@@ -509,12 +523,11 @@ export default function JobFinder({ initialRole }: { initialRole?: string | null
 
           {/* Job List */}
           <div className="space-y-4">
-            {filteredJobs.map((job, index) => {
-              // Temporary mock data for UI visual fidelity if missing
+            {filteredJobs.map((job) => {
               const salaryStr = job.salaryMin && job.salaryMax ? `₹${job.salaryMin} - ${job.salaryMax} LPA` : (job.salaryMin ? `₹${job.salaryMin}+ LPA` : 'Not disclosed');
-              const expStr = job.experienceLevel || '1-3 Yrs';
-              const typeStr = job.employmentType || 'Full Time';
-              const matchScore = job.matchAnalysis?.score || [92, 88, 85][index % 3] || 85;
+              const expStr = job.experienceLevel || 'Not specified';
+              const typeStr = job.employmentType || 'Not specified';
+              const matchScore = typeof job.matchAnalysis?.score === 'number' ? job.matchAnalysis.score : null;
 
               return (
               <div 
@@ -537,9 +550,15 @@ export default function JobFinder({ initialRole }: { initialRole?: string | null
                     <div>
                       <div className="flex items-center gap-3 mb-1">
                         <h3 className="text-lg font-bold text-text-primary leading-tight">{job.title}</h3>
-                        <span className="bg-green-50 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-green-200">
-                          {matchScore}% Match
-                        </span>
+                        {matchScore !== null ? (
+                          <span className="bg-green-50 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-green-200">
+                            {matchScore}% Match
+                          </span>
+                        ) : (
+                          <span className="bg-amber-50 text-amber-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-amber-200">
+                            Complete profile for match
+                          </span>
+                        )}
                       </div>
                       <div className="flex items-center gap-1.5 text-sm font-medium text-text-secondary">
                         {job.company} <CheckCircle2 className="w-4 h-4 text-blue-500 fill-blue-50" />
@@ -563,17 +582,21 @@ export default function JobFinder({ initialRole }: { initialRole?: string | null
 
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-xs font-bold text-text-primary mr-2">{salaryStr}</span>
-                    {(job.skills && job.skills.length > 0 ? job.skills : ['Python', 'Django', 'SQL', 'Git', 'REST API']).slice(0, 4).map((skill, idx) => (
+                    {(job.skills && job.skills.length > 0 ? job.skills : []).slice(0, 4).map((skill, idx) => (
                       <span key={idx} className="bg-background text-text-secondary border border-border text-[11px] font-semibold px-2.5 py-1 rounded-md">
                         {skill}
                       </span>
                     ))}
-                    <span className="text-[11px] font-semibold text-text-muted bg-background px-2.5 py-1 rounded-md border border-border">+2</span>
+                    {(!job.skills || job.skills.length === 0) && (
+                      <span className="text-[11px] font-semibold text-text-muted bg-background px-2.5 py-1 rounded-md border border-border">
+                        Skills not specified
+                      </span>
+                    )}
                   </div>
 
                   <div className="flex items-center justify-between pt-2">
                     <div className="flex items-center gap-3 text-[11px] font-medium text-text-muted">
-                      <span>{Math.floor(Math.random() * 24) + 1} hours ago</span>
+                      <span>{formatPostedAt(job.postedAt)}</span>
                       <span className="text-text-muted">•</span>
                       <span className="flex items-center gap-1 bg-blue-50 text-primary-hover px-1.5 py-0.5 rounded font-bold">
                         in {job.source || 'LinkedIn'}
@@ -614,15 +637,23 @@ export default function JobFinder({ initialRole }: { initialRole?: string | null
               <div className="relative w-28 h-28 flex items-center justify-center rounded-full bg-blue-50">
                 <svg className="absolute inset-0 w-full h-full transform -rotate-90">
                   <circle cx="56" cy="56" r="48" className="stroke-slate-100" strokeWidth="8" fill="none" />
-                  <circle cx="56" cy="56" r="48" className="stroke-blue-600 transition-all duration-1000 ease-out" strokeWidth="8" fill="none" strokeDasharray="301" strokeDashoffset={301 - (301 * (selectedJob?.matchAnalysis?.score || jobInsights.aiMatchScore)) / 100} strokeLinecap="round" />
+                  <circle cx="56" cy="56" r="48" className="stroke-blue-600 transition-all duration-1000 ease-out" strokeWidth="8" fill="none" strokeDasharray="301" strokeDashoffset={301 - (301 * (selectedJob?.matchAnalysis?.score ?? jobInsights.aiMatchScore ?? 0)) / 100} strokeLinecap="round" />
                 </svg>
                 <div className="text-center">
-                  <div className="text-2xl font-extrabold text-text-primary">{selectedJob?.matchAnalysis?.score || jobInsights.aiMatchScore}%</div>
+                  <div className="text-2xl font-extrabold text-text-primary">
+                    {typeof (selectedJob?.matchAnalysis?.score ?? jobInsights.aiMatchScore) === 'number'
+                      ? `${selectedJob?.matchAnalysis?.score ?? jobInsights.aiMatchScore}%`
+                      : 'N/A'}
+                  </div>
                   <div className="text-[10px] font-bold text-text-muted uppercase">Match Score</div>
                 </div>
               </div>
               <p className="text-xs text-text-secondary text-center mt-4 font-medium">
-                {selectedJob ? 'Based on your profile vs job requirements.' : "Great match! You're a strong fit for these roles."}
+                {selectedJob
+                  ? 'Based on your profile vs job requirements.'
+                  : (jobInsights.aiMatchScore === null
+                    ? 'Complete your profile to calculate your match.'
+                    : "Based on your current profile and available job requirements.")}
               </p>
             </div>
 
@@ -643,22 +674,22 @@ export default function JobFinder({ initialRole }: { initialRole?: string | null
                   <div>
                     <h4 className="text-xs font-bold text-text-primary mb-2">Top Matched Skills</h4>
                     <ul className="space-y-1.5">
-                      {jobInsights.topMatchedSkills.map(skill => (
+                      {jobInsights.topMatchedSkills.length > 0 ? jobInsights.topMatchedSkills.map(skill => (
                         <li key={skill} className="flex items-center gap-2 text-xs font-medium text-text-primary">
                           <CheckCircle2 className="w-3.5 h-3.5 text-green-500" /> {skill}
                         </li>
-                      ))}
+                      )) : <li className="text-xs text-text-muted">No matched skills yet.</li>}
                     </ul>
                   </div>
 
                   <div>
                     <h4 className="text-xs font-bold text-text-primary mb-2">Skills to Improve</h4>
                     <ul className="space-y-1.5">
-                      {jobInsights.skillsToImprove.map(skill => (
+                      {jobInsights.skillsToImprove.length > 0 ? jobInsights.skillsToImprove.map(skill => (
                         <li key={skill} className="flex items-center gap-2 text-xs font-medium text-text-primary">
                           <AlertCircle className="w-3.5 h-3.5 text-amber-500" /> {skill}
                         </li>
-                      ))}
+                      )) : <li className="text-xs text-text-muted">Add skills to get personalized suggestions.</li>}
                     </ul>
                   </div>
                 </>
@@ -684,7 +715,7 @@ export default function JobFinder({ initialRole }: { initialRole?: string | null
               </li>
               <li className="flex justify-between items-center text-sm">
                 <span className="text-text-muted font-medium flex items-center gap-2"><IndianRupee className="w-4 h-4 text-text-muted" /> Avg. Salary</span>
-                <span className="font-bold text-text-primary">₹{jobInsights.avgSalary} LPA</span>
+                <span className="font-bold text-text-primary">{jobInsights.avgSalary === 'N/A' ? 'Not available' : `₹${jobInsights.avgSalary} LPA`}</span>
               </li>
             </ul>
             <div className="border-t border-border mt-4 pt-4">
