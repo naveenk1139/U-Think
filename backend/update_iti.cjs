@@ -1,1 +1,0 @@
-const mongoose = require('mongoose'); mongoose.connect('mongodb://localhost:27017/uthink').then(async () => { const db = mongoose.connection; await db.collection('pathways').updateOne({ slug: 'it-polytechnic' }, { $set: { name: 'ITI (Industrial Training Institute)' } }); console.log('Updated IT/Polytechnic name'); process.exit(0); });

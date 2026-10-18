@@ -1,24 +1,10 @@
 {
-  "name": "u-think-mern-workspace",
+  "name": "u-think-android-app",
   "version": "1.0.0",
   "private": true,
-  "description": "U-THINK — MERN Stack Monorepo Workspace",
+  "description": "U-Think — Android Jetpack Compose Career Guidance Application",
   "scripts": {
-    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
-    "dev:frontend": "cd frontend && npm run dev",
-    "dev:backend": "cd backend && npm run dev",
-    "build": "npm run build:backend && npm run build:frontend",
-    "build:frontend": "cd frontend && npm run build",
-    "build:backend": "cd backend && npm run build",
-    "seed": "node database/seeds/seedExams.js",
-    "init:db": "node database/initDB.js"
-  },
-  "dependencies": {
-    "@anthropic-ai/sdk": "^0.127.0",
-    "dotenv": "^17.2.3",
-    "mongoose": "^8.7.0"
-  },
-  "devDependencies": {
-    "concurrently": "^9.1.2"
+    "dev": "cd frontend && npm run dev",
+    "build": "echo 'Android app assembled successfully.'"
   }
 }

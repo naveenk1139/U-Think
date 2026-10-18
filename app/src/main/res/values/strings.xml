@@ -1,0 +1,22 @@
+<resources>
+    <string name="app_name">U-Think</string>
+    <string name="tagline">Map Your Future After 10th</string>
+    <string name="tab_home">Home</string>
+    <string name="tab_pathways">Pathways</string>
+    <string name="tab_exams">Exams</string>
+    <string name="tab_degrees">Degrees</string>
+    <string name="tab_colleges">Colleges</string>
+    <string name="tab_jobs">Careers</string>
+    <string name="tab_quiz">Aptitude Test</string>
+    <string name="tab_dashboard">Dashboard</string>
+    
+    <string name="search_placeholder">Search streams, exams, degrees, colleges...</string>
+    <string name="explore_pathways">Explore Pathways</string>
+    <string name="take_assessment">Take Aptitude Test</string>
+    <string name="view_details">View Details</string>
+    <string name="saved_items">Saved Items</string>
+    <string name="eligibility">Eligibility</string>
+    <string name="duration">Duration</string>
+    <string name="career_prospects">Career Prospects</string>
+    <string name="branches_covered">Branches &amp; Subjects</string>
+</resources>

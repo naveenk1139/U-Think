@@ -275,8 +275,8 @@
 275 004 
 276 004 <div className="grid grid-cols-1 md:grid
 277 005 {[
-278 005 { title: 'Science', sub: 'Explore · Expe
-279 005 { title: 'Commerce', sub: 'Plan · Manage
+278 005 { title: 'Science', sub: 'Explore ï¿½ Expe
+279 005 { title: 'Commerce', sub: 'Plan ï¿½ Manage
 280 005 { title: 'Arts / Humanities', sub: 'Crea
 281 005 { title: 'Diploma / Polytechnic', sub: '
 282 005 { title: 'ITI (Industrial Training)', su

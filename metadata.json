@@ -1,6 +1,6 @@
 {
-  "name": "Remix:  U THINK",
-  "description": "",
+  "name": "U-Think",
+  "description": "Comprehensive Android career and education pathway guidance platform for students after 10th grade, featuring stream mapping, entrance exams, degree directories, aptitude assessment, and job profiles.",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
